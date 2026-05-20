@@ -1,0 +1,1270 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>FIIL — 제주 스마트 신고</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --primary: #00529B;
+  --primary-dark: #003A6E;
+  --primary-light: #E8F0FB;
+  --accent: #0EA47A;
+  --accent-light: #E0F5EF;
+  --warn: #D64F0A;
+  --warn-light: #FFF0E8;
+  --text: #1A1A1A;
+  --muted: #767676;
+  --border: #E0E0E0;
+  --bg: #F5F7FA;
+  --white: #fff;
+  --radius: 14px;
+  --shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; overflow: hidden; background: var(--bg); font-family: 'Noto Sans KR', sans-serif; }
+
+/* ── APP SHELL ── */
+#app {
+  max-width: 430px;
+  margin: 0 auto;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  position: relative;
+  overflow: hidden;
+}
+
+/* ── SCREENS ── */
+.screen {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s;
+  background: var(--bg);
+  overflow-y: auto;
+}
+.screen.hidden { transform: translateX(100%); opacity: 0; pointer-events: none; }
+.screen.slide-out { transform: translateX(-100%); opacity: 0; pointer-events: none; }
+
+/* ── TOP BAR ── */
+.topbar {
+  background: var(--white);
+  padding: 14px 18px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  box-shadow: 0 1px 8px rgba(0,0,0,0.06);
+}
+.topbar-logo {
+  width: 32px; height: 32px;
+  background: var(--primary);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 900; color: #fff;
+  letter-spacing: -1px;
+}
+.topbar-info { flex: 1; }
+.topbar-title { font-size: 16px; font-weight: 700; color: var(--text); }
+.topbar-sub { font-size: 11px; color: var(--muted); }
+.topbar-back {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: var(--bg);
+  border: none;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  color: var(--text);
+}
+
+/* ── HOME SCREEN ── */
+.home-banner {
+  background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+  padding: 28px 20px 32px;
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+}
+.home-banner::after {
+  content: '';
+  position: absolute;
+  bottom: -40px; right: -40px;
+  width: 140px; height: 140px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.05);
+}
+.home-banner-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 20px;
+  padding: 3px 10px;
+  font-size: 11px; font-weight: 600;
+  margin-bottom: 10px;
+}
+.live-dot {
+  width: 6px; height: 6px;
+  background: #4CAF50;
+  border-radius: 50%;
+  animation: blink 1.5s infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+.home-banner h2 { font-size: 22px; font-weight: 700; line-height: 1.3; margin-bottom: 6px; }
+.home-banner p { font-size: 13px; color: rgba(255,255,255,0.75); line-height: 1.6; }
+
+.home-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+}
+.home-stat {
+  text-align: center;
+  padding: 14px 8px;
+  border-right: 1px solid var(--border);
+}
+.home-stat:last-child { border-right: none; }
+.home-stat-val { font-size: 20px; font-weight: 700; color: var(--primary); display: block; }
+.home-stat-label { font-size: 10px; color: var(--muted); margin-top: 2px; }
+
+.section-heading {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 18px 20px 8px;
+}
+
+/* ── BIG REPORT BUTTON ── */
+.report-cta {
+  margin: 0 16px 16px;
+  background: linear-gradient(135deg, var(--accent) 0%, #0B8A65 100%);
+  border: none;
+  border-radius: var(--radius);
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  cursor: pointer;
+  width: calc(100% - 32px);
+  text-align: left;
+  box-shadow: 0 4px 16px rgba(14,164,122,0.3);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.report-cta:active { transform: scale(0.98); box-shadow: 0 2px 8px rgba(14,164,122,0.2); }
+.report-cta-icon {
+  width: 52px; height: 52px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px;
+  flex-shrink: 0;
+}
+.report-cta-text { color: #fff; }
+.report-cta-title { font-size: 17px; font-weight: 700; display: block; margin-bottom: 3px; }
+.report-cta-sub { font-size: 12px; opacity: 0.85; }
+
+/* ── QUICK SCENARIO BUTTONS ── */
+.scenario-grid-home {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding: 0 16px 16px;
+}
+.scenario-btn {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 12px;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.scenario-btn:active { transform: scale(0.97); background: var(--primary-light); border-color: var(--primary); }
+.scenario-btn-icon { font-size: 24px; display: block; margin-bottom: 8px; }
+.scenario-btn-title { font-size: 13px; font-weight: 600; color: var(--text); display: block; margin-bottom: 2px; }
+.scenario-btn-tag { font-size: 10px; color: var(--muted); }
+
+/* ── RECENT REPORTS ── */
+.recent-list { padding: 0 16px 100px; }
+.recent-item {
+  background: var(--white);
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  padding: 14px;
+  margin-bottom: 10px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.recent-photo {
+  width: 48px; height: 48px;
+  border-radius: 8px;
+  background: var(--bg);
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+  overflow: hidden;
+}
+.recent-photo img { width: 100%; height: 100%; object-fit: cover; }
+.recent-info { flex: 1; min-width: 0; }
+.recent-title { font-size: 13px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.recent-loc { font-size: 11px; color: var(--muted); margin-top: 1px; }
+.recent-badge {
+  font-size: 10px; font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+.badge-done { background: var(--accent-light); color: var(--accent); }
+.badge-active { background: #FEF3C7; color: #92400E; }
+.badge-new { background: var(--primary-light); color: var(--primary); }
+
+/* ── BOTTOM NAV ── */
+.bottom-nav {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 72px;
+  background: var(--white);
+  border-top: 1px solid var(--border);
+  display: flex;
+  z-index: 20;
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+}
+.nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  cursor: pointer;
+  border: none;
+  background: none;
+  padding-bottom: 8px;
+  transition: color 0.15s;
+  color: var(--muted);
+}
+.nav-item.active { color: var(--primary); }
+.nav-item-icon { font-size: 22px; line-height: 1; }
+.nav-item-label { font-size: 10px; font-weight: 500; }
+
+/* ── REPORT SCREEN ── */
+.report-scroll { padding: 16px 16px 120px; }
+
+.upload-zone {
+  background: var(--white);
+  border: 2px dashed var(--border);
+  border-radius: var(--radius);
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 14px;
+  position: relative;
+  overflow: hidden;
+}
+.upload-zone.has-image { border-style: solid; border-color: var(--primary); }
+.upload-zone:active { background: var(--primary-light); }
+.upload-zone-icon { font-size: 42px; }
+.upload-zone-text { font-size: 14px; font-weight: 600; color: var(--text); }
+.upload-zone-sub { font-size: 12px; color: var(--muted); }
+.upload-preview {
+  position: absolute; inset: 0;
+  object-fit: cover;
+  width: 100%; height: 100%;
+}
+.upload-overlay {
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,0.35);
+  display: flex; align-items: center; justify-content: center;
+  gap: 10px;
+}
+.upload-overlay-btn {
+  background: rgba(255,255,255,0.9);
+  border: none; border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 12px; font-weight: 600;
+  cursor: pointer;
+  font-family: 'Noto Sans KR', sans-serif;
+}
+#photoInput { display: none; }
+
+.gps-bar {
+  background: var(--accent-light);
+  border: 1px solid var(--accent);
+  border-radius: 10px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+  font-size: 12px;
+  color: var(--accent);
+  font-weight: 600;
+}
+.gps-bar-val {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--text);
+  font-weight: 400;
+  flex: 1;
+}
+.gps-spinner {
+  width: 14px; height: 14px;
+  border: 2px solid var(--accent);
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.form-group { margin-bottom: 14px; }
+.form-label { font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 6px; display: block; }
+.form-label span { color: var(--warn); }
+.form-select, .form-textarea, .form-input {
+  width: 100%;
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 14px;
+  font-family: 'Noto Sans KR', sans-serif;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.15s;
+  appearance: none;
+}
+.form-select:focus, .form-textarea:focus, .form-input:focus { border-color: var(--primary); }
+.form-textarea { min-height: 80px; resize: none; line-height: 1.6; }
+.form-select-wrap { position: relative; }
+.form-select-wrap::after {
+  content: '▾';
+  position: absolute;
+  right: 14px; top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: var(--muted);
+}
+
+.sender-info-box {
+  background: var(--primary-light);
+  border: 1px solid #C5D8F0;
+  border-radius: 10px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.sender-avatar {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: var(--primary);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; color: #fff;
+  flex-shrink: 0;
+}
+.sender-details { font-size: 12px; color: var(--text); }
+.sender-name { font-weight: 700; display: block; }
+.sender-phone { color: var(--muted); }
+
+.submit-btn {
+  width: 100%;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  padding: 17px;
+  font-size: 16px;
+  font-weight: 700;
+  font-family: 'Noto Sans KR', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.submit-btn:active { transform: scale(0.98); background: var(--primary-dark); }
+.submit-btn:disabled { background: #B0B0B0; cursor: not-allowed; }
+
+/* ── AI ANALYSIS SCREEN ── */
+.analysis-screen { background: var(--white); }
+.analysis-header {
+  background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+  padding: 28px 20px;
+  color: #fff;
+}
+.analysis-header h3 { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
+.analysis-header p { font-size: 12px; opacity: 0.8; }
+.analysis-photo-strip {
+  display: flex;
+  gap: 0;
+}
+.analysis-photo {
+  flex: 1;
+  height: 140px;
+  background: #1A1A2E;
+  position: relative;
+  overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+}
+.analysis-photo img { width: 100%; height: 100%; object-fit: cover; }
+.analysis-photo-overlay {
+  position: absolute; inset: 0;
+  background: rgba(0,82,155,0.7);
+  display: flex; align-items: center; justify-content: center;
+}
+.analysis-photo-label {
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  text-align: center;
+  padding: 6px 12px;
+  background: rgba(0,0,0,0.4);
+  border-radius: 6px;
+}
+
+.ai-thinking {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.ai-step-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: var(--bg);
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.4s;
+}
+.ai-step-item.visible { opacity: 1; transform: translateY(0); }
+.ai-step-dot {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px;
+  flex-shrink: 0;
+  background: var(--border);
+  color: var(--muted);
+}
+.ai-step-dot.active { background: var(--primary); color: #fff; }
+.ai-step-dot.done { background: var(--accent); color: #fff; }
+.ai-step-text { font-size: 12px; color: var(--text); flex: 1; }
+.ai-step-text strong { color: var(--primary); font-weight: 700; }
+.ai-step-spinner {
+  width: 16px; height: 16px;
+  border: 2px solid var(--primary);
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+/* ── RESULT SCREEN ── */
+.result-header {
+  background: var(--accent);
+  padding: 32px 20px 28px;
+  text-align: center;
+  color: #fff;
+}
+.result-check {
+  width: 64px; height: 64px;
+  background: rgba(255,255,255,0.25);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 32px;
+  margin: 0 auto 14px;
+  animation: pop 0.4s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes pop { from { transform: scale(0); } to { transform: scale(1); } }
+.result-header h3 { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+.result-header p { font-size: 12px; opacity: 0.9; }
+.result-code {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 6px;
+  padding: 4px 10px;
+  margin-top: 10px;
+  display: inline-block;
+}
+
+.result-body { padding: 20px; padding-bottom: 100px; }
+
+.result-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+.result-card-title {
+  background: var(--bg);
+  padding: 10px 16px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border);
+}
+.result-row {
+  display: flex;
+  padding: 11px 16px;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+.result-row:last-child { border-bottom: none; }
+.result-key { color: var(--muted); width: 90px; flex-shrink: 0; }
+.result-val { color: var(--text); font-weight: 500; flex: 1; }
+
+.ai-analysis-box {
+  background: var(--primary-dark);
+  color: #fff;
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 14px;
+}
+.ai-analysis-box-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: #7DD3B0;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  display: flex; align-items: center; gap: 6px;
+}
+.ai-analysis-text {
+  font-size: 13px;
+  line-height: 1.7;
+  color: rgba(255,255,255,0.85);
+}
+
+.action-list { display: flex; flex-direction: column; gap: 8px; }
+.action-item {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 13px;
+}
+.action-num {
+  width: 24px; height: 24px;
+  background: var(--primary);
+  color: #fff;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700;
+  flex-shrink: 0;
+}
+.action-text { color: var(--text); }
+
+.result-btns { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
+.btn-outline {
+  width: 100%;
+  border: 1.5px solid var(--primary);
+  background: none;
+  color: var(--primary);
+  border-radius: var(--radius);
+  padding: 14px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: 'Noto Sans KR', sans-serif;
+  cursor: pointer;
+}
+
+/* ── MY PAGE ── */
+.mypage-header {
+  background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+  padding: 32px 20px 24px;
+  color: #fff;
+  text-align: center;
+}
+.mypage-avatar {
+  width: 72px; height: 72px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 32px;
+  margin: 0 auto 12px;
+}
+.mypage-name { font-size: 18px; font-weight: 700; margin-bottom: 2px; }
+.mypage-phone { font-size: 12px; opacity: 0.75; }
+.mypage-score {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  margin-top: 16px;
+}
+.mypage-score-item { text-align: center; }
+.mypage-score-val { font-size: 22px; font-weight: 700; display: block; }
+.mypage-score-label { font-size: 10px; opacity: 0.75; }
+
+.mypage-body { padding: 16px 16px 100px; }
+.mypage-menu-group {
+  background: var(--white);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+.mypage-menu-item {
+  display: flex;
+  align-items: center;
+  padding: 15px 16px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  font-size: 14px;
+  gap: 12px;
+  transition: background 0.1s;
+}
+.mypage-menu-item:last-child { border-bottom: none; }
+.mypage-menu-item:active { background: var(--bg); }
+.mypage-menu-icon { font-size: 20px; width: 28px; text-align: center; }
+.mypage-menu-text { flex: 1; }
+.mypage-menu-arrow { color: var(--muted); }
+
+/* ── STATUS SCREEN ── */
+.status-body { padding: 16px 16px 100px; }
+.status-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  margin-bottom: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: box-shadow 0.2s;
+}
+.status-card:active { box-shadow: 0 4px 16px rgba(0,0,0,0.12); }
+.status-card-top {
+  display: flex;
+  align-items: center;
+  padding: 14px;
+  gap: 12px;
+}
+.status-card-img {
+  width: 52px; height: 52px;
+  border-radius: 10px;
+  background: var(--bg);
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px;
+  overflow: hidden;
+}
+.status-card-img img { width: 100%; height: 100%; object-fit: cover; }
+.status-card-info { flex: 1; min-width: 0; }
+.status-card-title { font-size: 13px; font-weight: 600; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.status-card-meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.status-track {
+  padding: 14px;
+  border-top: 1px solid var(--border);
+  background: var(--bg);
+}
+.track-steps {
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+  padding: 0 10px;
+}
+.track-steps::before {
+  content: '';
+  position: absolute;
+  top: 14px;
+  left: 10px; right: 10px;
+  height: 2px;
+  background: var(--border);
+}
+.track-progress-line {
+  position: absolute;
+  top: 14px;
+  left: 10px;
+  height: 2px;
+  background: var(--accent);
+  transition: width 1s ease;
+}
+.track-step { display: flex; flex-direction: column; align-items: center; gap: 6px; position: relative; z-index: 1; }
+.track-dot {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px;
+  border: 2px solid var(--white);
+}
+.track-dot.done { background: var(--accent); color: #fff; }
+.track-dot.active { background: var(--primary); color: #fff; animation: pulse-dot 1.5s infinite; }
+.track-dot.pending { background: var(--border); color: var(--muted); }
+@keyframes pulse-dot { 0%,100%{box-shadow:0 0 0 0 rgba(0,82,155,0.4)} 50%{box-shadow:0 0 0 6px rgba(0,82,155,0)} }
+.track-label { font-size: 9px; color: var(--muted); text-align: center; line-height: 1.2; }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- HOME SCREEN -->
+  <div class="screen" id="screen-home">
+    <div class="topbar">
+      <div class="topbar-logo">F</div>
+      <div class="topbar-info">
+        <div class="topbar-title">FIIL.kr</div>
+        <div class="topbar-sub">제주 스마트 민원 신고</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--accent);font-weight:600;">
+        <span class="live-dot"></span> 실시간
+      </div>
+    </div>
+
+    <div class="home-banner">
+      <div class="home-banner-badge"><span class="live-dot"></span> AI 분석 실시간 작동 중</div>
+      <h2>📸 사진 한 장으로<br>제주를 지킵니다</h2>
+      <p>응급환자 · 환경오염 · 불법투기 · 재난안전<br>AI가 즉시 분석하고 담당부서가 출동합니다</p>
+    </div>
+
+    <div class="home-stats">
+      <div class="home-stat"><span class="home-stat-val">2,847</span><div class="home-stat-label">누적 신고</div></div>
+      <div class="home-stat"><span class="home-stat-val">94%</span><div class="home-stat-label">해결률</div></div>
+      <div class="home-stat"><span class="home-stat-val">28분</span><div class="home-stat-label">평균응답</div></div>
+    </div>
+
+    <div class="section-heading">빠른 신고</div>
+    <button class="report-cta" onclick="goScreen('screen-report')">
+      <div class="report-cta-icon">📷</div>
+      <div class="report-cta-text">
+        <span class="report-cta-title">사진으로 신고하기</span>
+        <span class="report-cta-sub">사진 + AI 분석 + 자동 배정 → 즉시 출동</span>
+      </div>
+    </button>
+
+    <div class="section-heading">카테고리별 신고</div>
+    <div class="scenario-grid-home">
+      <button class="scenario-btn" onclick="goScreen('screen-report','응급환자')">
+        <span class="scenario-btn-icon">🚨</span>
+        <span class="scenario-btn-title">응급환자</span>
+        <span class="scenario-btn-tag">긴급 대응</span>
+      </button>
+      <button class="scenario-btn" onclick="goScreen('screen-report','해안쓰레기')">
+        <span class="scenario-btn-icon">🏖️</span>
+        <span class="scenario-btn-title">해안쓰레기</span>
+        <span class="scenario-btn-tag">환경·수거팀</span>
+      </button>
+      <button class="scenario-btn" onclick="goScreen('screen-report','불법투기')">
+        <span class="scenario-btn-icon">🗑️</span>
+        <span class="scenario-btn-title">불법투기</span>
+        <span class="scenario-btn-tag">환경과</span>
+      </button>
+      <button class="scenario-btn" onclick="goScreen('screen-report','식당위생')">
+        <span class="scenario-btn-icon">🍽️</span>
+        <span class="scenario-btn-title">식당위생/평가</span>
+        <span class="scenario-btn-tag">위생검사팀</span>
+      </button>
+      <button class="scenario-btn" onclick="goScreen('screen-report','도로파손')">
+        <span class="scenario-btn-icon">🚧</span>
+        <span class="scenario-btn-title">도로파손</span>
+        <span class="scenario-btn-tag">도로과</span>
+      </button>
+      <button class="scenario-btn" onclick="goScreen('screen-report','기타')">
+        <span class="scenario-btn-icon">➕</span>
+        <span class="scenario-btn-title">기타 신고</span>
+        <span class="scenario-btn-tag">AI 자동분류</span>
+      </button>
+    </div>
+
+    <div class="section-heading">최근 신고 현황</div>
+    <div class="recent-list">
+      <div class="recent-item">
+        <div class="recent-photo">🏖️</div>
+        <div class="recent-info">
+          <div class="recent-title">협재해수욕장 해안쓰레기</div>
+          <div class="recent-loc">📍 한림읍 협재리 · 14분 전</div>
+        </div>
+        <span class="recent-badge badge-active">출동중</span>
+      </div>
+      <div class="recent-item">
+        <div class="recent-photo">🚧</div>
+        <div class="recent-info">
+          <div class="recent-title">일주서로 포트홀 발생</div>
+          <div class="recent-loc">📍 애월읍 · 1시간 전</div>
+        </div>
+        <span class="recent-badge badge-done">완료</span>
+      </div>
+      <div class="recent-item">
+        <div class="recent-photo">🗑️</div>
+        <div class="recent-info">
+          <div class="recent-title">중문관광단지 불법투기</div>
+          <div class="recent-loc">📍 서귀포시 중문동 · 2시간 전</div>
+        </div>
+        <span class="recent-badge badge-done">완료</span>
+      </div>
+    </div>
+    <div class="bottom-nav">
+      <button class="nav-item active" onclick="showNav('home')"><div class="nav-item-icon">🏠</div><div class="nav-item-label">홈</div></button>
+      <button class="nav-item" onclick="goScreen('screen-report')"><div class="nav-item-icon">📷</div><div class="nav-item-label">신고</div></button>
+      <button class="nav-item" onclick="goScreen('screen-status')"><div class="nav-item-icon">📋</div><div class="nav-item-label">내 신고</div></button>
+      <button class="nav-item" onclick="goScreen('screen-mypage')"><div class="nav-item-icon">👤</div><div class="nav-item-label">마이</div></button>
+    </div>
+  </div>
+
+  <!-- REPORT SCREEN -->
+  <div class="screen hidden" id="screen-report">
+    <div class="topbar">
+      <button class="topbar-back" onclick="goBack()">←</button>
+      <div class="topbar-info">
+        <div class="topbar-title">신고하기</div>
+        <div class="topbar-sub">AI가 자동으로 분석합니다</div>
+      </div>
+    </div>
+    <div class="report-scroll">
+      <!-- Sender Info -->
+      <div class="sender-info-box">
+        <div class="sender-avatar">👤</div>
+        <div class="sender-details">
+          <span class="sender-name">김제주 (자동입력)</span>
+          <span class="sender-phone">010-****-5678 · 제주시 연동</span>
+        </div>
+        <span style="font-size:10px;color:var(--accent);font-weight:700;">✓ 인증</span>
+      </div>
+
+      <!-- Photo Upload -->
+      <div class="form-label">사진 첨부 <span>*</span></div>
+      <div class="upload-zone" id="uploadZone" onclick="document.getElementById('photoInput').click()">
+        <img id="previewImg" class="upload-preview" style="display:none;">
+        <div id="uploadPrompt">
+          <div class="upload-zone-icon">📷</div>
+          <div class="upload-zone-text">사진을 첨부하세요</div>
+          <div class="upload-zone-sub">탭하여 카메라 또는 갤러리 선택</div>
+        </div>
+        <div class="upload-overlay" id="uploadOverlay" style="display:none;">
+          <button class="upload-overlay-btn" onclick="event.stopPropagation();document.getElementById('photoInput').click()">🔄 변경</button>
+          <button class="upload-overlay-btn" onclick="event.stopPropagation();clearPhoto()">✕ 삭제</button>
+        </div>
+      </div>
+      <input type="file" id="photoInput" accept="image/*" capture="environment" onchange="handlePhoto(this)">
+
+      <!-- GPS -->
+      <div class="gps-bar" id="gpsBar">
+        <div class="gps-spinner" id="gpsSpinner"></div>
+        <span style="white-space:nowrap;">📍 GPS</span>
+        <span class="gps-bar-val" id="gpsVal">위치 감지 중…</span>
+      </div>
+
+      <!-- Category -->
+      <div class="form-group">
+        <label class="form-label">신고 유형 <span>*</span></label>
+        <div class="form-select-wrap">
+          <select class="form-select" id="categorySelect">
+            <option value="">유형 선택</option>
+            <option value="응급환자">🚨 응급환자 발생</option>
+            <option value="해안쓰레기">🏖️ 해안·해양 쓰레기</option>
+            <option value="불법투기">🗑️ 쓰레기 불법투기</option>
+            <option value="도로파손">🚧 도로 파손·위험</option>
+            <option value="식당위생">🍽️ 식당 위생·평가</option>
+            <option value="산불연기">🔥 산불·연기 발생</option>
+            <option value="수질오염">🌊 수질 오염</option>
+            <option value="소음진동">🔊 소음·진동</option>
+            <option value="기타">➕ 기타 (AI 자동분류)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Description -->
+      <div class="form-group">
+        <label class="form-label">상황 설명 <span style="color:var(--muted);font-weight:400;">(선택)</span></label>
+        <textarea class="form-textarea" id="descInput" placeholder="AI가 사진으로 자동 분석하지만, 추가 정보를 입력하면 더 정확합니다.&#10;예) '오후 2시쯤 발생', '냄새가 심함', '이미 신고한 적 있음'"></textarea>
+      </div>
+
+      <button class="submit-btn" onclick="submitReport()" id="submitBtn">
+        <span>🤖</span> AI 분석 후 신고 접수
+      </button>
+    </div>
+  </div>
+
+  <!-- AI ANALYSIS SCREEN -->
+  <div class="screen hidden" id="screen-analysis">
+    <div class="topbar">
+      <div class="topbar-info">
+        <div class="topbar-title">AI 분석 중</div>
+        <div class="topbar-sub">Claude Vision이 사진을 분석합니다</div>
+      </div>
+    </div>
+    <div class="analysis-header">
+      <h3>🤖 AI 자동 분석</h3>
+      <p>사진, GPS, 시간 정보를 종합 분석하여<br>최적의 대응 방안을 도출합니다</p>
+    </div>
+    <div class="analysis-photo-strip">
+      <div class="analysis-photo" id="analysisPic">
+        <div class="analysis-photo-overlay">
+          <div class="analysis-photo-label">🔍 AI 스캔 중</div>
+        </div>
+      </div>
+    </div>
+    <div class="ai-thinking" id="aiThinking">
+      <div class="ai-step-item" id="step1">
+        <div class="ai-step-dot" id="dot1">1</div>
+        <div class="ai-step-text">📡 GPS 좌표 및 발신자 정보 자동 추출</div>
+        <div class="ai-step-spinner" id="sp1" style="display:none"></div>
+        <span id="ck1" style="display:none">✅</span>
+      </div>
+      <div class="ai-step-item" id="step2">
+        <div class="ai-step-dot" id="dot2">2</div>
+        <div class="ai-step-text">🖼 사진 객체 인식 및 상황 판단</div>
+        <div class="ai-step-spinner" id="sp2" style="display:none"></div>
+        <span id="ck2" style="display:none">✅</span>
+      </div>
+      <div class="ai-step-item" id="step3">
+        <div class="ai-step-dot" id="dot3">3</div>
+        <div class="ai-step-text">🏷 신고 유형 분류 및 긴급도 평가</div>
+        <div class="ai-step-spinner" id="sp3" style="display:none"></div>
+        <span id="ck3" style="display:none">✅</span>
+      </div>
+      <div class="ai-step-item" id="step4">
+        <div class="ai-step-dot" id="dot4">4</div>
+        <div class="ai-step-text">📋 대응 방안 생성 및 담당부서 배정</div>
+        <div class="ai-step-spinner" id="sp4" style="display:none"></div>
+        <span id="ck4" style="display:none">✅</span>
+      </div>
+      <div class="ai-step-item" id="step5">
+        <div class="ai-step-dot" id="dot5">5</div>
+        <div class="ai-step-text">⛓ 블록체인 해시 생성 및 신고 접수</div>
+        <div class="ai-step-spinner" id="sp5" style="display:none"></div>
+        <span id="ck5" style="display:none">✅</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULT SCREEN -->
+  <div class="screen hidden" id="screen-result">
+    <div class="result-header">
+      <div class="result-check">✅</div>
+      <h3>신고 접수 완료</h3>
+      <p>AI 분석이 완료되었습니다. 담당팀에 즉시 배정됩니다.</p>
+      <div class="result-code" id="resultCode">RPT-2026-0000</div>
+    </div>
+    <div class="result-body">
+      <div class="result-card">
+        <div class="result-card-title">신고 정보 (자동 입력)</div>
+        <div class="result-row"><span class="result-key">신고자</span><span class="result-val">김제주 · 010-****-5678</span></div>
+        <div class="result-row"><span class="result-key">위치</span><span class="result-val" id="resLoc">제주시 연동 일대</span></div>
+        <div class="result-row"><span class="result-key">GPS</span><span class="result-val" id="resGps" style="font-family:'IBM Plex Mono',monospace;font-size:11px;">33.4996, 126.5312</span></div>
+        <div class="result-row"><span class="result-key">시각</span><span class="result-val" id="resTime">—</span></div>
+        <div class="result-row"><span class="result-key">유형</span><span class="result-val" id="resType">—</span></div>
+        <div class="result-row"><span class="result-key">긴급도</span><span class="result-val" id="resUrgency">—</span></div>
+      </div>
+
+      <div class="ai-analysis-box">
+        <div class="ai-analysis-box-title">🤖 AI 분석 결과</div>
+        <div class="ai-analysis-text" id="aiAnalysisText">분석 중...</div>
+      </div>
+
+      <div class="result-card-title" style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;padding:10px 0 8px;">권고 조치 사항</div>
+      <div class="action-list" id="actionList"></div>
+
+      <div class="result-btns">
+        <button class="submit-btn" onclick="goScreen('screen-status')">📋 내 신고 현황 보기</button>
+        <button class="btn-outline" onclick="goScreen('screen-home')">🏠 홈으로 돌아가기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATUS SCREEN -->
+  <div class="screen hidden" id="screen-status">
+    <div class="topbar">
+      <div class="topbar-logo">F</div>
+      <div class="topbar-info">
+        <div class="topbar-title">내 신고 현황</div>
+        <div class="topbar-sub">실시간 처리 상태</div>
+      </div>
+    </div>
+    <div class="status-body">
+      <div class="status-card">
+        <div class="status-card-top">
+          <div class="status-card-img">🏖️</div>
+          <div class="status-card-info">
+            <div class="status-card-title">협재 해안쓰레기 신고</div>
+            <div class="status-card-meta">RPT-2026-2841 · 2026.05.14</div>
+          </div>
+          <span class="recent-badge badge-active">출동중</span>
+        </div>
+        <div class="status-track">
+          <div class="track-steps">
+            <div class="track-progress-line" style="width:60%"></div>
+            <div class="track-step"><div class="track-dot done">✓</div><div class="track-label">접수</div></div>
+            <div class="track-step"><div class="track-dot done">✓</div><div class="track-label">분류</div></div>
+            <div class="track-step"><div class="track-dot active">🚗</div><div class="track-label">출동</div></div>
+            <div class="track-step"><div class="track-dot pending">·</div><div class="track-label">처리</div></div>
+            <div class="track-step"><div class="track-dot pending">·</div><div class="track-label">완료</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="status-card">
+        <div class="status-card-top">
+          <div class="status-card-img">🚧</div>
+          <div class="status-card-info">
+            <div class="status-card-title">일주서로 포트홀 신고</div>
+            <div class="status-card-meta">RPT-2026-2830 · 2026.05.13</div>
+          </div>
+          <span class="recent-badge badge-done">완료</span>
+        </div>
+        <div class="status-track">
+          <div class="track-steps">
+            <div class="track-progress-line" style="width:100%"></div>
+            <div class="track-step"><div class="track-dot done">✓</div><div class="track-label">접수</div></div>
+            <div class="track-step"><div class="track-dot done">✓</div><div class="track-label">분류</div></div>
+            <div class="track-step"><div class="track-dot done">✓</div><div class="track-label">출동</div></div>
+            <div class="track-step"><div class="track-dot done">✓</div><div class="track-label">처리</div></div>
+            <div class="track-step"><div class="track-dot done">✓</div><div class="track-label">완료</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="bottom-nav">
+      <button class="nav-item" onclick="goScreen('screen-home')"><div class="nav-item-icon">🏠</div><div class="nav-item-label">홈</div></button>
+      <button class="nav-item" onclick="goScreen('screen-report')"><div class="nav-item-icon">📷</div><div class="nav-item-label">신고</div></button>
+      <button class="nav-item active"><div class="nav-item-icon">📋</div><div class="nav-item-label">내 신고</div></button>
+      <button class="nav-item" onclick="goScreen('screen-mypage')"><div class="nav-item-icon">👤</div><div class="nav-item-label">마이</div></button>
+    </div>
+  </div>
+
+  <!-- MYPAGE SCREEN -->
+  <div class="screen hidden" id="screen-mypage">
+    <div class="mypage-header">
+      <div class="mypage-avatar">👤</div>
+      <div class="mypage-name">김제주</div>
+      <div class="mypage-phone">010-****-5678</div>
+      <div class="mypage-score">
+        <div class="mypage-score-item"><span class="mypage-score-val">12</span><div class="mypage-score-label">신고 건수</div></div>
+        <div class="mypage-score-item"><span class="mypage-score-val">92%</span><div class="mypage-score-label">처리율</div></div>
+        <div class="mypage-score-item"><span class="mypage-score-val">🏆</span><div class="mypage-score-label">환경지킴이</div></div>
+      </div>
+    </div>
+    <div class="mypage-body">
+      <div class="mypage-menu-group">
+        <div class="mypage-menu-item"><span class="mypage-menu-icon">📋</span><span class="mypage-menu-text">신고 내역</span><span class="mypage-menu-arrow">›</span></div>
+        <div class="mypage-menu-item"><span class="mypage-menu-icon">🔔</span><span class="mypage-menu-text">알림 설정</span><span class="mypage-menu-arrow">›</span></div>
+        <div class="mypage-menu-item"><span class="mypage-menu-icon">📍</span><span class="mypage-menu-text">내 위치 관리</span><span class="mypage-menu-arrow">›</span></div>
+      </div>
+      <div class="mypage-menu-group">
+        <div class="mypage-menu-item"><span class="mypage-menu-icon">🔍</span><span class="mypage-menu-text">신고 조회 (번호 입력)</span><span class="mypage-menu-arrow">›</span></div>
+        <div class="mypage-menu-item"><span class="mypage-menu-icon">⛓</span><span class="mypage-menu-text">블록체인 기록 열람</span><span class="mypage-menu-arrow">›</span></div>
+      </div>
+      <div class="mypage-menu-group">
+        <div class="mypage-menu-item"><span class="mypage-menu-icon">❓</span><span class="mypage-menu-text">도움말 · FAQ</span><span class="mypage-menu-arrow">›</span></div>
+        <div class="mypage-menu-item"><span class="mypage-menu-icon">🔒</span><span class="mypage-menu-text">개인정보 처리방침</span><span class="mypage-menu-arrow">›</span></div>
+      </div>
+    </div>
+    <div class="bottom-nav">
+      <button class="nav-item" onclick="goScreen('screen-home')"><div class="nav-item-icon">🏠</div><div class="nav-item-label">홈</div></button>
+      <button class="nav-item" onclick="goScreen('screen-report')"><div class="nav-item-icon">📷</div><div class="nav-item-label">신고</div></button>
+      <button class="nav-item" onclick="goScreen('screen-status')"><div class="nav-item-icon">📋</div><div class="nav-item-label">내 신고</div></button>
+      <button class="nav-item active"><div class="nav-item-icon">👤</div><div class="nav-item-label">마이</div></button>
+    </div>
+  </div>
+
+</div><!-- /app -->
+
+<script>
+let currentScreen = 'screen-home';
+let previousScreen = 'screen-home';
+let photoDataUrl = null;
+let gpsCoords = null;
+
+// Navigation
+function goScreen(id, category) {
+  const prev = document.getElementById(currentScreen);
+  const next = document.getElementById(id);
+  if (!next) return;
+  prev.classList.add('slide-out');
+  next.classList.remove('hidden');
+  next.classList.remove('slide-out');
+  previousScreen = currentScreen;
+  currentScreen = id;
+  if (category && id === 'screen-report') {
+    setTimeout(() => {
+      const sel = document.getElementById('categorySelect');
+      if (sel) sel.value = category;
+    }, 100);
+  }
+  setTimeout(() => prev.classList.add('hidden'), 350);
+}
+
+function goBack() {
+  goScreen(previousScreen === currentScreen ? 'screen-home' : previousScreen);
+}
+
+// GPS simulation
+function initGPS() {
+  setTimeout(() => {
+    const lat = (33.4996 + (Math.random() - 0.5) * 0.02).toFixed(6);
+    const lng = (126.5312 + (Math.random() - 0.5) * 0.02).toFixed(6);
+    gpsCoords = { lat, lng };
+    document.getElementById('gpsSpinner').style.display = 'none';
+    document.getElementById('gpsVal').textContent = `${lat}, ${lng} (정확도 ±5m)`;
+    document.getElementById('gpsBar').style.background = 'var(--accent-light)';
+  }, 1800);
+}
+
+// Photo handling
+function handlePhoto(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    photoDataUrl = e.target.result;
+    document.getElementById('previewImg').src = photoDataUrl;
+    document.getElementById('previewImg').style.display = 'block';
+    document.getElementById('uploadPrompt').style.display = 'none';
+    document.getElementById('uploadOverlay').style.display = 'flex';
+    document.getElementById('uploadZone').classList.add('has-image');
+  };
+  reader.readAsDataURL(file);
+}
+function clearPhoto() {
+  photoDataUrl = null;
+  document.getElementById('previewImg').style.display = 'none';
+  document.getElementById('previewImg').src = '';
+  document.getElementById('uploadPrompt').style.display = 'flex';
+  document.getElementById('uploadOverlay').style.display = 'none';
+  document.getElementById('uploadZone').classList.remove('has-image');
+  document.getElementById('photoInput').value = '';
+}
+
+// Submit & AI analysis flow
+function submitReport() {
+  const cat = document.getElementById('categorySelect').value;
+  if (!cat) { alert('신고 유형을 선택해주세요.'); return; }
+  goScreen('screen-analysis');
+  runAIAnalysis(cat);
+}
+
+function runAIAnalysis(category) {
+  // Show the submitted photo in analysis screen
+  const apic = document.getElementById('analysisPic');
+  if (photoDataUrl) {
+    apic.innerHTML = `<img src="${photoDataUrl}" style="width:100%;height:100%;object-fit:cover;"><div class="analysis-photo-overlay"><div class="analysis-photo-label">🔍 AI 스캔 중</div></div>`;
+  }
+
+  const steps = [
+    {delay:400, id:'step1', dot:'dot1', sp:'sp1', ck:'ck1'},
+    {delay:1400, id:'step2', dot:'dot2', sp:'sp2', ck:'ck2'},
+    {delay:2600, id:'step3', dot:'dot3', sp:'sp3', ck:'ck3'},
+    {delay:3800, id:'step4', dot:'dot4', sp:'sp4', ck:'ck4'},
+    {delay:5000, id:'step5', dot:'dot5', sp:'sp5', ck:'ck5'},
+  ];
+
+  steps.forEach((s, i) => {
+    setTimeout(() => {
+      document.getElementById(s.id).classList.add('visible');
+      document.getElementById(s.dot).classList.add('active');
+      document.getElementById(s.sp).style.display = 'block';
+    }, s.delay);
+    setTimeout(() => {
+      document.getElementById(s.dot).classList.remove('active');
+      document.getElementById(s.dot).classList.add('done');
+      document.getElementById(s.sp).style.display = 'none';
+      document.getElementById(s.ck).style.display = 'block';
+    }, s.delay + 900);
+  });
+
+  setTimeout(() => {
+    showResult(category);
+  }, 6800);
+}
+
+const analysisDB = {
+  '응급환자': {
+    urgency: '🔴 최고 긴급',
+    analysis: '사진에서 쓰러진 사람 또는 의료 도움이 필요한 상황이 감지되었습니다. 119 구급대 즉시 출동을 요청하며, 주변 자동심장충격기(AED) 위치가 안내됩니다. 신고자에게 응급처치 가이드가 전송됩니다.',
+    actions: ['119 구급대 즉시 출동 요청', '주변 AED 위치 안내 (37m)', '응급처치 가이드 SMS 전송', '보호자/연락처 확인 요청']
+  },
+  '해안쓰레기': {
+    urgency: '🟡 보통',
+    analysis: '해안선에 플라스틱 폐기물, 그물망, 부유 쓰레기가 감지되었습니다. 규모는 중간 수준(예상 100~300kg)으로 판단됩니다. 해양환경팀 수거 차량 및 고무보트 출동이 배정되었습니다.',
+    actions: ['해양환경팀 수거팀 출동 (3명)', '고무보트 1척 배정', '수거 완료 후 처리 보고서 자동 생성', '블록체인 기록 저장']
+  },
+  '불법투기': {
+    urgency: '🟠 높음',
+    analysis: '지정되지 않은 장소에 대규모 폐기물이 무단 투기된 정황이 확인됩니다. CCTV 분석을 통해 차량번호 추적이 시작되었으며, 환경과 단속팀이 출동합니다.',
+    actions: ['환경과 단속팀 출동', 'CCTV 분석 및 차량번호 추적', '폐기물 수거팀 2차 배정', '과태료 부과 처리 시작']
+  },
+  '식당위생': {
+    urgency: '🟡 보통',
+    analysis: '식당 내 위생 관련 문제가 사진에서 감지되었습니다. 주방 청결 상태, 식품 보관 방식 등에서 위생 기준 미달 가능성이 있습니다. 식품위생 담당자가 현장 점검을 위해 배정되었습니다.',
+    actions: ['식품위생 담당자 현장 점검 배정', '영업소 위생 점검표 자동 작성', '처리 결과 공개 등록', '재발 시 영업정지 경고']
+  },
+  '도로파손': {
+    urgency: '🟠 높음',
+    analysis: '도로면에 포트홀(지름 약 30~50cm, 깊이 10cm 이상)이 감지되었습니다. 차량 파손 및 사고 위험이 높습니다. 도로과 긴급보수팀이 배정되며 임시 안전 표지 설치가 선행됩니다.',
+    actions: ['도로과 긴급보수팀 출동', '임시 안전표지 설치 (30분 내)', '아스팔트 보수 작업 배정', '인근 운전자 우회 안내 문자 발송']
+  },
+  '산불연기': {
+    urgency: '🔴 최고 긴급',
+    analysis: '연기 또는 화재 징후가 감지되었습니다. 산림청 및 소방서에 동시 신고가 접수되었습니다. 헬기 출동 여부를 즉시 검토합니다.',
+    actions: ['119 소방 즉시 출동 요청', '산림청 동시 신고 접수', '인근 주민 대피 안내 발송', '헬기 출동 여부 검토']
+  },
+  '수질오염': {
+    urgency: '🟠 높음',
+    analysis: '수체에서 이상 색상, 오염물질 유입 등의 징후가 감지되었습니다. 환경부 수질오염 대응팀이 즉시 샘플 채취를 위해 출동합니다.',
+    actions: ['환경부 수질오염 대응팀 출동', '현장 수질 샘플 채취', '오염원 역추적 조사 시작', '인근 취수장 모니터링 강화']
+  },
+  '소음진동': {
+    urgency: '🟢 낮음',
+    analysis: '사진 및 부가 정보를 기반으로 소음·진동 관련 민원이 접수되었습니다. 소음 측정팀이 현장에 파견되어 기준치 초과 여부를 측정합니다.',
+    actions: ['소음 측정팀 현장 파견', '소음 데시벨 기준치 측정', '민원인에게 처리 결과 통보', '기준 초과 시 시정명령 발부']
+  },
+  '기타': {
+    urgency: '🟡 보통',
+    analysis: 'AI가 사진을 분석하여 신고 내용을 자동 분류하였습니다. 담당 부서로 즉시 전달되며 24시간 내에 처리 결과가 안내됩니다.',
+    actions: ['담당 부서 자동 배정 완료', '현장 점검팀 출동 요청', '처리 결과 48시간 내 통보', '블록체인 기록 저장']
+  }
+};
+
+function showResult(category) {
+  goScreen('screen-result');
+  const db = analysisDB[category] || analysisDB['기타'];
+  const code = 'RPT-2026-' + (Math.floor(Math.random() * 9000) + 1000);
+  document.getElementById('resultCode').textContent = code;
+  document.getElementById('resType').textContent = category;
+  document.getElementById('resUrgency').textContent = db.urgency;
+  document.getElementById('resTime').textContent = new Date().toLocaleString('ko-KR');
+  if (gpsCoords) {
+    document.getElementById('resGps').textContent = `${gpsCoords.lat}, ${gpsCoords.lng}`;
+    document.getElementById('resLoc').textContent = '제주시 연동 일대 (GPS 자동입력)';
+  }
+  document.getElementById('aiAnalysisText').textContent = db.analysis;
+
+  const al = document.getElementById('actionList');
+  al.innerHTML = '';
+  db.actions.forEach((a, i) => {
+    al.innerHTML += `<div class="action-item"><div class="action-num">${i+1}</div><div class="action-text">${a}</div></div>`;
+  });
+}
+
+// Init
+window.addEventListener('load', () => {
+  initGPS();
+});
+</script>
+</body>
+</html>

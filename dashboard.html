@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FIIL 관리자 대시보드</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --primary: #00529B;
+  --primary-dark: #003A6E;
+  --primary-light: #E8F0FB;
+  --accent: #0EA47A;
+  --accent-light: #E0F5EF;
+  --warn: #D64F0A;
+  --warn-light: #FFF0E8;
+  --yellow: #F59E0B;
+  --yellow-light: #FEF3C7;
+  --text: #1A1A1A;
+  --sub: #4A4A4A;
+  --muted: #767676;
+  --border: #E0E0E0;
+  --bg: #F0F3F8;
+  --white: #fff;
+  --sidebar-w: 240px;
+  --topbar-h: 60px;
+  --radius: 10px;
+  --shadow: 0 2px 12px rgba(0,0,0,0.08);
+  --shadow-md: 0 4px 24px rgba(0,0,0,0.12);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Noto Sans KR', sans-serif; background: var(--bg); color: var(--text); font-size: 14px; }
+a { text-decoration: none; color: inherit; }
+
+/* ── LOGIN OVERLAY ── */
+#loginOverlay {
+  position: fixed; inset: 0;
+  background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 60%, #1565C0 100%);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 9999;
+  transition: opacity 0.5s;
+}
+#loginOverlay.fade-out { opacity: 0; pointer-events: none; }
+.login-box {
+  background: var(--white);
+  border-radius: 18px;
+  padding: 40px 36px;
+  width: 380px;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.3);
+}
+.login-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 28px; }
+.login-logo-mark {
+  width: 40px; height: 40px;
+  background: var(--primary);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; font-weight: 900; color: #fff;
+}
+.login-logo-text { font-size: 20px; font-weight: 700; color: var(--primary); }
+.login-logo-sub { font-size: 11px; color: var(--muted); display: block; }
+.login-title { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+.login-sub { font-size: 12px; color: var(--muted); margin-bottom: 24px; }
+.login-field { margin-bottom: 14px; }
+.login-label { font-size: 11px; font-weight: 700; color: var(--sub); margin-bottom: 6px; display: block; letter-spacing: 0.5px; }
+.login-input {
+  width: 100%;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 11px 14px;
+  font-size: 14px;
+  font-family: 'Noto Sans KR', sans-serif;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.login-input:focus { border-color: var(--primary); }
+.login-hint { font-size: 11px; color: var(--muted); margin-top: 5px; }
+.login-btn {
+  width: 100%;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 13px;
+  font-size: 15px;
+  font-weight: 700;
+  font-family: 'Noto Sans KR', sans-serif;
+  cursor: pointer;
+  margin-top: 8px;
+  transition: background 0.15s;
+}
+.login-btn:hover { background: var(--primary-dark); }
+.login-gov-note {
+  margin-top: 20px;
+  text-align: center;
+  font-size: 11px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+/* ── APP LAYOUT ── */
+#dashApp { display: none; min-height: 100vh; }
+#dashApp.show { display: flex; }
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width: var(--sidebar-w);
+  background: var(--primary-dark);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  left: 0; top: 0; bottom: 0;
+  z-index: 100;
+}
+.sidebar-logo {
+  padding: 18px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  display: flex; align-items: center; gap: 10px;
+}
+.sidebar-logo-mark {
+  width: 34px; height: 34px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; font-weight: 900; color: #fff;
+}
+.sidebar-logo-text { font-size: 16px; font-weight: 700; color: #fff; }
+.sidebar-logo-sub { font-size: 10px; color: rgba(255,255,255,0.5); display: block; }
+
+.sidebar-section-label {
+  font-size: 10px; font-weight: 700;
+  color: rgba(255,255,255,0.35);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 18px 20px 6px;
+}
+.sidebar-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 11px 20px;
+  color: rgba(255,255,255,0.65);
+  cursor: pointer;
+  border-radius: 0;
+  transition: all 0.15s;
+  font-size: 13px;
+  border-left: 3px solid transparent;
+}
+.sidebar-item:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.9); }
+.sidebar-item.active { background: rgba(255,255,255,0.1); color: #fff; border-left-color: var(--accent); }
+.sidebar-item-icon { font-size: 16px; width: 20px; text-align: center; }
+.sidebar-badge {
+  margin-left: auto;
+  background: var(--warn);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 10px;
+}
+.sidebar-footer {
+  margin-top: auto;
+  padding: 16px 20px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  font-size: 11px;
+  color: rgba(255,255,255,0.35);
+}
+.sidebar-user {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 6px;
+}
+.sidebar-user-dot {
+  width: 8px; height: 8px;
+  background: var(--accent);
+  border-radius: 50%;
+  animation: blink 2s infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+/* ── MAIN CONTENT ── */
+.main {
+  margin-left: var(--sidebar-w);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+.topbar {
+  background: var(--white);
+  height: var(--topbar-h);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  gap: 16px;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  box-shadow: 0 1px 8px rgba(0,0,0,0.05);
+}
+.topbar-breadcrumb { font-size: 13px; color: var(--muted); flex: 1; }
+.topbar-breadcrumb strong { color: var(--text); }
+.topbar-actions { display: flex; align-items: center; gap: 12px; }
+.topbar-time {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  color: var(--muted);
+  background: var(--bg);
+  padding: 5px 10px;
+  border-radius: 6px;
+}
+.topbar-status {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 12px;
+  color: var(--accent);
+  font-weight: 600;
+}
+.status-dot {
+  width: 8px; height: 8px;
+  background: var(--accent);
+  border-radius: 50%;
+  animation: blink 1.5s infinite;
+}
+.topbar-logout {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 12px;
+  cursor: pointer;
+  color: var(--muted);
+  font-family: 'Noto Sans KR', sans-serif;
+}
+.topbar-logout:hover { color: var(--warn); border-color: var(--warn); }
+
+/* ── PAGE CONTENT ── */
+.page-content { padding: 24px; flex: 1; }
+
+/* ── KPI GRID ── */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.kpi-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 20px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  position: relative;
+  overflow: hidden;
+}
+.kpi-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+}
+.kpi-blue::before { background: var(--primary); }
+.kpi-green::before { background: var(--accent); }
+.kpi-orange::before { background: var(--warn); }
+.kpi-yellow::before { background: var(--yellow); }
+.kpi-label { font-size: 11px; color: var(--muted); font-weight: 600; letter-spacing: 0.5px; margin-bottom: 8px; }
+.kpi-val {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -1px;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+.kpi-trend { font-size: 11px; display: flex; align-items: center; gap: 4px; }
+.trend-up { color: var(--accent); }
+.trend-dn { color: var(--warn); }
+.kpi-icon { position: absolute; top: 18px; right: 18px; font-size: 24px; opacity: 0.15; }
+
+/* ── LAYOUT GRID ── */
+.dash-grid {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.dash-grid-full { grid-template-columns: 1fr; }
+
+/* ── CARD ── */
+.card {
+  background: var(--white);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.card-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.card-title { font-size: 14px; font-weight: 700; color: var(--text); }
+.card-subtitle { font-size: 11px; color: var(--muted); margin-top: 1px; }
+.card-action {
+  font-size: 12px;
+  color: var(--primary);
+  cursor: pointer;
+  font-weight: 600;
+}
+.card-body { padding: 16px 20px; }
+
+/* ── MAP ── */
+.map-area {
+  background: #E8F0F8;
+  position: relative;
+  min-height: 260px;
+  overflow: hidden;
+}
+.map-svg { width: 100%; height: 260px; }
+.map-pin {
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+.map-pin:hover { transform: scale(1.3); transform-origin: center; }
+.map-tooltip {
+  position: absolute;
+  background: var(--primary-dark);
+  color: #fff;
+  font-size: 11px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s;
+  white-space: nowrap;
+  z-index: 10;
+}
+.map-legend {
+  position: absolute;
+  bottom: 12px; right: 12px;
+  background: rgba(255,255,255,0.95);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 10px;
+  border: 1px solid var(--border);
+}
+.legend-item { display: flex; align-items: center; gap: 6px; margin-bottom: 3px; }
+.legend-item:last-child { margin-bottom: 0; }
+.legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+/* ── TABLE ── */
+.dash-table { width: 100%; border-collapse: collapse; }
+.dash-table th {
+  text-align: left;
+  padding: 8px 12px;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--muted);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+.dash-table td {
+  padding: 11px 12px;
+  font-size: 12px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+.dash-table tr:last-child td { border-bottom: none; }
+.dash-table tr:hover td { background: var(--bg); }
+.report-id {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--primary);
+}
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 10px;
+}
+.badge-red { background: #FEE2E2; color: #DC2626; }
+.badge-yellow { background: var(--yellow-light); color: #92400E; }
+.badge-green { background: var(--accent-light); color: var(--accent); }
+.badge-blue { background: var(--primary-light); color: var(--primary); }
+.badge-gray { background: #F3F4F6; color: #6B7280; }
+
+/* ── SIDE PANELS ── */
+.mini-stat { padding: 10px 0; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+.mini-stat:last-child { border-bottom: none; padding-bottom: 0; }
+.mini-stat-label { font-size: 12px; color: var(--sub); }
+.mini-stat-val { font-size: 14px; font-weight: 700; }
+
+/* ── BAR CHART ── */
+.bar-chart { display: flex; flex-direction: column; gap: 10px; }
+.bar-item { }
+.bar-label-row { display: flex; justify-content: space-between; font-size: 11px; color: var(--sub); margin-bottom: 4px; }
+.bar-track { height: 8px; background: var(--bg); border-radius: 4px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 4px; transition: width 1.5s ease; }
+
+/* ── DONUT CHART ── */
+.donut-wrap { display: flex; align-items: center; gap: 20px; }
+.donut-legend { display: flex; flex-direction: column; gap: 8px; flex: 1; }
+.donut-legend-item { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+.donut-legend-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+.donut-legend-label { flex: 1; }
+.donut-legend-pct { font-weight: 700; color: var(--text); }
+
+/* ── COST TABLE ── */
+.cost-summary {
+  background: var(--primary-dark);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  color: #fff;
+  margin-bottom: 14px;
+}
+.cost-summary-row { display: flex; justify-content: space-between; padding: 5px 0; font-size: 13px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+.cost-summary-row:last-child { border-bottom: none; font-weight: 700; font-size: 15px; margin-top: 6px; padding-top: 10px; }
+.cost-summary-key { color: rgba(255,255,255,0.7); }
+.cost-summary-val { color: #fff; }
+
+/* ── TIMELINE ── */
+.timeline { display: flex; flex-direction: column; gap: 0; }
+.timeline-item { display: flex; gap: 12px; padding-bottom: 14px; position: relative; }
+.timeline-item:last-child { padding-bottom: 0; }
+.timeline-line {
+  width: 1px;
+  background: var(--border);
+  position: absolute;
+  top: 24px; left: 11px;
+  bottom: 0;
+}
+.timeline-item:last-child .timeline-line { display: none; }
+.timeline-dot {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px;
+  flex-shrink: 0;
+  z-index: 1;
+}
+.timeline-content { flex: 1; padding-top: 2px; }
+.timeline-title { font-size: 12px; font-weight: 600; color: var(--text); }
+.timeline-meta { font-size: 10px; color: var(--muted); margin-top: 2px; }
+
+/* ── RESOURCE ── */
+.resource-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.resource-item {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+}
+.resource-icon { font-size: 20px; margin-bottom: 6px; }
+.resource-label { font-size: 11px; color: var(--muted); margin-bottom: 2px; }
+.resource-val { font-size: 16px; font-weight: 700; color: var(--text); }
+.resource-status { font-size: 10px; margin-top: 2px; }
+.rs-avail { color: var(--accent); }
+.rs-busy { color: var(--warn); }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 1200px) {
+  .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+  .dash-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 900px) {
+  .sidebar { transform: translateX(-100%); }
+  .main { margin-left: 0; }
+}
+@media (max-width: 580px) {
+  .sidebar { display: none; }
+  .main { margin-left: 0; width: 100%; }
+  .topbar { padding: 0 12px; gap: 8px; }
+  .topbar-breadcrumb { font-size: 11px; }
+  .page-content { padding: 12px; }
+  .kpi-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .kpi-card { padding: 14px 12px; }
+  .kpi-val { font-size: 22px; }
+  .dash-grid { grid-template-columns: 1fr; gap: 12px; }
+  .card { padding: 14px; }
+  .card-title { font-size: 13px; }
+  .donut-wrap { flex-direction: column; }
+  .login-box { padding: 28px 20px; margin: 16px; }
+  .login-title { font-size: 18px; }
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN OVERLAY -->
+<div id="loginOverlay">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="login-logo-mark">F</div>
+      <div>
+        <div class="login-logo-text">FIIL.kr</div>
+        <span class="login-logo-sub">관리자 포털 — 제주특별자치도</span>
+      </div>
+    </div>
+    <div class="login-title">관리자 로그인</div>
+    <div class="login-sub">제주특별자치도 스마트 민원 대응 시스템 · 관계자 전용</div>
+    <div class="login-field">
+      <label class="login-label">아이디 (직원번호)</label>
+      <input class="login-input" type="text" id="loginId" value="admin" placeholder="직원번호 입력">
+      <div class="login-hint">데모: admin / admin 입력 후 로그인</div>
+    </div>
+    <div class="login-field">
+      <label class="login-label">비밀번호</label>
+      <input class="login-input" type="password" id="loginPw" value="admin" placeholder="비밀번호 입력" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button class="login-btn" onclick="doLogin()">🔐 로그인</button>
+    <div class="login-gov-note">🛡️ 이 시스템은 제주특별자치도 공무원 및 지정 담당자만 접근할 수 있습니다.</div>
+  </div>
+</div>
+
+<!-- DASHBOARD APP -->
+<div id="dashApp">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-mark">F</div>
+      <div>
+        <div class="sidebar-logo-text">FIIL.kr</div>
+        <span class="sidebar-logo-sub">관리자 대시보드</span>
+      </div>
+    </div>
+
+    <div class="sidebar-section-label">운영 현황</div>
+    <div class="sidebar-item active"><span class="sidebar-item-icon">📊</span> 종합 대시보드</div>
+    <div class="sidebar-item"><span class="sidebar-item-icon">📋</span> 신고 현황 <span class="sidebar-badge">4</span></div>
+    <div class="sidebar-item"><span class="sidebar-item-icon">🗺</span> 실시간 지도</div>
+    <div class="sidebar-item"><span class="sidebar-item-icon">🚗</span> 출동 현황</div>
+
+    <div class="sidebar-section-label">분석 · 보고</div>
+    <div class="sidebar-item"><span class="sidebar-item-icon">📈</span> 통계 분석</div>
+    <div class="sidebar-item"><span class="sidebar-item-icon">💰</span> 예산 · 비용</div>
+    <div class="sidebar-item"><span class="sidebar-item-icon">📄</span> 조치 결과 보고서</div>
+    <div class="sidebar-item"><span class="sidebar-item-icon">⛓</span> 블록체인 기록</div>
+
+    <div class="sidebar-section-label">관리</div>
+    <div class="sidebar-item"><span class="sidebar-item-icon">👥</span> 인력 · 장비</div>
+    <div class="sidebar-item"><span class="sidebar-item-icon">⚙️</span> 시스템 설정</div>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="sidebar-user-dot"></div>
+        <div>관리자 · 제주시 환경정책과</div>
+      </div>
+      <div>최종 로그인: 오늘 09:14</div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main">
+    <!-- Topbar -->
+    <div class="topbar">
+      <div class="topbar-breadcrumb">FIIL.kr &rsaquo; <strong>종합 대시보드</strong></div>
+      <div class="topbar-actions">
+        <div class="topbar-status"><span class="status-dot"></span> 시스템 정상</div>
+        <div class="topbar-time" id="liveClock">--:--:--</div>
+        <button class="topbar-logout" onclick="doLogout()">로그아웃</button>
+      </div>
+    </div>
+
+    <!-- Page Content -->
+    <div class="page-content">
+
+      <!-- KPI Cards -->
+      <div class="kpi-grid">
+        <div class="kpi-card kpi-blue">
+          <div class="kpi-icon">📋</div>
+          <div class="kpi-label">오늘 신고 접수</div>
+          <div class="kpi-val">23</div>
+          <div class="kpi-trend"><span class="trend-up">▲ 4건</span> 전일 대비</div>
+        </div>
+        <div class="kpi-card kpi-green">
+          <div class="kpi-icon">✅</div>
+          <div class="kpi-label">처리 완료</div>
+          <div class="kpi-val">19</div>
+          <div class="kpi-trend"><span class="trend-up">처리율 82.6%</span></div>
+        </div>
+        <div class="kpi-card kpi-orange">
+          <div class="kpi-icon">🚗</div>
+          <div class="kpi-label">현재 출동 중</div>
+          <div class="kpi-val">3</div>
+          <div class="kpi-trend"><span class="trend-dn">평균 응답 28분</span></div>
+        </div>
+        <div class="kpi-card kpi-yellow">
+          <div class="kpi-icon">💰</div>
+          <div class="kpi-label">오늘 집행 비용</div>
+          <div class="kpi-val">₩84만</div>
+          <div class="kpi-trend"><span>예산 대비 <strong>73%</strong></span></div>
+        </div>
+      </div>
+
+      <!-- Map + Side Panel -->
+      <div class="dash-grid">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">🗺 제주 신고 현황 실시간 지도</div>
+              <div class="card-subtitle">오늘 23건 · 지도를 클릭하면 상세 정보가 표시됩니다</div>
+            </div>
+            <span class="card-action">전체 지도 보기 →</span>
+          </div>
+          <div class="map-area" id="mapArea">
+            <div class="map-tooltip" id="mapTooltip"></div>
+            <svg class="map-svg" viewBox="0 0 700 260" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <radialGradient id="seaGrad" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stop-color="#C8DCF0"/>
+                  <stop offset="100%" stop-color="#A8C8E8"/>
+                </radialGradient>
+              </defs>
+              <rect width="700" height="260" fill="url(#seaGrad)" rx="0"/>
+              <!-- Grid lines -->
+              <g stroke="rgba(255,255,255,0.15)" stroke-width="0.5">
+                <line x1="0" y1="65" x2="700" y2="65"/>
+                <line x1="0" y1="130" x2="700" y2="130"/>
+                <line x1="0" y1="195" x2="700" y2="195"/>
+                <line x1="175" y1="0" x2="175" y2="260"/>
+                <line x1="350" y1="0" x2="350" y2="260"/>
+                <line x1="525" y1="0" x2="525" y2="260"/>
+              </g>
+              <!-- Jeju Island -->
+              <ellipse cx="350" cy="130" rx="280" ry="90" fill="#D4E8C8" stroke="#A8D090" stroke-width="1.5"/>
+              <!-- Interior terrain -->
+              <ellipse cx="350" cy="130" rx="180" ry="55" fill="#C4D8B8" opacity="0.6"/>
+              <!-- Hallasan -->
+              <circle cx="348" cy="128" r="36" fill="#B8CCA8" stroke="#98B888" stroke-width="1"/>
+              <circle cx="348" cy="128" r="20" fill="#A8BC98" stroke="#88A878" stroke-width="1"/>
+              <circle cx="348" cy="128" r="8" fill="#98AC88"/>
+              <text x="348" y="132" text-anchor="middle" font-size="9" fill="#4A6A3A" font-family="'Noto Sans KR',sans-serif" font-weight="700">한라산</text>
+              <!-- City labels -->
+              <text x="200" y="145" text-anchor="middle" font-size="9" fill="#2A4A6A" font-family="sans-serif">제주시</text>
+              <text x="430" y="155" text-anchor="middle" font-size="9" fill="#2A4A6A" font-family="sans-serif">서귀포시</text>
+              <text x="150" y="120" text-anchor="middle" font-size="8" fill="#3A5A7A" font-family="sans-serif">한림</text>
+              <text x="490" y="105" text-anchor="middle" font-size="8" fill="#3A5A7A" font-family="sans-serif">성산</text>
+              <!-- Map pins with hover -->
+              <g class="map-pin" data-info="협재해수욕장 · 해안쓰레기 · 출동중" data-x="155" data-y="115">
+                <circle cx="160" cy="105" r="10" fill="#D64F0A" opacity="0.9"/>
+                <circle cx="160" cy="105" r="5" fill="white"/>
+                <circle cx="160" cy="105" r="10" fill="#D64F0A" opacity="0" class="pin-anim">
+                  <animate attributeName="r" from="10" to="20" dur="2s" repeatCount="indefinite"/>
+                  <animate attributeName="opacity" from="0.5" to="0" dur="2s" repeatCount="indefinite"/>
+                </circle>
+              </g>
+              <g class="map-pin" data-info="제주시 연동 · 불법투기 · 대기중" data-x="205" data-y="140">
+                <circle cx="210" cy="130" r="10" fill="#F59E0B" opacity="0.9"/>
+                <circle cx="210" cy="130" r="5" fill="white"/>
+              </g>
+              <g class="map-pin" data-info="성산일출봉 · 공중화장실 · 완료" data-x="490" data-y="100">
+                <circle cx="495" cy="90" r="10" fill="#0EA47A" opacity="0.9"/>
+                <circle cx="495" cy="90" r="5" fill="white"/>
+              </g>
+              <g class="map-pin" data-info="중문관광단지 · 쓰레기불법투기 · 완료" data-x="370" data-y="165">
+                <circle cx="375" cy="155" r="10" fill="#0EA47A" opacity="0.9"/>
+                <circle cx="375" cy="155" r="5" fill="white"/>
+              </g>
+              <g class="map-pin" data-info="표선해비치 · 해안쓰레기 · 접수" data-x="455" data-y="150">
+                <circle cx="460" cy="140" r="10" fill="#00529B" opacity="0.9"/>
+                <circle cx="460" cy="140" r="5" fill="white"/>
+              </g>
+              <g class="map-pin" data-info="애월읍 · 도로파손 · 완료" data-x="215" data-y="108">
+                <circle cx="220" cy="98" r="10" fill="#0EA47A" opacity="0.9"/>
+                <circle cx="220" cy="98" r="5" fill="white"/>
+              </g>
+            </svg>
+            <div class="map-legend">
+              <div class="legend-item"><div class="legend-dot" style="background:#D64F0A"></div> 출동중</div>
+              <div class="legend-item"><div class="legend-dot" style="background:#F59E0B"></div> 대기중</div>
+              <div class="legend-item"><div class="legend-dot" style="background:#0EA47A"></div> 완료</div>
+              <div class="legend-item"><div class="legend-dot" style="background:#00529B"></div> 접수</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Panel: Resource + Today Stats -->
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <div class="card">
+            <div class="card-header"><div class="card-title">👥 투입 인력 · 장비</div></div>
+            <div class="card-body">
+              <div class="resource-grid">
+                <div class="resource-item">
+                  <div class="resource-icon">👷</div>
+                  <div class="resource-label">현장 인원</div>
+                  <div class="resource-val">14명</div>
+                  <div class="resource-status rs-busy">3팀 출동중</div>
+                </div>
+                <div class="resource-item">
+                  <div class="resource-icon">🚛</div>
+                  <div class="resource-label">차량</div>
+                  <div class="resource-val">5대</div>
+                  <div class="resource-status rs-busy">3대 운행중</div>
+                </div>
+                <div class="resource-item">
+                  <div class="resource-icon">🚤</div>
+                  <div class="resource-label">선박·보트</div>
+                  <div class="resource-val">2척</div>
+                  <div class="resource-status rs-busy">1척 출동중</div>
+                </div>
+                <div class="resource-item">
+                  <div class="resource-icon">🚁</div>
+                  <div class="resource-label">헬기</div>
+                  <div class="resource-val">1대</div>
+                  <div class="resource-status rs-avail">대기중</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><div class="card-title">📊 오늘 유형별 현황</div></div>
+            <div class="card-body">
+              <div class="bar-chart">
+                <div class="bar-item">
+                  <div class="bar-label-row"><span>🏖️ 해안쓰레기</span><span>8건</span></div>
+                  <div class="bar-track"><div class="bar-fill" style="width:82%;background:var(--primary)"></div></div>
+                </div>
+                <div class="bar-item">
+                  <div class="bar-label-row"><span>🗑️ 불법투기</span><span>5건</span></div>
+                  <div class="bar-track"><div class="bar-fill" style="width:50%;background:var(--warn)"></div></div>
+                </div>
+                <div class="bar-item">
+                  <div class="bar-label-row"><span>🚧 도로파손</span><span>4건</span></div>
+                  <div class="bar-track"><div class="bar-fill" style="width:40%;background:var(--yellow)"></div></div>
+                </div>
+                <div class="bar-item">
+                  <div class="bar-label-row"><span>🚨 응급환자</span><span>2건</span></div>
+                  <div class="bar-track"><div class="bar-fill" style="width:20%;background:#DC2626"></div></div>
+                </div>
+                <div class="bar-item">
+                  <div class="bar-label-row"><span>🍽️ 식당위생</span><span>2건</span></div>
+                  <div class="bar-track"><div class="bar-fill" style="width:20%;background:var(--accent)"></div></div>
+                </div>
+                <div class="bar-item">
+                  <div class="bar-label-row"><span>➕ 기타</span><span>2건</span></div>
+                  <div class="bar-track"><div class="bar-fill" style="width:20%;background:#9CA3AF"></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Reports Table + Cost Panel -->
+      <div class="dash-grid">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">📋 신고 목록 · 조치 현황</div>
+              <div class="card-subtitle">오늘 전체 23건</div>
+            </div>
+            <span class="card-action">전체 보기 →</span>
+          </div>
+          <div style="overflow-x:auto;">
+            <table class="dash-table">
+              <thead>
+                <tr>
+                  <th>신고번호</th>
+                  <th>유형</th>
+                  <th>위치</th>
+                  <th>신고자</th>
+                  <th>긴급도</th>
+                  <th>상태</th>
+                  <th>투입인원</th>
+                  <th>비용</th>
+                  <th>시간</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="report-id">RPT-2026-2847</td>
+                  <td>🏖️ 해안쓰레기</td>
+                  <td>협재해수욕장</td>
+                  <td>010-****-1234</td>
+                  <td><span class="badge badge-yellow">🟡 보통</span></td>
+                  <td><span class="badge badge-yellow">출동중</span></td>
+                  <td>3명 / 보트1</td>
+                  <td>₩120,000</td>
+                  <td>14분 전</td>
+                </tr>
+                <tr>
+                  <td class="report-id">RPT-2026-2846</td>
+                  <td>🚨 응급환자</td>
+                  <td>한라산 등산로</td>
+                  <td>010-****-5678</td>
+                  <td><span class="badge badge-red">🔴 긴급</span></td>
+                  <td><span class="badge badge-green">완료</span></td>
+                  <td>4명 / 구급1</td>
+                  <td>₩280,000</td>
+                  <td>1시간 전</td>
+                </tr>
+                <tr>
+                  <td class="report-id">RPT-2026-2845</td>
+                  <td>🗑️ 불법투기</td>
+                  <td>중문관광단지</td>
+                  <td>010-****-9012</td>
+                  <td><span class="badge badge-yellow">🟠 높음</span></td>
+                  <td><span class="badge badge-blue">대기중</span></td>
+                  <td>2명</td>
+                  <td>₩45,000</td>
+                  <td>32분 전</td>
+                </tr>
+                <tr>
+                  <td class="report-id">RPT-2026-2844</td>
+                  <td>🚧 도로파손</td>
+                  <td>애월읍 일주서로</td>
+                  <td>010-****-3456</td>
+                  <td><span class="badge badge-yellow">🟠 높음</span></td>
+                  <td><span class="badge badge-green">완료</span></td>
+                  <td>3명 / 차량2</td>
+                  <td>₩95,000</td>
+                  <td>1.5h 전</td>
+                </tr>
+                <tr>
+                  <td class="report-id">RPT-2026-2843</td>
+                  <td>🍽️ 식당위생</td>
+                  <td>제주시 연동</td>
+                  <td>010-****-7890</td>
+                  <td><span class="badge badge-gray">🟢 낮음</span></td>
+                  <td><span class="badge badge-green">완료</span></td>
+                  <td>1명</td>
+                  <td>₩30,000</td>
+                  <td>2h 전</td>
+                </tr>
+                <tr>
+                  <td class="report-id">RPT-2026-2842</td>
+                  <td>🏖️ 해안쓰레기</td>
+                  <td>표선해비치</td>
+                  <td>010-****-2345</td>
+                  <td><span class="badge badge-yellow">🟡 보통</span></td>
+                  <td><span class="badge badge-yellow">출동중</span></td>
+                  <td>2명 / 보트1</td>
+                  <td>₩90,000</td>
+                  <td>45분 전</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Cost + Timeline -->
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <div class="card">
+            <div class="card-header"><div class="card-title">💰 오늘 비용 현황</div></div>
+            <div class="card-body">
+              <div class="cost-summary">
+                <div class="cost-summary-row"><span class="cost-summary-key">인건비</span><span class="cost-summary-val">₩ 420,000</span></div>
+                <div class="cost-summary-row"><span class="cost-summary-key">장비·차량</span><span class="cost-summary-val">₩ 285,000</span></div>
+                <div class="cost-summary-row"><span class="cost-summary-key">소모품</span><span class="cost-summary-val">₩ 78,000</span></div>
+                <div class="cost-summary-row"><span class="cost-summary-key">기타</span><span class="cost-summary-val">₩ 57,000</span></div>
+                <div class="cost-summary-row"><span class="cost-summary-key">합계</span><span class="cost-summary-val">₩ 840,000</span></div>
+              </div>
+              <div class="bar-item" style="margin-top:6px;">
+                <div class="bar-label-row"><span style="font-size:11px;font-weight:600;">일일 예산 소진율</span><span style="font-size:11px;font-weight:700;color:var(--warn);">73%</span></div>
+                <div class="bar-track" style="height:12px;">
+                  <div class="bar-fill" style="width:73%;background:linear-gradient(to right,var(--accent),var(--yellow));"></div>
+                </div>
+                <div style="font-size:10px;color:var(--muted);margin-top:4px;">일일 예산: ₩1,150,000 / 잔액: ₩310,000</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><div class="card-title">🕐 최근 활동 타임라인</div></div>
+            <div class="card-body">
+              <div class="timeline">
+                <div class="timeline-item">
+                  <div class="timeline-line"></div>
+                  <div class="timeline-dot" style="background:var(--warn);color:#fff;">🚗</div>
+                  <div class="timeline-content">
+                    <div class="timeline-title">협재 해안 수거팀 출동</div>
+                    <div class="timeline-meta">14:23 · 3명 · 고무보트 1척</div>
+                  </div>
+                </div>
+                <div class="timeline-item">
+                  <div class="timeline-line"></div>
+                  <div class="timeline-dot" style="background:var(--accent);color:#fff;">✓</div>
+                  <div class="timeline-content">
+                    <div class="timeline-title">한라산 응급환자 이송 완료</div>
+                    <div class="timeline-meta">13:52 · 소요 34분</div>
+                  </div>
+                </div>
+                <div class="timeline-item">
+                  <div class="timeline-line"></div>
+                  <div class="timeline-dot" style="background:var(--accent);color:#fff;">✓</div>
+                  <div class="timeline-content">
+                    <div class="timeline-title">애월 포트홀 긴급 보수 완료</div>
+                    <div class="timeline-meta">13:10 · 소요 52분</div>
+                  </div>
+                </div>
+                <div class="timeline-item">
+                  <div class="timeline-dot" style="background:var(--primary);color:#fff;">📋</div>
+                  <div class="timeline-content">
+                    <div class="timeline-title">중문 불법투기 접수 · 대기</div>
+                    <div class="timeline-meta">14:05 · 배정 대기중</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /page-content -->
+  </div><!-- /main -->
+</div><!-- /dashApp -->
+
+<script>
+function doLogin() {
+  const id = document.getElementById('loginId').value;
+  const pw = document.getElementById('loginPw').value;
+  if (!id || !pw) { alert('아이디와 비밀번호를 입력하세요.'); return; }
+  // Demo: any input works
+  document.getElementById('loginOverlay').classList.add('fade-out');
+  setTimeout(() => {
+    document.getElementById('loginOverlay').style.display = 'none';
+    document.getElementById('dashApp').classList.add('show');
+  }, 500);
+}
+
+function doLogout() {
+  document.getElementById('dashApp').classList.remove('show');
+  document.getElementById('loginOverlay').style.display = 'flex';
+  document.getElementById('loginOverlay').classList.remove('fade-out');
+  document.getElementById('loginId').value = 'admin';
+  document.getElementById('loginPw').value = '';
+}
+
+// Live clock
+function updateClock() {
+  const now = new Date();
+  document.getElementById('liveClock').textContent =
+    now.toLocaleTimeString('ko-KR', {hour:'2-digit',minute:'2-digit',second:'2-digit'});
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// Map pin tooltips
+document.addEventListener('DOMContentLoaded', () => {
+  const pins = document.querySelectorAll('.map-pin');
+  const tooltip = document.getElementById('mapTooltip');
+  const mapArea = document.getElementById('mapArea');
+  pins.forEach(pin => {
+    pin.addEventListener('mouseenter', e => {
+      tooltip.textContent = pin.dataset.info;
+      tooltip.style.opacity = '1';
+    });
+    pin.addEventListener('mousemove', e => {
+      const rect = mapArea.getBoundingClientRect();
+      tooltip.style.left = (e.clientX - rect.left + 10) + 'px';
+      tooltip.style.top = (e.clientY - rect.top - 30) + 'px';
+    });
+    pin.addEventListener('mouseleave', () => {
+      tooltip.style.opacity = '0';
+    });
+  });
+});
+</script>
+</body>
+</html>
