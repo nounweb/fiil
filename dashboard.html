@@ -165,7 +165,7 @@ a{text-decoration:none;color:inherit}
 <body>
 
 <!-- ══ SIDEBAR ══ -->
-<aside class="sidebar" id="sidebar">
+<aside class="sidebar" id="sidebar" style="display:none">
   <div class="sb-brand">
     <div class="sb-icon">F</div>
     <div><div class="sb-name">FIIL.kr</div><div class="sb-sub">관리자 대시보드</div></div>
@@ -441,8 +441,8 @@ a{text-decoration:none;color:inherit}
 <script>
 /* ── Clock ── */
 (function tick(){
-  document.getElementById('clock').textContent =
-    new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  const el=document.getElementById('clock');
+  if(el) el.textContent=new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
   setTimeout(tick,1000);
 })();
 
