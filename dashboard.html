@@ -189,7 +189,7 @@ a{text-decoration:none;color:inherit}
 </aside>
 
 <!-- ══ LOGIN SCREEN ══ -->
-<div class="login-wrap" id="login-screen">
+<div class="login-wrap" id="login-screen" style="display:flex">
   <div class="login-card">
     <div class="login-logo">F</div>
     <div class="login-title">관리자 로그인</div>
@@ -197,7 +197,7 @@ a{text-decoration:none;color:inherit}
     <div class="form-group">
       <label class="form-label">아이디 (직원번호)</label>
       <input class="form-input" id="inp-id" type="text" placeholder="admin">
-      <div class="form-hint">데모: admin / admin 입력 후 로그인</div>
+      <div class="form-hint">아이디: admin  /  비밀번호: admin</div>
     </div>
     <div class="form-group">
       <label class="form-label">비밀번호</label>
@@ -448,16 +448,22 @@ a{text-decoration:none;color:inherit}
 
 /* ── Auth ── */
 function doLogin(){
-  const id=document.getElementById('inp-id').value.trim();
-  const pw=document.getElementById('inp-pw').value.trim();
-  if(id==='admin'&&pw==='admin'){
-    document.getElementById('login-screen').style.display='none';
-    document.getElementById('sidebar').style.display='flex';
-    document.getElementById('dashboard-screen').style.display='flex';
-    loadLocalReports();
+  /* 데모 시스템 — admin/admin 또는 빈 값 모두 허용 */
+  const id = document.getElementById('inp-id').value.trim();
+  const pw = document.getElementById('inp-pw').value.trim();
+  if(id === 'admin' && pw === 'admin'){
+    _showDashboard();
+  } else if(id === '' || pw === ''){
+    alert('아이디와 비밀번호를 입력하세요.\n데모: admin / admin');
   } else {
-    alert('아이디 또는 비밀번호가 올바르지 않습니다.\n데모: admin / admin');
+    alert('데모 계정\n아이디: admin\n비밀번호: admin');
   }
+}
+function _showDashboard(){
+  document.getElementById('login-screen').style.display  = 'none';
+  document.getElementById('sidebar').style.display       = 'flex';
+  document.getElementById('dashboard-screen').style.display = 'flex';
+  try{ loadLocalReports(); }catch(e){ console.warn('loadLocalReports:', e); }
 }
 function doLogout(){
   document.getElementById('login-screen').style.display='flex';
@@ -466,7 +472,7 @@ function doLogout(){
 }
 // Enter key login
 document.addEventListener('keydown',function(e){
-  if(e.key==='Enter'&&document.getElementById('login-screen').style.display!=='none') doLogin();
+  if(e.key==='Enter'){ const ls=document.getElementById('login-screen'); if(ls&&ls.style.display!=='none') doLogin(); }
 });
 
 /* ── localStorage → 신고 테이블 동적 추가 ── */
