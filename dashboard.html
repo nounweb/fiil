@@ -21,8 +21,6 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Noto Sans KR',system-ui,sans-serif;font-size:14px;color:var(--text);background:var(--bg);-webkit-font-smoothing:antialiased}
 a{text-decoration:none;color:inherit}
-
-/* ── SIDEBAR ── */
 .sidebar{width:240px;background:var(--sidebar);color:#fff;position:fixed;top:0;left:0;bottom:0;z-index:200;display:flex;flex-direction:column;overflow-y:auto}
 .sb-brand{display:flex;align-items:center;gap:12px;padding:18px 20px;border-bottom:1px solid rgba(255,255,255,.08)}
 .sb-icon{width:36px;height:36px;background:var(--primary);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:#fff;flex-shrink:0}
@@ -36,11 +34,7 @@ a{text-decoration:none;color:inherit}
 .sb-badge{margin-left:auto;background:var(--primary);color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px}
 .sb-user{padding:14px 20px;border-top:1px solid rgba(255,255,255,.08);font-size:12px;color:rgba(255,255,255,.55)}
 .sb-user strong{display:block;color:#fff;font-size:13px;margin-bottom:2px}
-
-/* ── MAIN ── */
 .main{margin-left:240px;min-height:100vh;display:flex;flex-direction:column}
-
-/* ── TOPBAR ── */
 .topbar{position:sticky;top:0;z-index:100;background:var(--surface);border-bottom:1px solid var(--border);height:56px;display:flex;align-items:center;padding:0 24px;gap:12px;box-shadow:var(--shadow-1)}
 .breadcrumb{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--sub);flex:1}
 .breadcrumb a{color:var(--sub)}
@@ -54,26 +48,7 @@ a{text-decoration:none;color:inherit}
 .btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:4px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;border:none;transition:background .15s}
 .btn-outline{background:transparent;border:1px solid var(--border);color:var(--text)}
 .btn-outline:hover{background:var(--bg)}
-
-/* ── CONTENT ── */
 .content{padding:24px}
-
-/* ── LOGIN SCREEN ── */
-.login-wrap{display:flex;align-items:center;justify-content:center;min-height:100vh;background:var(--bg)}
-.login-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:40px 36px;width:360px;box-shadow:var(--shadow-2);text-align:center}
-.login-logo{width:56px;height:56px;background:var(--primary);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800;color:#fff;margin:0 auto 20px}
-.login-title{font-size:20px;font-weight:800;margin-bottom:6px}
-.login-sub{font-size:13px;color:var(--sub);margin-bottom:28px}
-.form-group{margin-bottom:14px;text-align:left}
-.form-label{font-size:12px;font-weight:600;color:var(--sub);margin-bottom:5px;display:block}
-.form-input{width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:6px;font-size:14px;font-family:inherit;outline:none;transition:border-color .15s}
-.form-input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(26,115,232,.12)}
-.form-hint{font-size:11px;color:var(--hint);margin-top:4px}
-.btn-login{width:100%;background:var(--primary);color:#fff;padding:12px;border-radius:6px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;border:none;margin-top:6px;transition:background .15s}
-.btn-login:hover{background:var(--primary-dk)}
-.login-notice{font-size:12px;color:var(--hint);margin-top:20px;display:flex;align-items:flex-start;gap:6px;text-align:left}
-
-/* ── STAT CARDS ── */
 .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px}
 .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px 20px;box-shadow:var(--shadow-1)}
 .stat-icon{font-size:20px;margin-bottom:10px}
@@ -82,28 +57,21 @@ a{text-decoration:none;color:inherit}
 .stat-sub{font-size:12px;font-weight:600;margin-top:4px}
 .stat-sub.up{color:var(--green)}
 .stat-sub.blue{color:var(--primary)}
-
-/* ── 2-col layout ── */
 .row-2{display:grid;grid-template-columns:3fr 1fr;gap:16px;margin-bottom:20px}
 .row-equal{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
-
-/* ── CARD ── */
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow-1)}
 .card-head{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border)}
 .card-title{font-size:13px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.5px}
 .card-link{font-size:12px;color:var(--primary);font-weight:600}
 .card-link:hover{text-decoration:underline}
 .card-body{padding:16px 18px}
-
-/* ── MAP placeholder ── */
 .map-box{background:linear-gradient(135deg,#e8f0fe,#f0f9ff);border-radius:6px;height:200px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;margin-bottom:12px}
-.map-label{position:absolute;top:10px;left:10px;font-size:11px;font-weight:700;color:var(--primary)}
-.map-dots span{position:absolute;width:12px;height:12px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:8px;cursor:pointer}
-.map-dot-red{background:var(--red);color:#fff}
-.map-dot-blue{background:var(--primary);color:#fff}
-.map-dot-green{background:var(--green);color:#fff}
-
-/* ── REPORT TABLE ── */
+.chip{display:inline-flex;align-items:center;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap}
+.chip-green{background:var(--green-bg);color:var(--green)}
+.chip-blue{background:var(--primary-bg);color:var(--primary)}
+.chip-orange{background:var(--orange-bg);color:var(--orange)}
+.chip-red{background:var(--red-bg);color:var(--red)}
+.chip-gray{background:#f1f3f4;color:var(--sub)}
 .report-table{width:100%;border-collapse:collapse;font-size:13px}
 .report-table th{padding:10px 12px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--hint);border-bottom:2px solid var(--border);background:var(--bg)}
 .report-table td{padding:11px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
@@ -112,60 +80,41 @@ a{text-decoration:none;color:inherit}
 .report-table tr:hover td{background:#f8f9fa}
 .rpt-id{color:var(--primary);font-weight:700;cursor:pointer}
 .rpt-id:hover{text-decoration:underline}
-
-/* ── CHIPS ── */
-.chip{display:inline-flex;align-items:center;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap}
-.chip-green {background:var(--green-bg);color:var(--green)}
-.chip-blue  {background:var(--primary-bg);color:var(--primary)}
-.chip-orange{background:var(--orange-bg);color:var(--orange)}
-.chip-red   {background:var(--red-bg);color:var(--red)}
-.chip-gray  {background:#f1f3f4;color:var(--sub)}
-
-/* ── RESOURCE ── */
 .resource-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .res-item{background:var(--bg);border-radius:6px;padding:12px 14px;text-align:center}
 .res-icon{font-size:20px;margin-bottom:6px}
 .res-val{font-size:18px;font-weight:800}
 .res-lbl{font-size:11px;color:var(--sub);margin-top:2px}
 .res-sub{font-size:11px;color:var(--primary);font-weight:600;margin-top:2px}
-
-/* ── TYPE CHART ── */
 .type-item{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-size:13px}
 .type-item:last-child{margin-bottom:0}
 .type-bar{flex:1;height:8px;background:var(--border);border-radius:4px;overflow:hidden}
 .type-fill{height:100%;border-radius:4px;background:var(--primary)}
 .type-val{font-size:12px;font-weight:700;color:var(--primary);min-width:28px;text-align:right}
-
-/* ── COST TABLE ── */
 .cost-row{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);font-size:13px}
 .cost-row:last-child{border-bottom:none;font-weight:700}
 .cost-lbl{color:var(--sub)}
-.cost-progress{margin-top:14px}
 .cost-bar-wrap{height:8px;background:var(--border);border-radius:4px;overflow:hidden;margin-top:6px}
 .cost-bar-fill{height:100%;border-radius:4px;background:var(--orange)}
 .cost-note{font-size:11px;color:var(--sub);margin-top:6px}
-
-/* ── TIMELINE ── */
 .tl{padding-left:24px;position:relative}
-.tl::before{content:'';position:absolute;left:8px;top:6px;bottom:6px;width:2px;background:var(--border)}
+.tl::before{content:'';position:absolute;left:8px;top:6px;bottom:6px;width:2px;background:#e5e7eb}
 .tl-item{position:relative;margin-bottom:18px}
 .tl-item:last-child{margin-bottom:0}
-.tl-dot{position:absolute;left:-24px;top:2px;width:16px;height:16px;border-radius:50%;border:2px solid var(--surface);display:flex;align-items:center;justify-content:center;font-size:9px}
-.tl-dot.go  {background:var(--primary);color:#fff;box-shadow:0 0 0 2px #aac4f0}
-.tl-dot.done{background:var(--green);color:#fff;box-shadow:0 0 0 2px #a8d5b5}
-.tl-dot.wait{background:#ddd;box-shadow:0 0 0 2px #e5e7eb}
+.tl-dot{position:absolute;left:-22px;top:2px;width:16px;height:16px;border-radius:50%;border:2px solid var(--surface);display:flex;align-items:center;justify-content:center;font-size:9px}
+.tl-dot.go{background:var(--primary);color:#fff;box-shadow:0 0 0 2px #bfdbfe}
+.tl-dot.done{background:var(--green);color:#fff;box-shadow:0 0 0 2px #bbf7d0}
+.tl-dot.wait{background:#d1d5db;box-shadow:0 0 0 2px #e5e7eb}
 .tl-time{font-size:11px;color:var(--hint);margin-bottom:2px}
 .tl-lbl{font-size:13px;font-weight:600}
 .tl-sub{font-size:12px;color:var(--sub);margin-top:2px}
-
 @media(max-width:1100px){.stat-grid{grid-template-columns:1fr 1fr}.row-2{grid-template-columns:1fr}}
 @media(max-width:720px){.sidebar{display:none}.main{margin-left:0}.row-equal{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 
-<!-- ══ SIDEBAR ══ -->
-<aside class="sidebar" id="sidebar" style="display:none">
+<aside class="sidebar">
   <div class="sb-brand">
     <div class="sb-icon">F</div>
     <div><div class="sb-name">FIIL.kr</div><div class="sb-sub">관리자 대시보드</div></div>
@@ -173,7 +122,7 @@ a{text-decoration:none;color:inherit}
   <nav class="sb-nav">
     <div class="sb-section">운영 현황</div>
     <a class="sb-item active" href="dashboard.html"><span>📊</span> 종합 대시보드</a>
-    <a class="sb-item" href="#" id="sb-reports"><span>📋</span> 신고 현황 <span class="sb-badge" id="sb-badge">4</span></a>
+    <a class="sb-item" href="#"><span>📋</span> 신고 현황 <span class="sb-badge" id="sb-badge">0</span></a>
     <a class="sb-item" href="#"><span>🗺</span> 실시간 지도</a>
     <a class="sb-item" href="#"><span>🚗</span> 출동 현황</a>
     <div class="sb-section">분석 · 보고</div>
@@ -188,29 +137,7 @@ a{text-decoration:none;color:inherit}
   <div class="sb-user"><strong>관리자 · 제주시 환경정책과</strong>최종 로그인: 오늘 09:14</div>
 </aside>
 
-<!-- ══ LOGIN SCREEN ══ -->
-<div class="login-wrap" id="login-screen" style="display:flex">
-  <div class="login-card">
-    <div class="login-logo">F</div>
-    <div class="login-title">관리자 로그인</div>
-    <div class="login-sub">제주특별자치도 스마트 민원 대응 시스템 · 관계자 전용</div>
-    <div class="form-group">
-      <label class="form-label">아이디 (직원번호)</label>
-      <input class="form-input" id="inp-id" type="text" placeholder="admin">
-      <div class="form-hint">아이디: admin  /  비밀번호: admin</div>
-    </div>
-    <div class="form-group">
-      <label class="form-label">비밀번호</label>
-      <input class="form-input" id="inp-pw" type="password" placeholder="••••••">
-    </div>
-    <button class="btn-login" onclick="doLogin()">🔐 로그인</button>
-    <div class="login-notice">🛡️ 이 시스템은 제주특별자치도 공무원 및 지정 담당자만 접근할 수 있습니다.</div>
-  </div>
-</div>
-
-<!-- ══ DASHBOARD ══ -->
-<div class="main" id="dashboard-screen" style="display:none">
-  <!-- Topbar -->
+<div class="main">
   <header class="topbar">
     <nav class="breadcrumb">
       <a href="index.html">FIIL.kr</a>
@@ -220,13 +147,10 @@ a{text-decoration:none;color:inherit}
     <div class="topbar-right">
       <div class="sys-ok"><div class="sys-dot"></div>시스템 정상</div>
       <div class="clock" id="clock"></div>
-      <button class="btn btn-outline" onclick="doLogout()">로그아웃</button>
     </div>
   </header>
 
   <div class="content">
-
-    <!-- STAT CARDS -->
     <div class="stat-grid">
       <div class="stat-card">
         <div class="stat-icon">📋</div>
@@ -254,7 +178,6 @@ a{text-decoration:none;color:inherit}
       </div>
     </div>
 
-    <!-- MAP + RESOURCE -->
     <div class="row-2">
       <div class="card">
         <div class="card-head">
@@ -263,20 +186,17 @@ a{text-decoration:none;color:inherit}
         </div>
         <div class="card-body">
           <div class="map-box">
-            <span class="map-label">제주도 전역</span>
+            <span style="position:absolute;top:10px;left:10px;font-size:11px;font-weight:700;color:var(--primary)">제주도 전역</span>
             <span style="position:absolute;top:30%;left:30%;font-size:11px;color:var(--sub)">한라산</span>
             <span style="position:absolute;top:25%;left:20%;font-size:11px;color:var(--sub)">제주시</span>
             <span style="position:absolute;top:60%;left:55%;font-size:11px;color:var(--sub)">서귀포시</span>
-            <div class="map-dots">
-              <span class="map-dot-blue" style="top:28%;left:18%" title="협재 — 출동중">●</span>
-              <span class="map-dot-blue" style="top:45%;left:60%" title="중문 — 대기중">●</span>
-              <span class="map-dot-green" style="top:35%;left:75%" title="성산 — 완료">●</span>
-            </div>
+            <span style="position:absolute;top:28%;left:18%;width:12px;height:12px;border-radius:50%;background:var(--primary);display:inline-block"></span>
+            <span style="position:absolute;top:45%;left:60%;width:12px;height:12px;border-radius:50%;background:var(--primary);display:inline-block"></span>
+            <span style="position:absolute;top:35%;left:75%;width:12px;height:12px;border-radius:50%;background:var(--green);display:inline-block"></span>
             <div style="position:absolute;bottom:10px;right:12px;display:flex;gap:12px;font-size:11px">
-              <span>🔵 출동중</span><span>⚪ 대기중</span><span>🟢 완료</span>
+              <span>🔵 출동중</span><span>🟢 완료</span>
             </div>
           </div>
-          <!-- 신고 목록 요약 -->
           <div style="display:flex;flex-direction:column;gap:8px">
             <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:6px 0;border-bottom:1px solid var(--border)">
               <span>협재 해수욕장 — 해안 쓰레기 수거</span>
@@ -295,7 +215,6 @@ a{text-decoration:none;color:inherit}
       </div>
 
       <div style="display:flex;flex-direction:column;gap:16px">
-        <!-- 인력·장비 -->
         <div class="card">
           <div class="card-head"><div class="card-title">👥 투입 인력 · 장비</div></div>
           <div class="card-body">
@@ -307,7 +226,6 @@ a{text-decoration:none;color:inherit}
             </div>
           </div>
         </div>
-        <!-- 유형별 -->
         <div class="card">
           <div class="card-head"><div class="card-title">📊 유형별 현황</div></div>
           <div class="card-body">
@@ -321,7 +239,6 @@ a{text-decoration:none;color:inherit}
       </div>
     </div>
 
-    <!-- REPORT TABLE -->
     <div class="card" style="margin-bottom:20px">
       <div class="card-head">
         <div class="card-title">📋 신고 목록 · 조치 현황 <span style="font-weight:400;color:var(--hint)" id="table-count">오늘 전체 23건</span></div>
@@ -336,54 +253,17 @@ a{text-decoration:none;color:inherit}
             </tr>
           </thead>
           <tbody id="report-tbody">
-            <tr>
-              <td><a class="rpt-id" href="report.html?id=RPT-2026-2847">RPT-2026-2847</a></td>
-              <td>🏖️ 해안쓰레기</td><td>협재해수욕장</td><td>010-****-1234</td>
-              <td><span class="chip chip-blue">보통</span></td>
-              <td><span class="chip chip-blue">출동중</span></td>
-              <td>3명 / 보트1</td><td>₩120,000</td><td>14분 전</td>
-            </tr>
-            <tr>
-              <td><a class="rpt-id" href="report.html?id=RPT-2026-2846">RPT-2026-2846</a></td>
-              <td>🚨 응급환자</td><td>한라산 등산로</td><td>010-****-5678</td>
-              <td><span class="chip chip-red">긴급</span></td>
-              <td><span class="chip chip-green">완료</span></td>
-              <td>4명 / 구급1</td><td>₩280,000</td><td>1시간 전</td>
-            </tr>
-            <tr>
-              <td><a class="rpt-id" href="report.html?id=RPT-2026-2845">RPT-2026-2845</a></td>
-              <td>🗑️ 불법투기</td><td>중문관광단지</td><td>010-****-9012</td>
-              <td><span class="chip chip-orange">높음</span></td>
-              <td><span class="chip chip-orange">대기중</span></td>
-              <td>2명</td><td>₩45,000</td><td>32분 전</td>
-            </tr>
-            <tr>
-              <td><a class="rpt-id" href="report.html?id=RPT-2026-2844">RPT-2026-2844</a></td>
-              <td>🌲 산림쓰레기</td><td>애월읍 일주서로</td><td>010-****-3456</td>
-              <td><span class="chip chip-orange">높음</span></td>
-              <td><span class="chip chip-green">완료</span></td>
-              <td>3명 / 차량2</td><td>₩95,000</td><td>1.5h 전</td>
-            </tr>
-            <tr>
-              <td><a class="rpt-id" href="report.html?id=RPT-2026-2843">RPT-2026-2843</a></td>
-              <td>🌊 수중쓰레기</td><td>제주시 연동</td><td>010-****-7890</td>
-              <td><span class="chip chip-gray">낮음</span></td>
-              <td><span class="chip chip-green">완료</span></td>
-              <td>1명</td><td>₩30,000</td><td>2h 전</td>
-            </tr>
-            <tr>
-              <td><a class="rpt-id" href="report.html?id=RPT-2026-2842">RPT-2026-2842</a></td>
-              <td>🏖️ 해안쓰레기</td><td>표선해비치</td><td>010-****-2345</td>
-              <td><span class="chip chip-blue">보통</span></td>
-              <td><span class="chip chip-blue">출동중</span></td>
-              <td>2명 / 보트1</td><td>₩90,000</td><td>45분 전</td>
-            </tr>
+            <tr><td><a class="rpt-id" href="report.html?id=RPT-2026-2847">RPT-2026-2847</a></td><td>🏖️ 해안쓰레기</td><td>협재해수욕장</td><td>010-****-1234</td><td><span class="chip chip-blue">보통</span></td><td><span class="chip chip-blue">출동중</span></td><td>3명 / 보트1</td><td>₩120,000</td><td>14분 전</td></tr>
+            <tr><td><a class="rpt-id" href="report.html?id=RPT-2026-2846">RPT-2026-2846</a></td><td>🚨 응급환자</td><td>한라산 등산로</td><td>010-****-5678</td><td><span class="chip chip-red">긴급</span></td><td><span class="chip chip-green">완료</span></td><td>4명 / 구급1</td><td>₩280,000</td><td>1시간 전</td></tr>
+            <tr><td><a class="rpt-id" href="report.html?id=RPT-2026-2845">RPT-2026-2845</a></td><td>🗑️ 불법투기</td><td>중문관광단지</td><td>010-****-9012</td><td><span class="chip chip-orange">높음</span></td><td><span class="chip chip-orange">대기중</span></td><td>2명</td><td>₩45,000</td><td>32분 전</td></tr>
+            <tr><td><a class="rpt-id" href="report.html?id=RPT-2026-2844">RPT-2026-2844</a></td><td>🌲 산림쓰레기</td><td>애월읍 일주서로</td><td>010-****-3456</td><td><span class="chip chip-orange">높음</span></td><td><span class="chip chip-green">완료</span></td><td>3명 / 차량2</td><td>₩95,000</td><td>1.5h 전</td></tr>
+            <tr><td><a class="rpt-id" href="report.html?id=RPT-2026-2843">RPT-2026-2843</a></td><td>🌊 수중쓰레기</td><td>제주시 연동</td><td>010-****-7890</td><td><span class="chip chip-gray">낮음</span></td><td><span class="chip chip-green">완료</span></td><td>1명</td><td>₩30,000</td><td>2h 전</td></tr>
+            <tr><td><a class="rpt-id" href="report.html?id=RPT-2026-2842">RPT-2026-2842</a></td><td>🏖️ 해안쓰레기</td><td>표선해비치</td><td>010-****-2345</td><td><span class="chip chip-blue">보통</span></td><td><span class="chip chip-blue">출동중</span></td><td>2명 / 보트1</td><td>₩90,000</td><td>45분 전</td></tr>
           </tbody>
         </table>
       </div>
     </div>
 
-    <!-- COST + TIMELINE -->
     <div class="row-equal">
       <div class="card">
         <div class="card-head"><div class="card-title">💰 오늘 비용 현황</div></div>
@@ -393,7 +273,7 @@ a{text-decoration:none;color:inherit}
           <div class="cost-row"><span class="cost-lbl">소모품</span><span>₩ 78,000</span></div>
           <div class="cost-row"><span class="cost-lbl">기타</span><span>₩ 57,000</span></div>
           <div class="cost-row"><span>합계</span><span style="color:var(--primary)">₩ 840,000</span></div>
-          <div class="cost-progress">
+          <div style="margin-top:14px">
             <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--sub)">
               <span>일일 예산 소진율</span><span style="font-weight:700;color:var(--orange)">73%</span>
             </div>
@@ -406,98 +286,42 @@ a{text-decoration:none;color:inherit}
         <div class="card-head"><div class="card-title">🕐 최근 활동 타임라인</div></div>
         <div class="card-body">
           <div class="tl">
-            <div class="tl-item">
-              <div class="tl-dot go">▶</div>
-              <div class="tl-time">14:23</div>
-              <div class="tl-lbl">협재 해안 수거팀 출동</div>
-              <div class="tl-sub">3명 · 고무보트 1척</div>
-            </div>
-            <div class="tl-item">
-              <div class="tl-dot done">✓</div>
-              <div class="tl-time">13:52</div>
-              <div class="tl-lbl">한라산 응급환자 이송 완료</div>
-              <div class="tl-sub">소요 34분</div>
-            </div>
-            <div class="tl-item">
-              <div class="tl-dot done">✓</div>
-              <div class="tl-time">13:10</div>
-              <div class="tl-lbl">애월 포트홀 긴급 보수 완료</div>
-              <div class="tl-sub">소요 52분</div>
-            </div>
-            <div class="tl-item">
-              <div class="tl-dot wait">·</div>
-              <div class="tl-time">14:05</div>
-              <div class="tl-lbl">중문 불법투기 접수 · 대기</div>
-              <div class="tl-sub">배정 대기중</div>
-            </div>
+            <div class="tl-item"><div class="tl-dot go">▶</div><div class="tl-time">14:23</div><div class="tl-lbl">협재 해안 수거팀 출동</div><div class="tl-sub">3명 · 고무보트 1척</div></div>
+            <div class="tl-item"><div class="tl-dot done">✓</div><div class="tl-time">13:52</div><div class="tl-lbl">한라산 응급환자 이송 완료</div><div class="tl-sub">소요 34분</div></div>
+            <div class="tl-item"><div class="tl-dot done">✓</div><div class="tl-time">13:10</div><div class="tl-lbl">애월 포트홀 긴급 보수 완료</div><div class="tl-sub">소요 52분</div></div>
+            <div class="tl-item"><div class="tl-dot wait">·</div><div class="tl-time">14:05</div><div class="tl-lbl">중문 불법투기 접수 · 대기</div><div class="tl-sub">배정 대기중</div></div>
           </div>
         </div>
       </div>
     </div>
-
-  </div><!-- /content -->
-</div><!-- /dashboard-screen -->
+  </div>
+</div>
 
 <script>
-/* ── Clock ── */
 (function tick(){
   const el=document.getElementById('clock');
   if(el) el.textContent=new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
   setTimeout(tick,1000);
 })();
 
-/* ── Auth ── */
-function doLogin(){
-  /* 데모 시스템 — admin/admin 또는 빈 값 모두 허용 */
-  const id = document.getElementById('inp-id').value.trim();
-  const pw = document.getElementById('inp-pw').value.trim();
-  if(id === 'admin' && pw === 'admin'){
-    _showDashboard();
-  } else if(id === '' || pw === ''){
-    alert('아이디와 비밀번호를 입력하세요.\n데모: admin / admin');
-  } else {
-    alert('데모 계정\n아이디: admin\n비밀번호: admin');
-  }
-}
-function _showDashboard(){
-  document.getElementById('login-screen').style.display  = 'none';
-  document.getElementById('sidebar').style.display       = 'flex';
-  document.getElementById('dashboard-screen').style.display = 'flex';
-  try{ loadLocalReports(); }catch(e){ console.warn('loadLocalReports:', e); }
-}
-function doLogout(){
-  document.getElementById('login-screen').style.display='flex';
-  document.getElementById('sidebar').style.display='none';
-  document.getElementById('dashboard-screen').style.display='none';
-}
-// Enter key login
-document.addEventListener('keydown',function(e){
-  if(e.key==='Enter'){ const ls=document.getElementById('login-screen'); if(ls&&ls.style.display!=='none') doLogin(); }
-});
-
-/* ── localStorage → 신고 테이블 동적 추가 ── */
 function loadLocalReports(){
   const raw=localStorage.getItem('fiil_reports');
   if(!raw) return;
   let reports;
   try{ reports=JSON.parse(raw); }catch(e){ return; }
   if(!reports||!reports.length) return;
-
   const tbody=document.getElementById('report-tbody');
   const urgClass={긴급:'chip-red',높음:'chip-orange',보통:'chip-blue',낮음:'chip-gray'};
   const statClass={완료:'chip-green',출동중:'chip-blue',대기중:'chip-orange',접수:'chip-gray'};
-
   let added=0;
   reports.forEach(function(r){
-    if(document.querySelector('[data-id="'+r.id+'"]')) return; // 중복 방지
+    if(document.querySelector('[data-id="'+r.id+'"]')) return;
     const tr=document.createElement('tr');
     tr.className='new-row';
     tr.dataset.id=r.id;
     tr.innerHTML=
       '<td><a class="rpt-id" href="report.html?id='+r.id+'">'+r.id+'</a></td>'+
-      '<td>'+r.type+'</td>'+
-      '<td>'+r.location+'</td>'+
-      '<td>'+r.reporter+'</td>'+
+      '<td>'+r.type+'</td><td>'+r.location+'</td><td>'+r.reporter+'</td>'+
       '<td><span class="chip '+(urgClass[r.urgency]||'chip-gray')+'">'+r.urgency+'</span></td>'+
       '<td><span class="chip '+(statClass[r.status]||'chip-gray')+'">'+r.status+'</span></td>'+
       '<td>'+(r.dispatch?r.dispatch.personnel+'명':'—')+'</td>'+
@@ -506,19 +330,16 @@ function loadLocalReports(){
     tbody.insertBefore(tr,tbody.firstChild);
     added++;
   });
-
   if(added>0){
-    // 오늘 신고 카운트 갱신
     const el=document.getElementById('cnt-today');
-    el.textContent=parseInt(el.textContent)+added;
-    // 사이드바 배지 갱신
+    if(el) el.textContent=parseInt(el.textContent)+added;
     const badge=document.getElementById('sb-badge');
-    badge.textContent=parseInt(badge.textContent)+added;
-    // 테이블 헤더 건수 갱신
+    if(badge) badge.textContent=parseInt(badge.textContent)+added;
     const tc=document.getElementById('table-count');
-    tc.textContent='오늘 전체 '+(23+added)+'건';
+    if(tc) tc.textContent='오늘 전체 '+(23+added)+'건';
   }
 }
+loadLocalReports();
 </script>
 </body>
 </html>
