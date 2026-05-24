@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FIIL 관리자 대시보드</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap');
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css');
 :root{
-  --primary:#1a73e8;--primary-dk:#1557b0;--primary-bg:#e8f0fe;
+  --primary:#0057A8;--primary-dk:#003C82;--primary-bg:#E8F0FA;
   --green:#1e8e3e;--green-bg:#e6f4ea;
   --orange:#e37400;--orange-bg:#fef7e0;
   --red:#d93025;--red-bg:#fce8e6;
@@ -19,7 +19,7 @@
   --r:8px;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Noto Sans KR',system-ui,sans-serif;font-size:14px;color:var(--text);background:var(--bg);-webkit-font-smoothing:antialiased}
+body{font-family:'Pretendard',-apple-system,'Apple SD Gothic Neo',sans-serif;font-size:14px;color:var(--text);background:var(--bg);-webkit-font-smoothing:antialiased}
 a{text-decoration:none;color:inherit}
 .sidebar{width:240px;background:var(--sidebar);color:#fff;position:fixed;top:0;left:0;bottom:0;z-index:200;display:flex;flex-direction:column;overflow-y:auto}
 .sb-brand{display:flex;align-items:center;gap:12px;padding:18px 20px;border-bottom:1px solid rgba(255,255,255,.08);transition:background .15s}.sb-brand:hover{background:rgba(255,255,255,.04)}
@@ -65,7 +65,7 @@ a{text-decoration:none;color:inherit}
 .card-link{font-size:12px;color:var(--primary);font-weight:600}
 .card-link:hover{text-decoration:underline}
 .card-body{padding:16px 18px}
-.map-box{background:linear-gradient(135deg,#e8f0fe,#f0f9ff);border-radius:6px;height:200px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;margin-bottom:12px}
+.map-box{background:linear-gradient(135deg,#E8F0FA,#f0f9ff);border-radius:6px;height:200px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;margin-bottom:12px}
 .chip{display:inline-flex;align-items:center;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap}
 .chip-green{background:var(--green-bg);color:var(--green)}
 .chip-blue{background:var(--primary-bg);color:var(--primary)}
@@ -229,7 +229,7 @@ a{text-decoration:none;color:inherit}
         <div class="card">
           <div class="card-head"><div class="card-title">📊 유형별 현황</div></div>
           <div class="card-body">
-            <div class="type-item"><span style="font-size:13px;min-width:80px">🏖️ 해안쓰레기</span><div class="type-bar"><div class="type-fill" style="width:100%;background:#1a73e8"></div></div><span class="type-val">8</span></div>
+            <div class="type-item"><span style="font-size:13px;min-width:80px">🏖️ 해안쓰레기</span><div class="type-bar"><div class="type-fill" style="width:100%;background:#0057A8"></div></div><span class="type-val">8</span></div>
             <div class="type-item"><span style="font-size:13px;min-width:80px">🌊 수중쓰레기</span><div class="type-bar"><div class="type-fill" style="width:75%;background:#1e8e3e"></div></div><span class="type-val">6</span></div>
             <div class="type-item"><span style="font-size:13px;min-width:80px">🌲 산림쓰레기</span><div class="type-bar"><div class="type-fill" style="width:62%;background:#e37400"></div></div><span class="type-val">5</span></div>
             <div class="type-item"><span style="font-size:13px;min-width:80px">🚨 응급환자</span><div class="type-bar"><div class="type-fill" style="width:25%;background:#d93025"></div></div><span class="type-val">2</span></div>
