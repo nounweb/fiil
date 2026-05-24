@@ -22,7 +22,7 @@
 body{font-family:'Noto Sans KR',system-ui,sans-serif;font-size:14px;color:var(--text);background:var(--bg);-webkit-font-smoothing:antialiased}
 a{text-decoration:none;color:inherit}
 .sidebar{width:240px;background:var(--sidebar);color:#fff;position:fixed;top:0;left:0;bottom:0;z-index:200;display:flex;flex-direction:column;overflow-y:auto}
-.sb-brand{display:flex;align-items:center;gap:12px;padding:18px 20px;border-bottom:1px solid rgba(255,255,255,.08)}
+.sb-brand{display:flex;align-items:center;gap:12px;padding:18px 20px;border-bottom:1px solid rgba(255,255,255,.08);transition:background .15s}.sb-brand:hover{background:rgba(255,255,255,.04)}
 .sb-icon{width:36px;height:36px;background:var(--primary);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:#fff;flex-shrink:0}
 .sb-name{font-size:15px;font-weight:700}
 .sb-sub{font-size:11px;color:rgba(255,255,255,.45);margin-top:1px}
@@ -115,10 +115,10 @@ a{text-decoration:none;color:inherit}
 <body>
 
 <aside class="sidebar">
-  <div class="sb-brand">
+  <a href="index.html" class="sb-brand" style="text-decoration:none;cursor:pointer" title="메인 화면으로">
     <div class="sb-icon">F</div>
     <div><div class="sb-name">FIIL.kr</div><div class="sb-sub">관리자 대시보드</div></div>
-  </div>
+  </a>
   <nav class="sb-nav">
     <div class="sb-section">운영 현황</div>
     <a class="sb-item active" href="dashboard.html"><span>📊</span> 종합 대시보드</a>

@@ -25,17 +25,17 @@ img{max-width:100%}
 .container{max-width:1100px;margin:0 auto;padding:0 24px}
 
 /* ── GOV TOPBAR ── */
-.gov-bar{background:#003366;color:#fff;font-size:12px;padding:6px 0;text-align:center;letter-spacing:.3px}
+.gov-bar{background:#0D1B26;color:rgba(255,255,255,.65);font-size:12px;padding:6px 0;text-align:center;letter-spacing:.3px;border-bottom:1px solid rgba(255,255,255,.06)}
 .gov-bar a{color:rgba(255,255,255,.8)}
 
 /* ── NAV ── */
-.nav{background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;box-shadow:var(--shadow-1)}
+.nav{background:#17212B;border-bottom:1px solid rgba(255,255,255,.06);position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.25)}
 .nav-inner{display:flex;align-items:center;height:60px;gap:32px}
-.nav-logo{display:flex;align-items:center;gap:10px;font-size:18px;font-weight:800;color:var(--primary)}
+.nav-logo{display:flex;align-items:center;gap:10px;font-size:18px;font-weight:800;color:#ffffff}
 .nav-logo-icon{width:34px;height:34px;background:var(--primary);border-radius:7px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:17px;font-weight:800}
 .nav-links{display:flex;gap:4px;flex:1}
-.nav-links a{padding:6px 14px;border-radius:4px;font-size:13px;font-weight:500;color:var(--sub);transition:background .15s,color .15s}
-.nav-links a:hover{background:var(--primary-bg);color:var(--primary)}
+.nav-links a{padding:6px 14px;border-radius:4px;font-size:13px;font-weight:500;color:rgba(255,255,255,.70);transition:background .15s,color .15s}
+.nav-links a:hover{background:rgba(255,255,255,.08);color:#fff}
 .nav-cta{display:flex;gap:8px}
 .btn{display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border-radius:4px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;border:none;transition:box-shadow .15s,background .15s}
 .btn-contained{background:var(--primary);color:#fff}
@@ -45,7 +45,7 @@ img{max-width:100%}
 .btn-lg{padding:12px 28px;font-size:15px;border-radius:6px}
 
 /* ── HERO ── */
-.hero{background:linear-gradient(135deg,#1a2332 0%,#1a3a5c 100%);color:#fff;padding:80px 0 72px;text-align:center}
+.hero{background:linear-gradient(160deg,#0D1B26 0%,#17212B 40%,#1C3A5C 100%);color:#fff;padding:80px 0 72px;text-align:center;position:relative;overflow:hidden}
 .hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(26,115,232,.25);border:1px solid rgba(26,115,232,.5);border-radius:20px;padding:6px 16px;font-size:12px;font-weight:700;margin-bottom:28px;color:#64b5f6}
 .hero-dot{width:7px;height:7px;border-radius:50%;background:#4caf50;animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.6;transform:scale(1.3)}}
@@ -246,19 +246,61 @@ img{max-width:100%}
       <a href="#blockchain">블록체인 기록</a>
     </div>
     <div class="nav-cta">
-      <a href="webapp.html" class="btn btn-contained">📱 시민 신고앱</a>
+      <a href="https://gopang.net" target="_blank" class="btn btn-contained">📱 시민 건의 및 소통 앱 열기</a>
     </div>
   </div>
 </nav>
 
 <!-- HERO -->
 <section class="hero">
-  <div class="container">
+  <!-- 드론 배경 일러스트 -->
+  <div style="position:absolute;right:-40px;top:50%;transform:translateY(-50%);opacity:0.12;pointer-events:none;filter:drop-shadow(0 20px 40px rgba(0,0,0,0.5))">
+    <svg width="520" height="520" viewBox="0 0 520 520" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- 드론 몸체 -->
+      <rect x="195" y="220" width="130" height="80" rx="18" fill="white"/>
+      <rect x="215" y="235" width="90" height="50" rx="10" fill="rgba(0,87,168,0.8)"/>
+      <!-- 카메라 -->
+      <circle cx="260" cy="318" r="18" fill="rgba(255,255,255,0.9)"/>
+      <circle cx="260" cy="318" r="11" fill="rgba(0,87,168,0.7)"/>
+      <circle cx="260" cy="318" r="5" fill="white"/>
+      <!-- 팔 4개 -->
+      <rect x="120" y="248" width="80" height="10" rx="5" fill="white" transform="rotate(-15 120 248)"/>
+      <rect x="320" y="245" width="80" height="10" rx="5" fill="white" transform="rotate(15 320 245)"/>
+      <rect x="125" y="285" width="75" height="10" rx="5" fill="white" transform="rotate(15 125 285)"/>
+      <rect x="320" y="280" width="75" height="10" rx="5" fill="white" transform="rotate(-15 320 280)"/>
+      <!-- 프로펠러 4개 -->
+      <ellipse cx="108" cy="234" rx="52" ry="12" fill="white" opacity="0.7"/>
+      <ellipse cx="108" cy="234" rx="12" ry="52" fill="white" opacity="0.4"/>
+      <ellipse cx="412" cy="234" rx="52" ry="12" fill="white" opacity="0.7"/>
+      <ellipse cx="412" cy="234" rx="12" ry="52" fill="white" opacity="0.4"/>
+      <ellipse cx="108" cy="306" rx="52" ry="12" fill="white" opacity="0.7"/>
+      <ellipse cx="108" cy="306" rx="12" ry="52" fill="white" opacity="0.4"/>
+      <ellipse cx="412" cy="306" rx="52" ry="12" fill="white" opacity="0.7"/>
+      <ellipse cx="412" cy="306" rx="12" ry="52" fill="white" opacity="0.4"/>
+      <!-- 프로펠러 허브 -->
+      <circle cx="108" cy="234" r="10" fill="white"/>
+      <circle cx="412" cy="234" r="10" fill="white"/>
+      <circle cx="108" cy="306" r="10" fill="white"/>
+      <circle cx="412" cy="306" r="10" fill="white"/>
+      <!-- LED 표시등 -->
+      <circle cx="228" cy="248" r="5" fill="#2AABEE" opacity="0.9"/>
+      <circle cx="292" cy="248" r="5" fill="#4caf50" opacity="0.9"/>
+      <!-- 음영 -->
+      <ellipse cx="260" cy="440" rx="140" ry="22" fill="rgba(0,0,0,0.35)"/>
+      <!-- 하강선 -->
+      <line x1="260" y1="336" x2="260" y2="430" stroke="rgba(255,255,255,0.25)" stroke-width="2" stroke-dasharray="6 4"/>
+      <!-- 수거 네트 -->
+      <path d="M200 430 Q260 460 320 430" stroke="rgba(255,255,255,0.3)" stroke-width="2" fill="none"/>
+      <path d="M210 430 Q260 455 310 430" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" fill="none"/>
+    </svg>
+  </div>
+
+  <div class="container" style="position:relative;z-index:1">
     <div class="hero-badge"><div class="hero-dot"></div> AI 분석 시스템 운영 중</div>
     <h1>사진 한 장으로<br><em>제주를 더 깨끗하게</em></h1>
     <p class="hero-desc">시민이 촬영한 사진을 AI가 즉시 분석하여 최적의 대응 시나리오를 수립합니다. 모든 조치 내역은 Openhash 블록체인에 영구 기록됩니다.</p>
     <div class="hero-actions">
-      <a href="webapp.html" class="btn btn-contained btn-lg">📱 시민 웹앱 열기</a>
+      <a href="https://gopang.net" target="_blank" class="btn btn-contained btn-lg">📱 시민 건의 및 소통 앱 열기</a>
       <a href="dashboard.html" class="btn btn-outlined btn-lg" style="color:#fff;border-color:rgba(255,255,255,.4)">🖥 관리자 대시보드</a>
     </div>
     <div class="hero-stats">
@@ -267,7 +309,7 @@ img{max-width:100%}
       <div><div class="hero-stat-val">3개</div><div class="hero-stat-lbl">AI 대응 환경 분야</div></div>
       <div><div class="hero-stat-val">∞</div><div class="hero-stat-lbl">블록체인 기록 보존</div></div>
     </div>
-  </div>
+  </div><!-- /container -->
 </section>
 
 <!-- HOW TO -->
@@ -516,15 +558,15 @@ img{max-width:100%}
     <div class="access-grid">
       <div class="access-card">
         <div class="access-icon">📱</div>
-        <div class="access-title">시민 신고 웹앱</div>
-        <p class="access-desc">스마트폰 최적화 · 카메라 연동</p>
+        <div class="access-title">시민 건의 및 소통 앱</div>
+        <p class="access-desc">고팡 AI 비서 · 스마트폰 최적화</p>
         <ul class="access-list">
           <li>사진 촬영 즉시 AI 분석 및 신고</li>
           <li>GPS 자동 입력 · 발신자 정보 자동화</li>
           <li>해양·수중·산림 전 유형 대응</li>
           <li>신고 진행상황 실시간 추적</li>
         </ul>
-        <a href="webapp.html" class="btn btn-contained btn-lg" style="text-align:center">📱 시민 웹앱 열기 →</a>
+        <a href="https://gopang.net" target="_blank" class="btn btn-contained btn-lg" style="text-align:center">📱 시민 건의 및 소통 앱 →</a>
         <p class="access-note">스마트폰 브라우저에서 열면 앱처럼 동작합니다</p>
       </div>
       <div class="access-card">
@@ -602,7 +644,7 @@ img{max-width:100%}
       <div>
         <div class="footer-col-title">서비스</div>
         <ul class="footer-links">
-          <li><a href="webapp.html">시민 신고하기</a></li>
+          <li><a href="https://gopang.net" target="_blank">시민 건의 및 소통 앱</a></li>
           <li><a href="#">신고 조회</a></li>
           <li><a href="dashboard.html">현황 대시보드</a></li>
           <li><a href="#blockchain">블록체인 기록 열람</a></li>
