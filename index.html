@@ -157,13 +157,13 @@ img{max-width:100%}
 .chain-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:40px}
 @media(max-width:760px){.chain-grid{grid-template-columns:1fr}}
 .chain-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow-1)}
-.chain-card-header{background:var(--primary);color:#fff;padding:14px 18px;font-size:13px;font-weight:700}
-.chain-card-body{padding:18px;font-family:'JetBrains Mono','Courier New',monospace;font-size:11px}
-.chain-row{display:flex;gap:10px;margin-bottom:8px;line-height:1.5}
+.chain-card-header{background:var(--primary);color:#fff;padding:16px 20px;font-size:14px;font-weight:700;letter-spacing:-.1px}
+.chain-card-body{padding:18px 20px;font-family:'JetBrains Mono','Courier New',monospace;font-size:13px;line-height:1.6}
+.chain-row{display:flex;gap:12px;margin-bottom:11px;line-height:1.6;align-items:baseline}
 .chain-row:last-child{margin-bottom:0}
-.chain-k{color:var(--hint);min-width:100px;flex-shrink:0}
-.chain-v{color:var(--text);word-break:break-all}
-.chain-v.hash{color:var(--primary)}
+.chain-k{color:var(--sub);min-width:110px;flex-shrink:0;font-weight:600;font-size:12px}
+.chain-v{color:var(--text);word-break:break-all;font-weight:500}
+.chain-v.hash{color:var(--primary);font-weight:600}
 
 /* ── DASHBOARD PREVIEW ── */
 .dashboard-section{padding:72px 0;background:var(--surface)}
@@ -248,7 +248,7 @@ img{max-width:100%}
       <a href="#blockchain">블록체인 기록</a>
     </div>
     <div class="nav-cta">
-      <a href="webapp.html" class="btn btn-contained">📱 시민 신고앱</a>
+      <a href="https://gopang.net" target="_blank" class="btn btn-contained">📱 시민 건의 및 소통 앱 열기</a>
     </div>
   </div>
 </nav>
@@ -261,7 +261,7 @@ img{max-width:100%}
     <h1>사진 한 장으로<br><em>제주를 더 깨끗하게</em></h1>
     <p class="hero-desc">시민이 촬영한 사진을 AI가 즉시 분석하여 최적의 대응 시나리오를 수립합니다. 모든 조치 내역은 Openhash 블록체인에 영구 기록됩니다.</p>
     <div class="hero-actions">
-      <a href="webapp.html" class="btn btn-contained btn-lg">📱 시민 웹앱 열기</a>
+      <a href="https://gopang.net" target="_blank" class="btn btn-contained btn-lg">📱 시민 건의 및 소통 앱 열기</a>
       <a href="dashboard.html" class="btn btn-outlined btn-lg" style="color:#fff;border-color:rgba(255,255,255,.4)">🖥 관리자 대시보드</a>
     </div>
     <div class="hero-stats">
@@ -527,7 +527,7 @@ img{max-width:100%}
           <li>해양·수중·산림 전 유형 대응</li>
           <li>신고 진행상황 실시간 추적</li>
         </ul>
-        <a href="webapp.html" class="btn btn-contained btn-lg" style="text-align:center">📱 시민 웹앱 열기 →</a>
+        <a href="https://gopang.net" target="_blank" class="btn btn-contained btn-lg" style="text-align:center">📱 시민 웹앱 열기 →</a>
         <p class="access-note">스마트폰 브라우저에서 열면 앱처럼 동작합니다</p>
       </div>
       <div class="access-card">
@@ -605,7 +605,7 @@ img{max-width:100%}
       <div>
         <div class="footer-col-title">서비스</div>
         <ul class="footer-links">
-          <li><a href="webapp.html">시민 신고하기</a></li>
+          <li><a href="https://gopang.net" target="_blank">시민 신고하기</a></li>
           <li><a href="#">신고 조회</a></li>
           <li><a href="dashboard.html">현황 대시보드</a></li>
           <li><a href="#blockchain">블록체인 기록 열람</a></li>
