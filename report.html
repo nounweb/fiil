@@ -550,14 +550,32 @@ a { text-decoration: none; color: inherit; }
 const params   = new URLSearchParams(location.search);
 const reportId = params.get('id');
 
-/* ── localStorage ───────────────────────── */
-function loadReport() {
-  if (!reportId) return null;
-  const raw = localStorage.getItem('fiil_reports');
-  if (raw) {
-    const found = JSON.parse(raw).find(r => r.id === reportId);
-    if (found) return found;
-  }
+const _SB_URL = 'https://ebbecjfrwaswbdybbgiu.supabase.co';
+const _SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImViYmVjamZyd2Fzd2JkeWJiZ2l1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1NjE5ODQsImV4cCI6MjA5NTEzNzk4NH0.H2ahQKtWdSke04Pdi3hDY86pdTx7UUKPUpQMlS_zciA';
+
+/* ── Supabase 단건 조회 ─────────────────── */
+async function loadReport() {
+  if (!reportId) return DEMO[reportId] || null;
+  try {
+    const res = await fetch(
+      _SB_URL + '/rest/v1/reports?id=eq.' + encodeURIComponent(reportId) + '&select=*&limit=1',
+      { headers: { 'apikey': _SB_KEY, 'Authorization': 'Bearer ' + _SB_KEY } }
+    );
+    const data = await res.json();
+    if (Array.isArray(data) && data.length > 0) {
+      const r = data[0];
+      return {
+        id: r.id, type: r.type, typeCode: r.type_code,
+        location: r.location, gps: r.gps, reporter: r.reporter,
+        reportedAt: r.reported_at, urgency: r.urgency, status: r.status,
+        imageUrl: r.image_url,
+        gopangAnalysis: r.analysis || { summary:'분석 데이터 없음', materials:[], volume:'미상', hazard:'미상', recommendation:'—', geminiModel:'—', analyzedAt: r.reported_at },
+        dispatch: r.dispatch,
+        cost: r.cost || {labor:0,equipment:0,supplies:0,other:0},
+        blockchain: r.blockchain || {txHash:'—',blockHeight:0,imageHash:'—',network:'Openhash Network'},
+      };
+    }
+  } catch(e) { console.warn('[FIIL] 조회 오류:', e.message); }
   return DEMO[reportId] || null;
 }
 
@@ -759,18 +777,19 @@ function copyHash() {
 }
 
 /* ── Init ───────────────────────────────── */
-const report = loadReport();
-if (report) {
-  render(report);
-} else {
-  document.getElementById('content').innerHTML = `
+loadReport().then(report => {
+  if (report) {
+    render(report);
+  } else {
+    document.getElementById('content').innerHTML = `
     <div style="text-align:center;padding:80px 20px">
       <div style="font-size:40px;margin-bottom:16px">🔍</div>
       <h2 style="font-size:18px;margin-bottom:8px">보고서를 찾을 수 없습니다</h2>
       <p style="color:var(--color-text-sub);margin-bottom:24px">신고 번호 <strong>${reportId||'(없음)'}</strong>에 해당하는 데이터가 없습니다.</p>
       <button class="btn btn-contained" onclick="history.back()">← 목록으로</button>
     </div>`;
-}
+  }
+});
 </script>
 </body>
 </html>
