@@ -45,6 +45,9 @@ img{max-width:100%}
 .nav-links a:hover{background:var(--primary-bg);color:var(--primary)}
 .nav-cta{display:flex;gap:8px}
 .btn{display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border-radius:4px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;border:none;transition:box-shadow .15s,background .15s}
+
+.btn-green{background:#1B6B3A !important;color:#fff !important}
+.btn-green:hover{background:#145530 !important;box-shadow:var(--shadow-1)}
 .btn-contained{background:var(--primary);color:#fff}
 .btn-contained:hover{background:var(--primary-dk);box-shadow:var(--shadow-1)}
 .btn-outlined{background:transparent;border:1.5px solid var(--primary);color:var(--primary)}
@@ -394,6 +397,87 @@ img{max-width:100%}
   0%,100% { transform: translateY(0); }
   40%     { transform: translateY(-3px); }
 }
+
+/* ── GOPANG 앱 모달 (스마트폰 목업) ── */
+.app-modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 20, 40, 0.75);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 10000;
+  align-items: center;
+  justify-content: center;
+}
+.app-modal-overlay.show {
+  display: flex;
+}
+.app-modal-phone {
+  position: relative;
+  width: 380px;
+  max-width: 92vw;
+  background: #1a1a2e;
+  border-radius: 44px;
+  padding: 16px 10px;
+  box-shadow:
+    0 0 0 2px rgba(255,255,255,.15),
+    0 0 0 5px rgba(255,255,255,.05),
+    0 40px 80px rgba(0,0,0,.6);
+  animation: modal-pop .3s cubic-bezier(.34,1.56,.64,1) both;
+}
+@keyframes modal-pop {
+  from { transform: scale(.85) translateY(30px); opacity: 0; }
+  to   { transform: scale(1)   translateY(0);    opacity: 1; }
+}
+.app-modal-notch {
+  width: 100px; height: 24px;
+  background: #1a1a2e;
+  border-radius: 0 0 18px 18px;
+  margin: 0 auto 8px;
+}
+.app-modal-screen {
+  border-radius: 30px;
+  overflow: hidden;
+  height: 72vh;
+  max-height: 680px;
+  background: #F0F4F8;
+  position: relative;
+}
+.app-modal-screen iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  display: block;
+}
+.app-modal-close {
+  position: absolute;
+  top: -16px;
+  right: -16px;
+  width: 36px; height: 36px;
+  background: #fff;
+  border: none;
+  border-radius: 50%;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 12px rgba(0,0,0,.25);
+  color: #1A202C;
+  font-weight: 700;
+  line-height: 1;
+  transition: background .15s, transform .15s;
+}
+.app-modal-close:hover {
+  background: #f0f0f0;
+  transform: scale(1.1);
+}
+.app-modal-label {
+  text-align: center;
+  margin-top: 10px;
+  font-size: 11px;
+  color: rgba(255,255,255,.40);
+  letter-spacing: .3px;
+}
 </style>
 </head>
 
@@ -418,7 +502,7 @@ img{max-width:100%}
       <a href="#blockchain">블록체인 기록</a>
     </div>
     <div class="nav-cta">
-      <a href="https://gopang.net" target="_blank" class="btn btn-contained">📱 시민 신고앱</a>
+      <a href="#" onclick="openAppModal();return false;" class="btn btn-contained btn-green">📱 시민 신고앱</a>
     </div>
   </div>
 </nav>
@@ -434,11 +518,11 @@ img{max-width:100%}
         <h1>사진 한 장으로<br><em>제주를 더 깨끗하게</em></h1>
         <p class="hero-desc">시민이 촬영한 사진을 AI가 즉시 분석하여 최적의 대응 시나리오를 수립합니다. 쓰레기 수거부터 사고·범죄 신고까지, 모든 조치 내역은 Openhash 블록체인에 영구 기록됩니다.</p>
         <div class="hero-actions">
-          <a href="https://gopang.net" target="_blank" class="btn btn-contained btn-lg">📱 시민 웹앱 열기</a>
+          <a href="#" onclick="openAppModal();return false;" class="btn btn-contained btn-lg btn-green">📱 시민 웹앱 열기</a>
           <a href="dashboard.html" class="btn btn-outlined btn-lg" style="color:#fff;border-color:rgba(255,255,255,.4)">🖥 관리자 대시보드</a>
         </div>
         <div class="hero-links">
-          <a href="https://gopang.net" target="_blank" class="hero-link">gopang.net — 스마트폰에서 열기</a>
+          <a href="#" onclick="openAppModal();return false;" class="hero-link">gopang.net — 스마트폰에서 열기</a>
           <a href="dashboard.html" class="hero-link">dashboard.html — 관리자 전용 (로그인 필요)</a>
         </div>
         <div class="hero-stats">
@@ -744,7 +828,7 @@ img{max-width:100%}
           <li>해양·수중·산림 전 유형 대응</li>
           <li>신고 진행상황 실시간 추적</li>
         </ul>
-        <a href="https://gopang.net" target="_blank" class="btn btn-contained btn-lg" style="text-align:center">📱 시민 웹앱 열기 →</a>
+        <a href="#" onclick="openAppModal();return false;" class="btn btn-contained btn-lg btn-green" style="text-align:center">📱 시민 웹앱 열기 →</a>
         <p class="access-note">스마트폰 브라우저에서 열면 앱처럼 동작합니다</p>
       </div>
       <div class="access-card">
@@ -856,11 +940,49 @@ img{max-width:100%}
 
 
 <!-- FLOATING 실시간 상담 버튼 -->
-<a href="https://gopang.net" target="_blank" class="float-btn" title="고팡 AI 상담 앱 열기">
+<a href="#" onclick="openAppModal();return false;" class="float-btn" title="고팡 AI 상담 앱 열기">
   <div class="float-btn-circle">
     <span class="float-btn-icon">💬</span>
   </div>
   <div class="float-btn-label">실시간 상담</div>
 </a>
+
+<!-- GOPANG 앱 모달 -->
+<div class="app-modal-overlay" id="appModal" onclick="closeAppModal(event)">
+  <div class="app-modal-phone">
+    <button class="app-modal-close" onclick="closeModal()" title="닫기">✕</button>
+    <div class="app-modal-notch"></div>
+    <div class="app-modal-screen">
+      <iframe id="appIframe" src="" allow="geolocation; camera; microphone" allowfullscreen></iframe>
+    </div>
+    <div class="app-modal-label">고팡 — AI 환경 민원 상담 앱 &nbsp;·&nbsp; gopang.net</div>
+  </div>
+</div>
+
+<script>
+function openAppModal() {
+  // 모바일(768px 이하)이면 새 탭으로 직접 열기
+  if (window.innerWidth <= 768) {
+    window.open('https://gopang.net', '_blank');
+    return;
+  }
+  // 데스크탑이면 스마트폰 목업 모달
+  const modal = document.getElementById('appModal');
+  const iframe = document.getElementById('appIframe');
+  if (!iframe.src || iframe.src === window.location.href) {
+    iframe.src = 'https://gopang.net';
+  }
+  modal.classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+function closeModal() {
+  document.getElementById('appModal').classList.remove('show');
+  document.body.style.overflow = '';
+}
+function closeAppModal(e) {
+  if (e.target === document.getElementById('appModal')) closeModal();
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+</script>
 </body>
 </html>
