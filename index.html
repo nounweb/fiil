@@ -478,6 +478,163 @@ img{max-width:100%}
   color: rgba(255,255,255,.40);
   letter-spacing: .3px;
 }
+
+/* ── 앱 로딩 화면 ── */
+.app-loading-screen {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #F0F4F8;
+  font-family: 'Pretendard', -apple-system, sans-serif;
+}
+.app-loading-topbar {
+  background: #17212B;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.app-loading-logo {
+  width: 28px; height: 28px;
+  background: #0057A8;
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 800; color: #fff;
+  flex-shrink: 0;
+}
+.app-loading-name { font-size: 13px; font-weight: 700; color: #fff; line-height: 1; }
+.app-loading-sub  { font-size: 10px; color: rgba(255,255,255,.45); margin-top: 2px; }
+.app-loading-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+  gap: 10px;
+  overflow-y: auto;
+}
+/* 카메라 박스 */
+.app-loading-camera-wrap { flex-shrink: 0; }
+.app-loading-camera-box {
+  background: #DDE3EC;
+  border-radius: 12px;
+  height: 160px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  transition: background .15s;
+  gap: 8px;
+}
+.app-loading-camera-box:hover { background: #CDD5E0; }
+.app-loading-camera-hint {
+  font-size: 11px;
+  color: #718096;
+  font-weight: 600;
+}
+/* 스캔 코너 */
+.app-scan-corner {
+  position: absolute;
+  width: 18px; height: 18px;
+  border-color: #0057A8;
+  border-style: solid;
+  border-width: 0;
+}
+.app-scan-corner.tl { top:8px;  left:8px;  border-top-width:2px;    border-left-width:2px; }
+.app-scan-corner.tr { top:8px;  right:8px; border-top-width:2px;    border-right-width:2px; }
+.app-scan-corner.bl { bottom:8px; left:8px;  border-bottom-width:2px; border-left-width:2px; }
+.app-scan-corner.br { bottom:8px; right:8px; border-bottom-width:2px; border-right-width:2px; }
+/* AI 메시지 버블 */
+.app-loading-msg-wrap {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.app-loading-avatar {
+  width: 28px; height: 28px;
+  background: #0057A8;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px; font-weight: 800; color: #fff;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.app-loading-bubble {
+  background: #fff;
+  border: 1px solid #E2E8F0;
+  border-radius: 4px 12px 12px 12px;
+  padding: 10px 12px;
+  font-size: 12px;
+  color: #1A202C;
+  line-height: 1.65;
+  box-shadow: 0 1px 3px rgba(0,0,0,.07);
+}
+.app-loading-bubble-label {
+  font-size: 9px;
+  font-weight: 700;
+  color: #0057A8;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+  margin-bottom: 4px;
+}
+/* 입력 필드 */
+.app-loading-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #fff;
+  border: 1.5px solid #D1D9E6;
+  border-radius: 24px;
+  padding: 6px 6px 6px 10px;
+  flex-shrink: 0;
+}
+.app-loading-cam-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #718096;
+  padding: 4px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .15s, color .15s;
+  flex-shrink: 0;
+}
+.app-loading-cam-btn:hover { background: #EBF3FC; color: #0057A8; }
+.app-loading-input {
+  flex: 1;
+  font-size: 12px;
+  color: #A0AEC0;
+  cursor: text;
+  padding: 4px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.app-loading-send-btn {
+  width: 32px; height: 32px;
+  background: #0057A8;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff;
+  flex-shrink: 0;
+  transition: background .15s;
+}
+.app-loading-send-btn:hover { background: #003C82; }
+.app-loading-launch {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: #0057A8;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+  transition: background .15s;
+}
+.app-loading-launch:hover { background: #EBF3FC; }
 </style>
 </head>
 
@@ -953,13 +1110,87 @@ img{max-width:100%}
     <button class="app-modal-close" onclick="closeModal()" title="닫기">✕</button>
     <div class="app-modal-notch"></div>
     <div class="app-modal-screen">
-      <iframe id="appIframe" src="" allow="geolocation; camera; microphone" allowfullscreen></iframe>
+      <!-- 로딩 화면 (iframe 로드 전) -->
+      <div class="app-loading-screen" id="appLoadingScreen">
+        <div class="app-loading-topbar">
+          <div class="app-loading-logo">F</div>
+          <div>
+            <div class="app-loading-name">FIIL.kr</div>
+            <div class="app-loading-sub">제주 스마트 민원 신고</div>
+          </div>
+        </div>
+        <div class="app-loading-body">
+          <div class="app-loading-camera-wrap">
+            <div class="app-loading-camera-box" onclick="triggerCamera()">
+              <div class="app-scan-corner tl"></div>
+              <div class="app-scan-corner tr"></div>
+              <div class="app-scan-corner bl"></div>
+              <div class="app-scan-corner br"></div>
+              <svg viewBox="0 0 24 24" fill="none" stroke="#9AA5B4" stroke-width="1.5" width="44" height="44">
+                <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
+                <circle cx="12" cy="13" r="4"/>
+              </svg>
+              <div class="app-loading-camera-hint">탭하여 촬영</div>
+            </div>
+          </div>
+          <!-- 안내 메시지 버블 -->
+          <div class="app-loading-msg-wrap">
+            <div class="app-loading-avatar">AI</div>
+            <div class="app-loading-bubble">
+              <div class="app-loading-bubble-label">FIIL AI 안내</div>
+              환경 오염 현장을 촬영하여 신고 메시지를 첨부해 주세요. 저희 드론이 즉시 출동합니다.
+            </div>
+          </div>
+          <!-- 입력 필드 -->
+          <div class="app-loading-input-wrap">
+            <button class="app-loading-cam-btn" onclick="triggerCamera()" title="카메라">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
+                <circle cx="12" cy="13" r="4"/>
+              </svg>
+            </button>
+            <div class="app-loading-input" onclick="launchApp()">신고 내용을 입력하세요…</div>
+            <button class="app-loading-send-btn" onclick="launchApp()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="18" height="18">
+                <line x1="22" y1="2" x2="11" y2="13"/>
+                <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+              </svg>
+            </button>
+          </div>
+          <div class="app-loading-launch" onclick="launchApp()">
+            앱 전체 화면으로 열기 →
+          </div>
+        </div>
+      </div>
+      <!-- 실제 gopang.net iframe (로딩 후) -->
+      <iframe id="appIframe" src="" allow="geolocation; camera; microphone"
+        allowfullscreen style="display:none" onload="onIframeLoad()"></iframe>
     </div>
     <div class="app-modal-label">고팡 — AI 환경 민원 상담 앱 &nbsp;·&nbsp; gopang.net</div>
   </div>
 </div>
 
 <script>
+
+function triggerCamera() {
+  // 모바일이면 gopang.net 새 탭, 데스크탑이면 iframe 전환
+  launchApp();
+}
+function launchApp() {
+  const screen = document.getElementById('appLoadingScreen');
+  const iframe = document.getElementById('appIframe');
+  if (screen) screen.style.display = 'none';
+  if (iframe) {
+    iframe.style.display = 'block';
+    if (!iframe.src || iframe.src === window.location.href || iframe.src === '') {
+      iframe.src = 'https://gopang.net';
+    }
+  }
+}
+function onIframeLoad() {
+  // iframe 로드 완료 — 이미 표시 중
+}
+
 function openAppModal() {
   // 모바일(768px 이하)이면 새 탭으로 직접 열기
   if (window.innerWidth <= 768) {
@@ -968,10 +1199,11 @@ function openAppModal() {
   }
   // 데스크탑이면 스마트폰 목업 모달
   const modal = document.getElementById('appModal');
+  const screen = document.getElementById('appLoadingScreen');
   const iframe = document.getElementById('appIframe');
-  if (!iframe.src || iframe.src === window.location.href) {
-    iframe.src = 'https://gopang.net';
-  }
+  // 로딩 화면 초기화
+  if (screen) screen.style.display = 'flex';
+  if (iframe) { iframe.style.display = 'none'; iframe.src = ''; }
   modal.classList.add('show');
   document.body.style.overflow = 'hidden';
 }
