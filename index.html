@@ -328,13 +328,105 @@ img{max-width:100%}
 .footer-links li a:hover{color:#fff}
 .footer-bottom{border-top:1px solid rgba(255,255,255,.08);padding-top:20px;font-size:12px;color:rgba(255,255,255,.4);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
 
-/* ── Responsive helpers ── */
-@media(max-width:760px){
-  .nav-links{display:none}
-  .hero-stats{gap:24px}
-  .steps-grid{grid-template-columns:1fr 1fr}
-  .dash-stats{grid-template-columns:1fr 1fr}
-  .footer-grid{grid-template-columns:1fr 1fr}
+/* ════════════════════════════════════════
+   모바일 반응형 — 전면 강화
+   ════════════════════════════════════════ */
+
+/* ── 태블릿 (≤900px) ── */
+@media(max-width:900px){
+  .nav-links { display: none; }
+  .scenario-grid { grid-template-columns: 1fr 1fr; }
+  .chain-grid { grid-template-columns: 1fr; }
+  .footer-grid { grid-template-columns: 1fr 1fr; gap: 24px; }
+}
+
+/* ── 모바일 (≤640px) ── */
+@media(max-width:640px){
+  /* 전체 폰트 & 패딩 */
+  body { font-size: 14px; }
+  .container { padding: 0 16px; }
+
+  /* GOV BAR */
+  .gov-bar { font-size: 10px; padding: 5px 12px; }
+
+  /* NAV */
+  .nav { height: 52px; }
+  .nav-inner { padding: 0 16px; height: 52px; }
+  .nav-links { display: none; }
+  .nav-cta { gap: 6px; }
+  .nav-cta .btn { padding: 7px 12px; font-size: 12px; }
+
+  /* HERO */
+  .hero { padding: 0; }
+  .hero-inner {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 36px 0 32px;
+    gap: 28px;
+  }
+  .hero h1 { font-size: 28px; letter-spacing: -.5px; margin-bottom: 12px; }
+  .hero-badge { font-size: 11px; padding: 5px 12px; margin-bottom: 16px; }
+  .hero-desc { font-size: 14px; margin-bottom: 20px; }
+  .hero-actions { flex-direction: column; gap: 10px; width: 100%; }
+  .hero-actions .btn { width: 100%; justify-content: center; padding: 13px 0; font-size: 14px; }
+  .hero-links { flex-direction: column; gap: 6px; }
+  .hero-stats { gap: 16px; flex-wrap: wrap; margin-top: 24px; }
+  .hero-stat-val { font-size: 22px; }
+  .hero-stat-lbl { font-size: 10px; }
+  .hero-right { display: none; } /* 스마트폰 목업 숨김 */
+
+  /* SECTIONS */
+  .section { padding: 48px 0; }
+  .section-title { font-size: 22px; }
+  .section-desc { font-size: 13px; }
+
+  /* HOW-TO STEPS */
+  .steps-grid { grid-template-columns: 1fr; gap: 12px; margin-top: 28px; }
+  .step-arrow { display: none; }
+  .step-card { padding: 18px 16px; }
+
+  /* SCENARIO */
+  .scenario-grid { grid-template-columns: 1fr; gap: 14px; margin-top: 28px; }
+
+  /* AI PIPELINE */
+  .ai-pipeline { flex-direction: column; align-items: flex-start; gap: 0; }
+  .ai-step { min-width: unset; width: 100%; }
+  .ai-arrow { transform: rotate(90deg); margin: 4px auto; }
+
+  /* BLOCKCHAIN */
+  .chain-grid { grid-template-columns: 1fr; }
+  .chain-card-body { font-size: 12px; }
+  .chain-k { min-width: 80px; font-size: 11px; }
+  .chain-v { font-size: 11px; }
+
+  /* ACCESS */
+  .access-grid { grid-template-columns: 1fr; gap: 14px; }
+  .access-card { padding: 20px 16px; }
+
+  /* ROADMAP */
+  .roadmap-grid { grid-template-columns: 1fr; }
+
+  /* FOOTER */
+  .footer-grid { grid-template-columns: 1fr; gap: 20px; }
+  .footer-bottom { flex-direction: column; text-align: center; gap: 4px; }
+
+  /* FLOATING BTN */
+  .float-btn { bottom: 20px; right: 16px; }
+  .float-btn-circle { width: 52px; height: 52px; }
+  .float-btn-icon { font-size: 22px; }
+  .float-btn-label { font-size: 9px; padding: 2px 7px; }
+
+  /* STAT STRIP */
+  .stat-strip-grid { grid-template-columns: 1fr 1fr; }
+  .stat-strip-item { padding: 16px 12px; }
+  .stat-strip-val { font-size: 26px; }
+  .stat-strip-lbl { font-size: 11px; }
+}
+
+/* ── 초소형 (≤380px) ── */
+@media(max-width:380px){
+  .hero h1 { font-size: 24px; }
+  .stat-strip-grid { grid-template-columns: 1fr 1fr; }
 }
 
 
@@ -635,6 +727,57 @@ img{max-width:100%}
   transition: background .15s;
 }
 .app-loading-launch:hover { background: #EBF3FC; }
+
+/* ── 모바일 햄버거 메뉴 ── */
+.nav-hamburger {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  color: #fff;
+  margin-left: auto;
+  flex-direction: column;
+  gap: 5px;
+}
+.nav-hamburger span {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: #fff;
+  border-radius: 2px;
+  transition: all .25s;
+}
+.nav-mobile-menu {
+  display: none;
+  flex-direction: column;
+  background: var(--darkest);
+  border-top: 1px solid rgba(255,255,255,.10);
+  padding: 8px 0;
+}
+.nav-mobile-menu.open { display: flex; }
+.nav-mobile-menu a {
+  padding: 12px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(255,255,255,.80);
+  border-bottom: 1px solid rgba(255,255,255,.06);
+  transition: background .15s;
+}
+.nav-mobile-menu a:last-child { border-bottom: none; }
+.nav-mobile-menu a:hover { background: rgba(255,255,255,.07); color: #fff; }
+.nav-mobile-cta {
+  margin: 8px 16px 4px;
+}
+.nav-mobile-cta .btn {
+  width: 100%;
+  justify-content: center;
+  padding: 11px 0;
+  font-size: 14px;
+}
+@media(max-width:640px){
+  .nav-hamburger { display: flex; }
+}
 </style>
 </head>
 
@@ -658,8 +801,22 @@ img{max-width:100%}
       <a href="dashboard.html">관리자 대시보드</a>
       <a href="#blockchain">블록체인 기록</a>
     </div>
+    <button class="nav-hamburger" onclick="toggleMobileMenu()" id="hamburger" aria-label="메뉴">
+      <span></span><span></span><span></span>
+    </button>
     <div class="nav-cta">
       <a href="#" onclick="openAppModal();return false;" class="btn btn-contained btn-green">📱 시민 신고앱</a>
+    </div>
+  </div>
+  <!-- 모바일 드롭다운 메뉴 -->
+  <div class="nav-mobile-menu" id="mobileMenu">
+    <a href="#how-to" onclick="closeMobileMenu()">이용 방법</a>
+    <a href="#scenarios" onclick="closeMobileMenu()">대응 시나리오</a>
+    <a href="#ai-process" onclick="closeMobileMenu()">AI 처리 흐름</a>
+    <a href="#blockchain" onclick="closeMobileMenu()">블록체인 기록</a>
+    <a href="dashboard.html" onclick="closeMobileMenu()">관리자 대시보드</a>
+    <div class="nav-mobile-cta">
+      <a href="#" onclick="openAppModal();closeMobileMenu();return false;" class="btn btn-contained btn-green">📱 시민 웹앱 열기</a>
     </div>
   </div>
 </nav>
@@ -1171,6 +1328,33 @@ img{max-width:100%}
 </div>
 
 <script>
+
+
+function toggleMobileMenu() {
+  const menu = document.getElementById('mobileMenu');
+  const btn = document.getElementById('hamburger');
+  menu.classList.toggle('open');
+  // 햄버거 → X 애니메이션
+  const spans = btn.querySelectorAll('span');
+  if (menu.classList.contains('open')) {
+    spans[0].style.transform = 'translateY(7px) rotate(45deg)';
+    spans[1].style.opacity = '0';
+    spans[2].style.transform = 'translateY(-7px) rotate(-45deg)';
+  } else {
+    spans[0].style.transform = '';
+    spans[1].style.opacity = '1';
+    spans[2].style.transform = '';
+  }
+}
+function closeMobileMenu() {
+  const menu = document.getElementById('mobileMenu');
+  const btn = document.getElementById('hamburger');
+  menu.classList.remove('open');
+  const spans = btn.querySelectorAll('span');
+  spans[0].style.transform = '';
+  spans[1].style.opacity = '1';
+  spans[2].style.transform = '';
+}
 
 function triggerCamera() {
   // 모바일이면 gopang.net 새 탭, 데스크탑이면 iframe 전환
