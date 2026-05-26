@@ -9,24 +9,26 @@
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendardvariable.css');
 /* ── Design tokens (Supabase light) ── */
 :root{
-  --bg:        #fff;
-  --bg-subtle: #f8f9fa;       /* sidebar / header bg */
-  --bg-hover:  #f1f3f5;
-  --bg-sel:    #e8f4fd;       /* row selected */
-  --border:    #e5e7eb;
-  --border2:   #d1d5db;
-  --text:      #171717;
-  --text2:     #6b7280;       /* muted */
-  --text3:     #9ca3af;       /* placeholder / NULL */
-  --accent:    #3ecf8e;       /* Supabase green */
+  /* ── Supabase 라이트 테마 — Radix Slate ── */
+  --bg:        #f8f9fa;   /* slate1: 앱 배경 */
+  --bg-subtle: #f1f3f5;   /* slate2: 사이드바·헤더 */
+  --bg-hover:  #e9ecef;   /* slate3: 호버 배경 */
+  --bg-sel:    #dfe3e8;   /* slate4: 선택 배경 */
+  --border:    #dde1e7;   /* slate6: 기본 구분선 */
+  --border2:   #c1c8d0;   /* slate7: 강조 구분선 */
+  --text:      #0f172a;   /* 거의 검정 */
+  --text2:     #64748b;   /* slate11: muted */
+  --text3:     #94a3b8;   /* slate10: placeholder/NULL */
+  --accent:    #3ecf8e;   /* Supabase 그린 */
   --accent-d:  #29b978;
-  --blue:      #3b82f6;
+  --blue:      #3b82f6;   /* 링크 */
   --red:       #ef4444;
   --orange:    #f59e0b;
   --sb-w:      224px;
   --sb-rail:   48px;
   --top-h:     48px;
-  --font:      'Pretendard Variable','Pretendard',system-ui,sans-serif;
+  --font:      'Inter',-apple-system,'Segoe UI',system-ui,sans-serif;
+  --font-mono: 'JetBrains Mono','Fira Code','Cascadia Code',ui-monospace,monospace;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%}
@@ -199,8 +201,8 @@ input{font-family:var(--font)}
 .tbl-cb-col input[type=checkbox],.tbl tbody td input[type=checkbox]{
   width:14px;height:14px;accent-color:var(--accent);cursor:pointer;
 }
-.tbl tbody tr{border-bottom:1px solid var(--border);cursor:pointer}
-.tbl tbody tr:hover td{background:var(--bg-sel)}
+.tbl tbody tr{cursor:pointer;transition:background .08s}
+.tbl tbody tr:hover td{background:var(--bg-hover)}
 .tbl tbody tr.selected td{background:#eff6ff}
 .tbl tbody td{
   padding:0 10px;height:36px;
@@ -531,6 +533,163 @@ const statChip={완료:'chip-green',승인:'chip-approved',출동중:'chip-blue'
 
 let _allRows=[];
 
+/* ── 카카오 역지오코딩 캐시 ── */
+const _geoCache={};
+function _geocodeCell(cell, gps){
+  if(!gps||_geoCache[gps]===null) return;
+  if(_geoCache[gps]){cell.textContent=_geoCache[gps];return;}
+  const p=gps.replace(/\s/g,'').split(',');
+  if(p.length<2) return;
+  const lat=parseFloat(p[0]),lng=parseFloat(p[1]);
+  if(isNaN(lat)||isNaN(lng)) return;
+  if(!window.kakao||!kakao.maps||!kakao.maps.services){
+    // SDK 아직 로드 안 됨 → 재시도
+    setTimeout(()=>_geocodeCell(cell,gps),1500);
+    return;
+  }
+  new kakao.maps.services.Geocoder().coord2Address(lng,lat,(result,status)=>{
+    if(status===kakao.maps.services.Status.OK&&result[0]){
+      const addr=result[0].road_address?.address_name||result[0].address?.address_name;
+      if(addr){
+        _geoCache[gps]=addr;
+        if(cell.isConnected) cell.textContent=addr;
+      } else { _geoCache[gps]=null; }
+    } else { _geoCache[gps]=null; }
+  });
+}
+
+function td(val,cls=''){
+  if(val===null||val===undefined||val==='')
+    return `<td><span class="td-null">NULL</span></td>`;
+  return `<td class="${cls}" title="${String(val).replace(/"/g,'&quot;')}">${val}</td>`;
+}
+
+function renderRow(r){
+  const cost=r.cost?(r.cost.total||(r.cost.labor||0)+(r.cost.equipment||0)+(r.cost.supplies||0)):null;
+  const urg=r.urgency||'보통';
+
+  // ── 날짜 처리: Invalid Date → "날짜 미상"
+  let tsDisplay='<span class="td-null">날짜 미상</span>';
+  let hasDate=false;
+  if(r.reported_at){
+    const d=new Date(r.reported_at);
+    if(!isNaN(d.getTime())){
+      tsDisplay=d.toLocaleString('ko-KR',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});
+      hasDate=true;
+    }
+  }
+
+  // ── location: GPS 좌표면 역지오코딩 셀로 표시
+  const locVal=r.location&&r.location!=='위치 미상'?r.location:null;
+  const gpsForGeo=(!locVal&&r.gps)?r.gps:null;
+  const locCell=locVal
+    ? `<td title="${locVal}">${locVal}</td>`
+    : gpsForGeo
+      ? `<td class="loc-geo" data-gps="${gpsForGeo}" title="${gpsForGeo}" style="color:var(--text2);font-size:11px">${gpsForGeo}</td>`
+      : `<td><span class="td-null">NULL</span></td>`;
+
+  return `<tr data-id="${r.id}" data-hasdate="${hasDate}" onclick="rowClick('${r.id}')">
+    <td class="tbl-cb-col"><input type="checkbox" onclick="event.stopPropagation()"></td>
+    <td><a href="report.html?id=${r.id}" onclick="event.stopPropagation()" style="color:var(--blue);font-weight:500;font-family:var(--font-mono);font-size:11px">${r.id}</a></td>
+    ${td(r.type)}
+    ${td(r.type_code)}
+    ${locCell}
+    ${td(r.gps)}
+    ${td(r.reporter)}
+    <td>${r.urgency?`<span class="chip ${urgChip[urg]||'chip-gray'}">${urg}</span>`:'<span class="td-null">NULL</span>'}</td>
+    <td>${r.status?`<span class="chip ${statChip[r.status]||'chip-gray'}">${r.status}</span>`:'<span class="td-null">NULL</span>'}</td>
+    ${cost!==null?`<td style="font-variant-numeric:tabular-nums">₩${cost.toLocaleString()}</td>`:'<td><span class="td-null">NULL</span></td>'}
+    <td style="color:var(--text2)">${tsDisplay}</td>
+  </tr>`;
+}
+
+function renderTable(rows){
+  const tbody=document.getElementById('report-tbody');
+  if(!rows.length){
+    tbody.innerHTML='<tr><td colspan="11" style="text-align:center;padding:48px;color:var(--text3)">No rows found</td></tr>';
+    return;
+  }
+
+  // ── 정렬: 유효 날짜 우선(최신순) → 날짜 없는 항목 맨 아래
+  const sorted=[...rows].sort((a,b)=>{
+    const da=a.reported_at?new Date(a.reported_at):null;
+    const db=b.reported_at?new Date(b.reported_at):null;
+    const va=da&&!isNaN(da)?da.getTime():0;
+    const vb=db&&!isNaN(db)?db.getTime():0;
+    if(va===0&&vb===0) return 0;
+    if(va===0) return 1;   // a → 맨 아래
+    if(vb===0) return -1;  // b → 맨 아래
+    return vb-va;          // 최신순
+  });
+
+  tbody.innerHTML=sorted.map(renderRow).join('');
+  document.getElementById('foot-count').textContent=rows.length+' rows';
+  document.getElementById('cnt-today').textContent=rows.length+'건';
+  document.getElementById('sb-badge').textContent=rows.length;
+  const urg=rows.filter(r=>r.urgency==='긴급').length;
+  document.getElementById('cnt-urgent').textContent=urg+'건';
+
+  // ── 역지오코딩 (렌더 후 비동기)
+  requestAnimationFrame(()=>{
+    document.querySelectorAll('td.loc-geo[data-gps]').forEach(cell=>{
+      _geocodeCell(cell, cell.dataset.gps);
+    });
+  });
+}
+
+function filterTable(){
+  const q=document.getElementById('searchInput').value.toLowerCase();
+  if(!q){renderTable(_allRows);return;}
+  renderTable(_allRows.filter(r=>
+    (r.id||'').toLowerCase().includes(q)||
+    (r.type||'').toLowerCase().includes(q)||
+    (r.location||'').toLowerCase().includes(q)||
+    (r.reporter||'').toLowerCase().includes(q)
+  ));
+}
+
+function toggleAll(cb){
+  document.querySelectorAll('#report-tbody input[type=checkbox]').forEach(c=>c.checked=cb.checked);
+}
+
+function rowClick(id){
+  location.href='report.html?id='+id;
+}
+
+function loadReports(){
+  fetch(_SB_URL+'/rest/v1/reports?select=*&order=reported_at.desc&limit=100',{
+    headers:{'apikey':_SB_KEY,'Authorization':'Bearer '+_SB_KEY}
+  }).then(r=>r.json()).then(data=>{
+    if(Array.isArray(data)){_allRows=data;renderTable(data);}
+  }).catch(e=>console.warn('[FIIL]',e.message));
+}
+
+/* Sidebar mobile */
+function toggleSidebar(){
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebar-overlay').classList.toggle('show');
+}
+function closeSidebar(){
+  document.getElementById('sidebar')?.classList.remove('open');
+  document.getElementById('sidebar-overlay')?.classList.remove('show');
+}
+
+loadReports();
+setInterval(loadReports,30000);
+
+/* Clock */
+(function tick(){
+  const e=document.getElementById('clock');
+  if(e)e.textContent=new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  setTimeout(tick,1000);
+})();
+
+/* Chips */
+const urgChip ={긴급:'chip-red',높음:'chip-orange',보통:'chip-blue',낮음:'chip-gray'};
+const statChip={완료:'chip-green',승인:'chip-approved',출동중:'chip-blue',대기중:'chip-orange',접수:'chip-gray'};
+
+let _allRows=[];
+
 function td(val,cls=''){
   if(val===null||val===undefined||val==='')
     return `<td><span class="td-null">NULL</span></td>`;
@@ -543,7 +702,7 @@ function renderRow(r){
   const ts=r.reported_at?new Date(r.reported_at).toLocaleString('ko-KR',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}):null;
   return `<tr data-id="${r.id}" onclick="rowClick('${r.id}')">
     <td class="tbl-cb-col"><input type="checkbox" onclick="event.stopPropagation()"></td>
-    <td><a href="report.html?id=${r.id}" onclick="event.stopPropagation()" style="color:var(--blue);font-weight:500">${r.id}</a></td>
+    <td><a href="report.html?id=${r.id}" onclick="event.stopPropagation()" style="color:var(--blue);font-weight:500;font-family:var(--font-mono);font-size:11px">${r.id}</a></td>
     ${td(r.type)}
     ${td(r.type_code)}
     ${td(r.location&&r.location!=='위치 미상'?r.location:null)}
