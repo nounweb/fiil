@@ -130,8 +130,89 @@ a{text-decoration:none;color:inherit}
 .tl-time{font-size:11px;color:var(--hint);margin-bottom:2px}
 .tl-lbl{font-size:13px;font-weight:600}
 .tl-sub{font-size:12px;color:var(--sub);margin-top:2px}
-@media(max-width:1100px){.stat-grid{grid-template-columns:1fr 1fr}.row-2{grid-template-columns:1fr}}
-@media(max-width:720px){.sidebar{display:none}.main{margin-left:0}.row-equal{grid-template-columns:1fr}}
+@media(max-width:1100px){
+  .stat-grid{grid-template-columns:1fr 1fr}
+  .row-2{grid-template-columns:1fr}
+  .row-equal{grid-template-columns:1fr}
+}
+
+/* ── 모바일 반응형 ── */
+@media(max-width:768px){
+  /* 사이드바 오프캔버스 */
+  .sidebar{
+    transform:translateX(-100%);
+    transition:transform .25s ease;
+    width:280px;
+    z-index:400;
+  }
+  .sidebar.open{ transform:translateX(0); }
+
+  /* 사이드바 열릴 때 배경 오버레이 */
+  .sidebar-overlay{
+    display:none;
+    position:fixed;inset:0;
+    background:rgba(0,0,0,.4);
+    z-index:300;
+  }
+  .sidebar-overlay.show{ display:block; }
+
+  /* 메인 영역 */
+  .main{ margin-left:0; }
+
+  /* 탑바 */
+  .topbar{ padding:0 14px; height:48px; }
+  .topbar-title{ font-size:13px; }
+  .topbar-right .sys-ok span:last-child{ display:none; } /* "시스템 정상" 텍스트 숨김 */
+
+  /* 햄버거 버튼 */
+  .hamburger{
+    display:flex;
+    align-items:center;justify-content:center;
+    width:36px;height:36px;
+    background:none;border:none;
+    cursor:pointer;margin-right:8px;
+    color:var(--primary);flex-shrink:0;
+  }
+
+  /* 콘텐츠 패딩 */
+  .content{ padding:14px; }
+
+  /* stat 카드 */
+  .stat-grid{ grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px; }
+  .stat-card{ padding:12px 14px; }
+  .stat-val{ font-size:18px; }
+  .stat-lbl{ font-size:11px; }
+
+  /* 그리드 1열 */
+  .row-2,.row-equal{ grid-template-columns:1fr; gap:12px; }
+
+  /* 카드 */
+  .card{ margin-bottom:12px; }
+  .card-head{ padding:10px 14px; }
+  .card-title{ font-size:10px; }
+  .card-body{ padding:12px 14px; }
+
+  /* 테이블 — 가로 스크롤 */
+  .tbl-wrap{ overflow-x:auto; -webkit-overflow-scrolling:touch; }
+  .tbl th,.tbl td{ padding:8px 10px; font-size:11px; white-space:nowrap; }
+
+  /* 미니맵 높이 */
+  #mini-map{ height:160px !important; }
+
+  /* 리소스 카드 */
+  .res-grid{ grid-template-columns:1fr 1fr !important; }
+
+  /* chip */
+  .chip{ font-size:10px; padding:2px 7px; }
+}
+
+@media(max-width:400px){
+  .stat-grid{ grid-template-columns:1fr 1fr; gap:8px; }
+  .stat-val{ font-size:16px; }
+  .content{ padding:10px; }
+}
+.hamburger{ display:none; }  /* 데스크탑에서 숨김 */
+.sidebar-overlay{ display:none; }
 </style>
 <script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=c7160a2d047af2808065d9e1929a66a7&libraries=services,clusterer"></script>
 </head>
@@ -160,8 +241,19 @@ a{text-decoration:none;color:inherit}
   <div class="sb-user"><strong>관리자 · 제주시 환경정책과</strong>최종 로그인: 오늘 09:14</div>
 </aside>
 
+<!-- 모바일 사이드바 오버레이 -->
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+
 <div class="main">
   <header class="topbar">
+    <!-- 햄버거 버튼 (모바일 전용) -->
+    <button class="hamburger" id="hamburger-btn" onclick="toggleSidebar()" aria-label="메뉴 열기">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+        <line x1="3" y1="6" x2="21" y2="6"/>
+        <line x1="3" y1="12" x2="21" y2="12"/>
+        <line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </button>
     <nav class="breadcrumb">
       <a href="index.html">FIIL.kr</a>
       <span class="bc-sep">›</span>
@@ -259,7 +351,7 @@ a{text-decoration:none;color:inherit}
         <div class="card-title">신고 목록 · 조치 현황 <span style="font-weight:400;color:var(--hint)" id="table-count">오늘 전체 23건</span></div>
         <a class="card-link" href="#">전체 보기 →</a>
       </div>
-      <div style="overflow-x:auto">
+      <div class="tbl-wrap" style="overflow-x:auto">
         <table class="report-table">
           <thead>
             <tr>
@@ -327,19 +419,25 @@ const _SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsIn
 const _geoCache = {};
 async function _kakaoGeocode(gps) {
   if (!gps || _geoCache[gps]) return _geoCache[gps] || null;
-  try {
-    const parts = gps.split(',').map(s => s.trim());
-    if (parts.length < 2) return null;
-    const lat = parts[0], lng = parts[1];
-    const res = await fetch(
-      `https://dapi.kakao.com/v2/local/geo/coord2address.json?x=${lng}&y=${lat}&input_coord=WGS84`,
-      { headers: { 'Authorization': 'KakaoAK 66648ca49f126d8752b33d542789ac56' } }
-    );
-    const data = await res.json();
-    const addr = data.documents?.[0]?.address?.address_name || null;
-    if (addr) _geoCache[gps] = addr;
-    return addr;
-  } catch { return null; }
+  return new Promise(resolve => {
+    try {
+      const parts = gps.split(',').map(s => s.trim());
+      if (parts.length < 2) return resolve(null);
+      const lat = parseFloat(parts[0]), lng = parseFloat(parts[1]);
+      if (isNaN(lat)||isNaN(lng)) return resolve(null);
+      if (!window.kakao||!kakao.maps||!kakao.maps.services) return resolve(null);
+      new kakao.maps.services.Geocoder().coord2Address(lng, lat, (result, status) => {
+        if (status === kakao.maps.services.Status.OK && result[0]) {
+          const addr = result[0].road_address?.address_name
+                    || result[0].address?.address_name || null;
+          if (addr) _geoCache[gps] = addr;
+          resolve(addr);
+        } else {
+          resolve(null);
+        }
+      });
+    } catch { resolve(null); }
+  });
 }
 
 /* ── 신고 행 렌더 ── */
@@ -453,6 +551,26 @@ function loadReportById(id){
 }
 
 /* ── 페이지 로드 + 30초 자동 갱신 ── */
+// ── 모바일 사이드바 토글 ─────────────────────────────
+function toggleSidebar(){
+  const sb  = document.querySelector('.sidebar');
+  const ov  = document.getElementById('sidebar-overlay');
+  const btn = document.getElementById('hamburger-btn');
+  sb.classList.toggle('open');
+  ov.classList.toggle('show');
+  btn.setAttribute('aria-expanded', sb.classList.contains('open'));
+}
+function closeSidebar(){
+  document.querySelector('.sidebar')?.classList.remove('open');
+  document.getElementById('sidebar-overlay')?.classList.remove('show');
+}
+// 사이드바 링크 클릭 시 자동 닫기 (모바일)
+document.querySelectorAll('.sb-item').forEach(item=>{
+  item.addEventListener('click',()=>{
+    if(window.innerWidth<=768) closeSidebar();
+  });
+});
+
 loadReports();
 setInterval(loadReports, 30000);
 

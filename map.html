@@ -94,6 +94,38 @@ a{text-decoration:none;color:inherit}
 .spinner{display:inline-block;width:24px;height:24px;border:3px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:12px}
 @keyframes spin{to{transform:rotate(360deg)}}
 .empty{text-align:center;padding:48px;color:var(--hint);font-size:12px}
+#kakao-map{width:100%;height:520px}
+
+/* ── 모바일 반응형 ── */
+.hamburger{ display:none; }
+.sidebar-overlay{ display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:300; }
+
+@media(max-width:1100px){
+  .stat-grid{grid-template-columns:1fr 1fr !important}
+  .row-2,.panel-row{grid-template-columns:1fr !important}
+}
+@media(max-width:768px){
+  .sidebar{transform:translateX(-100%);transition:transform .25s ease;width:280px;z-index:400}
+  .sidebar.open{transform:translateX(0)}
+  .sidebar-overlay.show{display:block}
+  .main{margin-left:0}
+  .hamburger{display:flex;align-items:center;justify-content:center;width:36px;height:36px;background:none;border:none;cursor:pointer;flex-shrink:0;color:var(--primary,#305890)}
+  .content,.wrap{padding:12px}
+  .stat-grid{grid-template-columns:1fr 1fr !important;gap:10px;margin-bottom:12px}
+  .stat-card{padding:12px 12px}
+  .stat-val{font-size:18px}
+  .row-2,.row-equal,.panel-row,.kpi-grid{grid-template-columns:1fr !important;gap:10px}
+  .card,.panel{margin-bottom:10px}
+  .card-head,.panel-head{padding:9px 12px}
+  .tbl th,.tbl td,.list-tbl th,.list-tbl td,.fs-tbl th,.fs-tbl td{font-size:11px;padding:7px 10px;white-space:nowrap}
+  #mini-map{height:150px !important}
+  #kakao-map{height:360px !important}
+  .chip{font-size:10px;padding:2px 7px}
+}
+@media(max-width:400px){
+  .stat-grid{grid-template-columns:1fr 1fr !important;gap:8px}
+  .content,.wrap{padding:8px}
+}
 </style>
 </head>
 <body>
@@ -114,12 +146,8 @@ a{text-decoration:none;color:inherit}
 <div class="card">
   <div class="card-head"><div class="card-title">실시간 신고 위치</div><span style="font-size:11px;color:var(--sub)">GPS 좌표 기반 · 카카오맵</span></div>
   <div class="card-body" style="padding:0">
-    <div id="map" style="width:100%;height:520px;border-radius:0 0 8px 8px;background:#eaf2fa;display:flex;align-items:center;justify-content:center">
-      <div style="text-align:center;color:var(--sub)">
-        <div style="font-size:40px;margin-bottom:12px">🗺</div>
-        <div style="font-weight:700;margin-bottom:6px">카카오맵 로딩 중…</div>
-        <div style="font-size:12px">신고 위치를 지도에 표시합니다</div>
-      </div>
+    <div id="kakao-map" style="width:100%;height:520px"></div>
+  </div>
     </div>
   </div>
 </div>
@@ -151,7 +179,7 @@ async function loadMap(){
   document.getElementById('m-gps').textContent = gpsRows.length+'건';
 
   // 카카오맵 초기화
-  const mapDiv = document.getElementById('map');
+  const mapDiv = document.getElementById('kakao-map');
   if(window.kakao && kakao.maps){
     kakao.maps.load(()=>{
       const map = new kakao.maps.Map(mapDiv,{center:new kakao.maps.LatLng(33.4996,126.5312),level:10});
@@ -196,12 +224,33 @@ async function loadMap(){
     if(!gps||cell.textContent!==gps) return;
     const p=gps.replace(/\s/g,'').split(',');
     if(p.length<2) return;
-    fetch(`https://dapi.kakao.com/v2/local/geo/coord2address.json?x=${p[1]}&y=${p[0]}&input_coord=WGS84`,
-      {headers:{'Authorization':'KakaoAK 66648ca49f126d8752b33d542789ac56'}})
-    .then(r=>r.json()).then(d=>{const a=d.documents?.[0]?.address?.address_name;if(a)cell.textContent=a;}).catch(()=>{});
+    (function(lat,lng,cell){
+      if(!kakao.maps.services) return;
+      new kakao.maps.services.Geocoder().coord2Address(lng,lat,(result,status)=>{
+        if(status===kakao.maps.services.Status.OK&&result[0]){
+          const a=result[0].road_address?.address_name||result[0].address?.address_name;
+          if(a)cell.textContent=a;
+        }
+      });
+    })(lat,lng,cell);
   });
 }
 loadMap();
+
+
+// ── 모바일 사이드바 ──────────────────────────────────
+function toggleSidebar(){
+  const sb=document.querySelector('.sidebar');
+  const ov=document.getElementById('sidebar-overlay');
+  if(!sb)return;
+  sb.classList.toggle('open');
+  ov&&ov.classList.toggle('show');
+}
+function closeSidebar(){
+  document.querySelector('.sidebar')?.classList.remove('open');
+  document.getElementById('sidebar-overlay')?.classList.remove('show');
+}
+document.querySelectorAll('.sb-item').forEach(i=>i.addEventListener('click',()=>{if(window.innerWidth<=768)closeSidebar();}));
 
 </script>
 </body>

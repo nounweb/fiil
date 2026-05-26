@@ -188,7 +188,54 @@ a{text-decoration:none;color:inherit}
   .grid-2,.grid-3,.grid-5-7{grid-template-columns:1fr}
   .rh-top{flex-direction:column}
 }
+
+/* ── 모바일 반응형 ── */
+.hamburger{ display:none; }
+.sidebar-overlay{ display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:300; }
+
+@media(max-width:1100px){
+  .stat-grid{grid-template-columns:1fr 1fr !important}
+  .row-2,.panel-row{grid-template-columns:1fr !important}
+}
+@media(max-width:768px){
+  .sidebar{transform:translateX(-100%);transition:transform .25s ease;width:280px;z-index:400}
+  .sidebar.open{transform:translateX(0)}
+  .sidebar-overlay.show{display:block}
+  .main{margin-left:0}
+  .hamburger{display:flex;align-items:center;justify-content:center;width:36px;height:36px;background:none;border:none;cursor:pointer;flex-shrink:0;color:var(--primary,#305890)}
+  .content,.wrap{padding:12px}
+  .stat-grid{grid-template-columns:1fr 1fr !important;gap:10px;margin-bottom:12px}
+  .stat-card{padding:12px 12px}
+  .stat-val{font-size:18px}
+  .row-2,.row-equal,.panel-row,.kpi-grid{grid-template-columns:1fr !important;gap:10px}
+  .card,.panel{margin-bottom:10px}
+  .card-head,.panel-head{padding:9px 12px}
+  .tbl th,.tbl td,.list-tbl th,.list-tbl td,.fs-tbl th,.fs-tbl td{font-size:11px;padding:7px 10px;white-space:nowrap}
+  #mini-map{height:150px !important}
+  #kakao-map{height:360px !important}
+  .chip{font-size:10px;padding:2px 7px}
+}
+@media(max-width:400px){
+  .stat-grid{grid-template-columns:1fr 1fr !important;gap:8px}
+  .content,.wrap{padding:8px}
+}
 </style>
+<script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=c7160a2d047af2808065d9e1929a66a7&libraries=services">
+// ── 모바일 사이드바 ──────────────────────────────────
+function toggleSidebar(){
+  const sb=document.querySelector('.sidebar');
+  const ov=document.getElementById('sidebar-overlay');
+  if(!sb)return;
+  sb.classList.toggle('open');
+  ov&&ov.classList.toggle('show');
+}
+function closeSidebar(){
+  document.querySelector('.sidebar')?.classList.remove('open');
+  document.getElementById('sidebar-overlay')?.classList.remove('show');
+}
+document.querySelectorAll('.sb-item').forEach(i=>i.addEventListener('click',()=>{if(window.innerWidth<=768)closeSidebar();}));
+
+</script>
 </head>
 <body>
 
@@ -622,18 +669,19 @@ loadReport().then(r => {
   if (r) {
     render(r);
     _checkApprovalStatus(r);
-    // GPS → 카카오 역지오코딩 (비동기)
-    if (r.gps) {
+    // GPS → 카카오 역지오코딩 (Geocoder API — CORS 안전)
+    if (r.gps && window.kakao && kakao.maps && kakao.maps.services) {
       const parts = r.gps.replace(/\s/g,'').split(',');
       if (parts.length >= 2) {
-        fetch(
-          `https://dapi.kakao.com/v2/local/geo/coord2address.json?x=${parts[1]}&y=${parts[0]}&input_coord=WGS84`,
-          { headers: { 'Authorization': 'KakaoAK 66648ca49f126d8752b33d542789ac56' } }
-        ).then(res => res.json()).then(data => {
-          const addr = data.documents?.[0]?.address?.address_name;
-          const el = document.getElementById('gps-display');
-          if (addr && el) el.textContent = addr + ' (' + r.gps + ')';
-        }).catch(() => {});
+        const lat = parseFloat(parts[0]), lng = parseFloat(parts[1]);
+        new kakao.maps.services.Geocoder().coord2Address(lng, lat, (result, status) => {
+          if (status === kakao.maps.services.Status.OK && result[0]) {
+            const addr = result[0].road_address?.address_name
+                      || result[0].address?.address_name;
+            const el = document.getElementById('gps-display');
+            if (addr && el) el.textContent = addr + ' (' + r.gps + ')';
+          }
+        });
       }
     }
   }
