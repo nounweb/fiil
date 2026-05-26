@@ -137,6 +137,8 @@ a{text-decoration:none;color:inherit}
 }
 
 /* ── 모바일 반응형 ── */
+.hamburger{ display:none; }
+.sidebar-overlay{ display:none; }
 @media(max-width:768px){
   /* 사이드바 오프캔버스 */
   .sidebar{
@@ -211,8 +213,7 @@ a{text-decoration:none;color:inherit}
   .stat-val{ font-size:16px; }
   .content{ padding:10px; }
 }
-.hamburger{ display:none; }  /* 데스크탑에서 숨김 */
-.sidebar-overlay{ display:none; }
+/* .hamburger, .sidebar-overlay 기본값은 미디어쿼리 앞(아래 @media 블록 참조)에서 관리 */
 </style>
 <script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=c7160a2d047af2808065d9e1929a66a7&libraries=services,clusterer"></script>
 </head>
