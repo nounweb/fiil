@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>FIIL.kr — 종합 대시보드</title>
-<script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=c7160a2d047af2808065d9e1929a66a7&libraries=services,clusterer"></script>
 <style>
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendardvariable.css');
 /* ── Design tokens (Supabase light) ── */
@@ -677,97 +676,6 @@ function closeSidebar(){
 loadReports();
 setInterval(loadReports,30000);
 
-/* Clock */
-(function tick(){
-  const e=document.getElementById('clock');
-  if(e)e.textContent=new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
-  setTimeout(tick,1000);
-})();
-
-/* Chips */
-const urgChip ={긴급:'chip-red',높음:'chip-orange',보통:'chip-blue',낮음:'chip-gray'};
-const statChip={완료:'chip-green',승인:'chip-approved',출동중:'chip-blue',대기중:'chip-orange',접수:'chip-gray'};
-
-let _allRows=[];
-
-function td(val,cls=''){
-  if(val===null||val===undefined||val==='')
-    return `<td><span class="td-null">NULL</span></td>`;
-  return `<td class="${cls}" title="${String(val).replace(/"/g,'&quot;')}">${val}</td>`;
-}
-
-function renderRow(r){
-  const cost=r.cost?(r.cost.total||(r.cost.labor||0)+(r.cost.equipment||0)+(r.cost.supplies||0)):null;
-  const urg=r.urgency||'보통';
-  const ts=r.reported_at?new Date(r.reported_at).toLocaleString('ko-KR',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}):null;
-  return `<tr data-id="${r.id}" onclick="rowClick('${r.id}')">
-    <td class="tbl-cb-col"><input type="checkbox" onclick="event.stopPropagation()"></td>
-    <td><a href="report.html?id=${r.id}" onclick="event.stopPropagation()" style="color:var(--blue);font-weight:500;font-family:var(--font-mono);font-size:11px">${r.id}</a></td>
-    ${td(r.type)}
-    ${td(r.type_code)}
-    ${td(r.location&&r.location!=='위치 미상'?r.location:null)}
-    ${td(r.gps)}
-    ${td(r.reporter)}
-    <td>${r.urgency?`<span class="chip ${urgChip[urg]||'chip-gray'}">${urg}</span>`:'<span class="td-null">NULL</span>'}</td>
-    <td>${r.status?`<span class="chip ${statChip[r.status]||'chip-gray'}">${r.status}</span>`:'<span class="td-null">NULL</span>'}</td>
-    ${cost!==null?`<td style="font-variant-numeric:tabular-nums">₩${cost.toLocaleString()}</td>`:'<td><span class="td-null">NULL</span></td>'}
-    ${ts?`<td style="color:var(--text2)">${ts}</td>`:'<td><span class="td-null">NULL</span></td>'}
-  </tr>`;
-}
-
-function renderTable(rows){
-  const tbody=document.getElementById('report-tbody');
-  if(!rows.length){
-    tbody.innerHTML='<tr><td colspan="11" style="text-align:center;padding:48px;color:var(--text3)">No rows found</td></tr>';
-    return;
-  }
-  tbody.innerHTML=rows.map(renderRow).join('');
-  document.getElementById('foot-count').textContent=rows.length+' rows';
-  document.getElementById('cnt-today').textContent=rows.length+'건';
-  document.getElementById('sb-badge').textContent=rows.length;
-  const urg=rows.filter(r=>r.urgency==='긴급').length;
-  document.getElementById('cnt-urgent').textContent=urg+'건';
-}
-
-function filterTable(){
-  const q=document.getElementById('searchInput').value.toLowerCase();
-  if(!q){renderTable(_allRows);return;}
-  renderTable(_allRows.filter(r=>
-    (r.id||'').toLowerCase().includes(q)||
-    (r.type||'').toLowerCase().includes(q)||
-    (r.location||'').toLowerCase().includes(q)||
-    (r.reporter||'').toLowerCase().includes(q)
-  ));
-}
-
-function toggleAll(cb){
-  document.querySelectorAll('#report-tbody input[type=checkbox]').forEach(c=>c.checked=cb.checked);
-}
-
-function rowClick(id){
-  location.href='report.html?id='+id;
-}
-
-function loadReports(){
-  fetch(_SB_URL+'/rest/v1/reports?select=*&order=reported_at.desc&limit=100',{
-    headers:{'apikey':_SB_KEY,'Authorization':'Bearer '+_SB_KEY}
-  }).then(r=>r.json()).then(data=>{
-    if(Array.isArray(data)){_allRows=data;renderTable(data);}
-  }).catch(e=>console.warn('[FIIL]',e.message));
-}
-
-/* Sidebar mobile */
-function toggleSidebar(){
-  document.getElementById('sidebar').classList.toggle('open');
-  document.getElementById('sidebar-overlay').classList.toggle('show');
-}
-function closeSidebar(){
-  document.getElementById('sidebar')?.classList.remove('open');
-  document.getElementById('sidebar-overlay')?.classList.remove('show');
-}
-
-loadReports();
-setInterval(loadReports,30000);
 </script>
 </body>
 </html>
