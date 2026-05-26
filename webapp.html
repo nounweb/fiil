@@ -10,8 +10,8 @@
   --primary: #00529B;
   --primary-dark: #003A6E;
   --primary-light: #E8F0FB;
-  --accent: #305890;
-  --accent-light: #eaf2fa;
+  --accent: #0EA47A;
+  --accent-light: #E0F5EF;
   --warn: #D64F0A;
   --warn-light: #FFF0E8;
   --text: #1A1A1A;
@@ -148,7 +148,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); font-family:
 /* ── BIG REPORT BUTTON ── */
 .report-cta {
   margin: 0 16px 16px;
-  background: linear-gradient(135deg, var(--accent) 0%, #214176 100%);
+  background: linear-gradient(135deg, var(--accent) 0%, #0B8A65 100%);
   border: none;
   border-radius: var(--radius);
   padding: 20px;
@@ -227,7 +227,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); font-family:
   flex-shrink: 0;
 }
 .badge-done { background: var(--accent-light); color: var(--accent); }
-.badge-active { background: #eaf2fa; color: #305890; }
+.badge-active { background: #FEF3C7; color: #92400E; }
 .badge-new { background: var(--primary-light); color: var(--primary); }
 
 /* ── BOTTOM NAV ── */
@@ -260,7 +260,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); font-family:
   color: var(--muted);
 }
 .nav-item.active { color: var(--primary); }
-.nav-item-icon { display:flex; align-items:center; justify-content:center; height:24px; }
+.nav-item-icon { font-size: 22px; line-height: 1; }
 .nav-item-label { font-size: 10px; font-weight: 500; }
 
 /* ── REPORT SCREEN ── */
@@ -406,7 +406,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); font-family:
   gap: 8px;
 }
 .submit-btn:active { transform: scale(0.98); background: var(--primary-dark); }
-.submit-btn:disabled { background: #b0c8e0; cursor: not-allowed; }
+.submit-btn:disabled { background: #B0B0B0; cursor: not-allowed; }
 
 /* ── AI ANALYSIS SCREEN ── */
 .analysis-screen { background: var(--white); }
@@ -744,7 +744,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); font-family:
 
     <div class="home-banner">
       <div class="home-banner-badge"><span class="live-dot"></span> AI 분석 실시간 작동 중</div>
-      <h2>사진 한 장으로<br>제주를 지킵니다</h2>
+      <h2>📸 사진 한 장으로<br>제주를 지킵니다</h2>
       <p>응급환자 · 환경오염 · 불법투기 · 재난안전<br>AI가 즉시 분석하고 담당부서가 출동합니다</p>
     </div>
 
@@ -756,7 +756,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); font-family:
 
     <div class="section-heading">빠른 신고</div>
     <button class="report-cta" onclick="goScreen('screen-report')">
-      <div class="report-cta-icon" style="display:flex;align-items:center;justify-content:center;font-size:0"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
+      <div class="report-cta-icon">📷</div>
       <div class="report-cta-text">
         <span class="report-cta-title">사진으로 신고하기</span>
         <span class="report-cta-sub">사진 + AI 분석 + 자동 배정 → 즉시 출동</span>
@@ -766,32 +766,32 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); font-family:
     <div class="section-heading">카테고리별 신고</div>
     <div class="scenario-grid-home">
       <button class="scenario-btn" onclick="goScreen('screen-report','응급환자')">
-        <span class="scenario-btn-icon"></span>
+        <span class="scenario-btn-icon">🚨</span>
         <span class="scenario-btn-title">응급환자</span>
         <span class="scenario-btn-tag">긴급 대응</span>
       </button>
       <button class="scenario-btn" onclick="goScreen('screen-report','해안쓰레기')">
-        <span class="scenario-btn-icon">️</span>
+        <span class="scenario-btn-icon">🏖️</span>
         <span class="scenario-btn-title">해안쓰레기</span>
         <span class="scenario-btn-tag">환경·수거팀</span>
       </button>
       <button class="scenario-btn" onclick="goScreen('screen-report','불법투기')">
-        <span class="scenario-btn-icon">️</span>
+        <span class="scenario-btn-icon">🗑️</span>
         <span class="scenario-btn-title">불법투기</span>
         <span class="scenario-btn-tag">환경과</span>
       </button>
       <button class="scenario-btn" onclick="goScreen('screen-report','식당위생')">
-        <span class="scenario-btn-icon">️</span>
+        <span class="scenario-btn-icon">🍽️</span>
         <span class="scenario-btn-title">식당위생/평가</span>
         <span class="scenario-btn-tag">위생검사팀</span>
       </button>
       <button class="scenario-btn" onclick="goScreen('screen-report','도로파손')">
-        <span class="scenario-btn-icon"></span>
+        <span class="scenario-btn-icon">🚧</span>
         <span class="scenario-btn-title">도로파손</span>
         <span class="scenario-btn-tag">도로과</span>
       </button>
       <button class="scenario-btn" onclick="goScreen('screen-report','기타')">
-        <span class="scenario-btn-icon">+</span>
+        <span class="scenario-btn-icon">➕</span>
         <span class="scenario-btn-title">기타 신고</span>
         <span class="scenario-btn-tag">AI 자동분류</span>
       </button>
@@ -800,35 +800,35 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); font-family:
     <div class="section-heading">최근 신고 현황</div>
     <div class="recent-list">
       <div class="recent-item">
-        <div class="recent-photo">️</div>
+        <div class="recent-photo">🏖️</div>
         <div class="recent-info">
           <div class="recent-title">협재해수욕장 해안쓰레기</div>
-          <div class="recent-loc"><span style="color:var(--primary)">●</span> 한림읍 협재리 · 14분 전</div>
+          <div class="recent-loc">📍 한림읍 협재리 · 14분 전</div>
         </div>
         <span class="recent-badge badge-active">출동중</span>
       </div>
       <div class="recent-item">
-        <div class="recent-photo"></div>
+        <div class="recent-photo">🚧</div>
         <div class="recent-info">
           <div class="recent-title">일주서로 포트홀 발생</div>
-          <div class="recent-loc"><span style="color:var(--primary)">●</span> 애월읍 · 1시간 전</div>
+          <div class="recent-loc">📍 애월읍 · 1시간 전</div>
         </div>
         <span class="recent-badge badge-done">완료</span>
       </div>
       <div class="recent-item">
-        <div class="recent-photo">️</div>
+        <div class="recent-photo">🗑️</div>
         <div class="recent-info">
           <div class="recent-title">중문관광단지 불법투기</div>
-          <div class="recent-loc"><span style="color:var(--primary)">●</span> 서귀포시 중문동 · 2시간 전</div>
+          <div class="recent-loc">📍 서귀포시 중문동 · 2시간 전</div>
         </div>
         <span class="recent-badge badge-done">완료</span>
       </div>
     </div>
     <div class="bottom-nav">
-      <button class="nav-item active" onclick="showNav('home')"><div class="nav-item-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div><div class="nav-item-label">홈</div></button>
-      <button class="nav-item" onclick="goScreen('screen-report')"><div class="nav-item-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div><div class="nav-item-label">신고</div></button>
-      <button class="nav-item" onclick="goScreen('screen-status');_loadStatusScreen()"><div class="nav-item-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div><div class="nav-item-label">내 신고</div></button>
-      <button class="nav-item" onclick="goScreen('screen-mypage')"><div class="nav-item-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><div class="nav-item-label">마이</div></button>
+      <button class="nav-item active" onclick="showNav('home')"><div class="nav-item-icon">🏠</div><div class="nav-item-label">홈</div></button>
+      <button class="nav-item" onclick="goScreen('screen-report')"><div class="nav-item-icon">📷</div><div class="nav-item-label">신고</div></button>
+      <button class="nav-item" onclick="goScreen('screen-status');_loadStatusScreen()"><div class="nav-item-icon">📋</div><div class="nav-item-label">내 신고</div></button>
+      <button class="nav-item" onclick="goScreen('screen-mypage')"><div class="nav-item-icon">👤</div><div class="nav-item-label">마이</div></button>
     </div>
   </div>
 
@@ -844,12 +844,12 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); font-family:
     <div class="report-scroll">
       <!-- Sender Info -->
       <div class="sender-info-box">
-        <div class="sender-avatar" style="display:flex;align-items:center;justify-content:center;font-size:0"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+        <div class="sender-avatar">👤</div>
         <div class="sender-details">
           <span class="sender-name">김제주 (자동입력)</span>
           <span class="sender-phone">010-****-5678 · 제주시 연동</span>
         </div>
-        <span style="font-size:10px;color:var(--accent);font-weight:700;" style="display:flex;align-items:center;gap:3px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> 인증</span>
+        <span style="font-size:10px;color:var(--accent);font-weight:700;">✓ 인증</span>
       </div>
 
       <!-- Photo Upload -->
@@ -857,13 +857,13 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); font-family:
       <div class="upload-zone" id="uploadZone" onclick="document.getElementById('photoInput').click()">
         <img id="previewImg" class="upload-preview" style="display:none;">
         <div id="uploadPrompt">
-          <div class="upload-zone-icon" style="display:flex;align-items:center;justify-content:center;color:var(--primary)"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
+          <div class="upload-zone-icon">📷</div>
           <div class="upload-zone-text">사진을 첨부하세요</div>
           <div class="upload-zone-sub">탭하여 카메라 또는 갤러리 선택</div>
         </div>
         <div class="upload-overlay" id="uploadOverlay" style="display:none;">
-          <button class="upload-overlay-btn" onclick="event.stopPropagation();document.getElementById('photoInput').click()">변경</button>
-          <button class="upload-overlay-btn" onclick="event.stopPropagation();clearPhoto()">× 삭제</button>
+          <button class="upload-overlay-btn" onclick="event.stopPropagation();document.getElementById('photoInput').click()">🔄 변경</button>
+          <button class="upload-overlay-btn" onclick="event.stopPropagation();clearPhoto()">✕ 삭제</button>
         </div>
       </div>
       <input type="file" id="photoInput" accept="image/*" capture="environment" onchange="handlePhoto(this)">
@@ -871,7 +871,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); font-family:
       <!-- GPS -->
       <div class="gps-bar" id="gpsBar" onclick="requestGPS()" style="cursor:pointer;">
         <div class="gps-spinner" id="gpsSpinner" style="display:none;"></div>
-        <span style="white-space:nowrap;display:flex;align-items:center;gap:4px;color:var(--primary)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> GPS</span>
+        <span style="white-space:nowrap;">📍 GPS</span>
         <span class="gps-bar-val" id="gpsVal">탭하여 현재 위치 확인</span>
       </div>
 
@@ -881,15 +881,15 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); font-family:
         <div class="form-select-wrap">
           <select class="form-select" id="categorySelect">
             <option value="">유형 선택</option>
-            <option value="응급환자">응급환자 발생</option>
-            <option value="해안쓰레기">️ 해안·해양 쓰레기</option>
-            <option value="불법투기">️ 쓰레기 불법투기</option>
-            <option value="도로파손"> 도로 파손·위험</option>
-            <option value="식당위생">️ 식당 위생·평가</option>
-            <option value="산불연기"> 산불·연기 발생</option>
-            <option value="수질오염">수질 오염</option>
-            <option value="소음진동"> 소음·진동</option>
-            <option value="기타">+ 기타 (AI 자동분류)</option>
+            <option value="응급환자">🚨 응급환자 발생</option>
+            <option value="해안쓰레기">🏖️ 해안·해양 쓰레기</option>
+            <option value="불법투기">🗑️ 쓰레기 불법투기</option>
+            <option value="도로파손">🚧 도로 파손·위험</option>
+            <option value="식당위생">🍽️ 식당 위생·평가</option>
+            <option value="산불연기">🔥 산불·연기 발생</option>
+            <option value="수질오염">🌊 수질 오염</option>
+            <option value="소음진동">🔊 소음·진동</option>
+            <option value="기타">➕ 기타 (AI 자동분류)</option>
           </select>
         </div>
       </div>
@@ -901,7 +901,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); font-family:
       </div>
 
       <button class="submit-btn" onclick="submitReport()" id="submitBtn">
-        <span style="display:flex;align-items:center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 12h6M9 15h4"/><circle cx="7" cy="9" r="1" fill="currentColor"/><circle cx="7" cy="12" r="1" fill="currentColor"/><circle cx="7" cy="15" r="1" fill="currentColor"/></svg></span> AI 분석 후 신고 접수
+        <span>🤖</span> AI 분석 후 신고 접수
       </button>
     </div>
   </div>
@@ -915,46 +915,46 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); font-family:
       </div>
     </div>
     <div class="analysis-header">
-      <h3>AI 자동 분석</h3>
+      <h3>🤖 AI 자동 분석</h3>
       <p>사진, GPS, 시간 정보를 종합 분석하여<br>최적의 대응 방안을 도출합니다</p>
     </div>
     <div class="analysis-photo-strip">
       <div class="analysis-photo" id="analysisPic">
         <div class="analysis-photo-overlay">
-          <div class="analysis-photo-label" style="display:flex;align-items:center;gap:4px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 4v6h6M23 20v-6h-6"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10M23 14l-4.64 4.36A9 9 0 0 1 3.51 15"/></svg> 분석 중</div>
+          <div class="analysis-photo-label">🔍 AI 스캔 중</div>
         </div>
       </div>
     </div>
     <div class="ai-thinking" id="aiThinking">
       <div class="ai-step-item" id="step1">
         <div class="ai-step-dot" id="dot1">1</div>
-        <div class="ai-step-text">GPS 좌표 및 발신자 정보 자동 추출</div>
+        <div class="ai-step-text">📡 GPS 좌표 및 발신자 정보 자동 추출</div>
         <div class="ai-step-spinner" id="sp1" style="display:none"></div>
-        <span id="ck1" style="display:none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+        <span id="ck1" style="display:none">✅</span>
       </div>
       <div class="ai-step-item" id="step2">
         <div class="ai-step-dot" id="dot2">2</div>
-        <div class="ai-step-text"> 사진 객체 인식 및 상황 판단</div>
+        <div class="ai-step-text">🖼 사진 객체 인식 및 상황 판단</div>
         <div class="ai-step-spinner" id="sp2" style="display:none"></div>
-        <span id="ck2" style="display:none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+        <span id="ck2" style="display:none">✅</span>
       </div>
       <div class="ai-step-item" id="step3">
         <div class="ai-step-dot" id="dot3">3</div>
-        <div class="ai-step-text">신고 유형 분류 및 긴급도 평가</div>
+        <div class="ai-step-text">🏷 신고 유형 분류 및 긴급도 평가</div>
         <div class="ai-step-spinner" id="sp3" style="display:none"></div>
-        <span id="ck3" style="display:none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+        <span id="ck3" style="display:none">✅</span>
       </div>
       <div class="ai-step-item" id="step4">
         <div class="ai-step-dot" id="dot4">4</div>
-        <div class="ai-step-text">대응 방안 생성 및 담당부서 배정</div>
+        <div class="ai-step-text">📋 대응 방안 생성 및 담당부서 배정</div>
         <div class="ai-step-spinner" id="sp4" style="display:none"></div>
-        <span id="ck4" style="display:none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+        <span id="ck4" style="display:none">✅</span>
       </div>
       <div class="ai-step-item" id="step5">
         <div class="ai-step-dot" id="dot5">5</div>
         <div class="ai-step-text">⛓ 블록체인 해시 생성 및 신고 접수</div>
         <div class="ai-step-spinner" id="sp5" style="display:none"></div>
-        <span id="ck5" style="display:none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+        <span id="ck5" style="display:none">✅</span>
       </div>
     </div>
   </div>
@@ -962,7 +962,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); font-family:
   <!-- RESULT SCREEN -->
   <div class="screen hidden" id="screen-result">
     <div class="result-header">
-      <div class="result-check" style="display:flex;align-items:center;justify-content:center"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+      <div class="result-check">✅</div>
       <h3>신고 접수 완료</h3>
       <p>AI 분석이 완료되었습니다. 담당팀에 즉시 배정됩니다.</p>
       <div class="result-code" id="resultCode">RPT-2026-0000</div>
@@ -979,7 +979,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); font-family:
       </div>
 
       <div class="ai-analysis-box">
-        <div class="ai-analysis-box-title">AI 분석 결과</div>
+        <div class="ai-analysis-box-title">🤖 AI 분석 결과</div>
         <div class="ai-analysis-text" id="aiAnalysisText">분석 중...</div>
       </div>
 
@@ -987,8 +987,8 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); font-family:
       <div class="action-list" id="actionList"></div>
 
       <div class="result-btns">
-        <button class="submit-btn" onclick="goScreen('screen-status')">내 신고 현황 보기</button>
-        <button class="btn-outline" onclick="goScreen('screen-home')">홈으로 돌아가기</button>
+        <button class="submit-btn" onclick="goScreen('screen-status')">📋 내 신고 현황 보기</button>
+        <button class="btn-outline" onclick="goScreen('screen-home')">🏠 홈으로 돌아가기</button>
       </div>
     </div>
   </div>
@@ -1005,7 +1005,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); font-family:
     <div class="status-body">
       <div class="status-card">
         <div class="status-card-top">
-          <div class="status-card-img">️</div>
+          <div class="status-card-img">🏖️</div>
           <div class="status-card-info">
             <div class="status-card-title">협재 해안쓰레기 신고</div>
             <div class="status-card-meta">RPT-2026-2841 · 2026.05.14</div>
@@ -1015,9 +1015,9 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); font-family:
         <div class="status-track">
           <div class="track-steps">
             <div class="track-progress-line" style="width:60%"></div>
-            <div class="track-step"><div class="track-dot done"></div><div class="track-label">접수</div></div>
-            <div class="track-step"><div class="track-dot done"></div><div class="track-label">분류</div></div>
-            <div class="track-step"><div class="track-dot active" style="display:flex;align-items:center;justify-content:center;font-size:0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div><div class="track-label">출동</div></div>
+            <div class="track-step"><div class="track-dot done">✓</div><div class="track-label">접수</div></div>
+            <div class="track-step"><div class="track-dot done">✓</div><div class="track-label">분류</div></div>
+            <div class="track-step"><div class="track-dot active">🚗</div><div class="track-label">출동</div></div>
             <div class="track-step"><div class="track-dot pending">·</div><div class="track-label">처리</div></div>
             <div class="track-step"><div class="track-dot pending">·</div><div class="track-label">완료</div></div>
           </div>
@@ -1025,7 +1025,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); font-family:
       </div>
       <div class="status-card">
         <div class="status-card-top">
-          <div class="status-card-img"></div>
+          <div class="status-card-img">🚧</div>
           <div class="status-card-info">
             <div class="status-card-title">일주서로 포트홀 신고</div>
             <div class="status-card-meta">RPT-2026-2830 · 2026.05.13</div>
@@ -1035,55 +1035,55 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); font-family:
         <div class="status-track">
           <div class="track-steps">
             <div class="track-progress-line" style="width:100%"></div>
-            <div class="track-step"><div class="track-dot done"></div><div class="track-label">접수</div></div>
-            <div class="track-step"><div class="track-dot done"></div><div class="track-label">분류</div></div>
-            <div class="track-step"><div class="track-dot done"></div><div class="track-label">출동</div></div>
-            <div class="track-step"><div class="track-dot done"></div><div class="track-label">처리</div></div>
-            <div class="track-step"><div class="track-dot done"></div><div class="track-label">완료</div></div>
+            <div class="track-step"><div class="track-dot done">✓</div><div class="track-label">접수</div></div>
+            <div class="track-step"><div class="track-dot done">✓</div><div class="track-label">분류</div></div>
+            <div class="track-step"><div class="track-dot done">✓</div><div class="track-label">출동</div></div>
+            <div class="track-step"><div class="track-dot done">✓</div><div class="track-label">처리</div></div>
+            <div class="track-step"><div class="track-dot done">✓</div><div class="track-label">완료</div></div>
           </div>
         </div>
       </div>
     </div>
     <div class="bottom-nav">
-      <button class="nav-item" onclick="goScreen('screen-home')"><div class="nav-item-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div><div class="nav-item-label">홈</div></button>
-      <button class="nav-item" onclick="goScreen('screen-report')"><div class="nav-item-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div><div class="nav-item-label">신고</div></button>
-      <button class="nav-item active" onclick="_loadStatusScreen()"><div class="nav-item-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div><div class="nav-item-label">내 신고</div></button>
-      <button class="nav-item" onclick="goScreen('screen-mypage')"><div class="nav-item-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><div class="nav-item-label">마이</div></button>
+      <button class="nav-item" onclick="goScreen('screen-home')"><div class="nav-item-icon">🏠</div><div class="nav-item-label">홈</div></button>
+      <button class="nav-item" onclick="goScreen('screen-report')"><div class="nav-item-icon">📷</div><div class="nav-item-label">신고</div></button>
+      <button class="nav-item active" onclick="_loadStatusScreen()"><div class="nav-item-icon">📋</div><div class="nav-item-label">내 신고</div></button>
+      <button class="nav-item" onclick="goScreen('screen-mypage')"><div class="nav-item-icon">👤</div><div class="nav-item-label">마이</div></button>
     </div>
   </div>
 
   <!-- MYPAGE SCREEN -->
   <div class="screen hidden" id="screen-mypage">
     <div class="mypage-header">
-      <div class="mypage-avatar" style="display:flex;align-items:center;justify-content:center"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+      <div class="mypage-avatar">👤</div>
       <div class="mypage-name">김제주</div>
       <div class="mypage-phone">010-****-5678</div>
       <div class="mypage-score">
         <div class="mypage-score-item"><span class="mypage-score-val">12</span><div class="mypage-score-label">신고 건수</div></div>
         <div class="mypage-score-item"><span class="mypage-score-val">92%</span><div class="mypage-score-label">처리율</div></div>
-        <div class="mypage-score-item"><span class="mypage-score-val"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="8 17 12 21 16 17"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg></span><div class="mypage-score-label">환경지킴이</div></div>
+        <div class="mypage-score-item"><span class="mypage-score-val">🏆</span><div class="mypage-score-label">환경지킴이</div></div>
       </div>
     </div>
     <div class="mypage-body">
       <div class="mypage-menu-group">
-        <div class="mypage-menu-item"><span class="mypage-menu-icon"></span><span class="mypage-menu-text">신고 내역</span><span class="mypage-menu-arrow">›</span></div>
-        <div class="mypage-menu-item"><span class="mypage-menu-icon"></span><span class="mypage-menu-text">알림 설정</span><span class="mypage-menu-arrow">›</span></div>
-        <div class="mypage-menu-item"><span class="mypage-menu-icon"></span><span class="mypage-menu-text">내 위치 관리</span><span class="mypage-menu-arrow">›</span></div>
+        <div class="mypage-menu-item"><span class="mypage-menu-icon">📋</span><span class="mypage-menu-text">신고 내역</span><span class="mypage-menu-arrow">›</span></div>
+        <div class="mypage-menu-item"><span class="mypage-menu-icon">🔔</span><span class="mypage-menu-text">알림 설정</span><span class="mypage-menu-arrow">›</span></div>
+        <div class="mypage-menu-item"><span class="mypage-menu-icon">📍</span><span class="mypage-menu-text">내 위치 관리</span><span class="mypage-menu-arrow">›</span></div>
       </div>
       <div class="mypage-menu-group">
-        <div class="mypage-menu-item"><span class="mypage-menu-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span><span class="mypage-menu-text">신고 조회 (번호 입력)</span><span class="mypage-menu-arrow">›</span></div>
+        <div class="mypage-menu-item"><span class="mypage-menu-icon">🔍</span><span class="mypage-menu-text">신고 조회 (번호 입력)</span><span class="mypage-menu-arrow">›</span></div>
         <div class="mypage-menu-item"><span class="mypage-menu-icon">⛓</span><span class="mypage-menu-text">블록체인 기록 열람</span><span class="mypage-menu-arrow">›</span></div>
       </div>
       <div class="mypage-menu-group">
         <div class="mypage-menu-item"><span class="mypage-menu-icon">❓</span><span class="mypage-menu-text">도움말 · FAQ</span><span class="mypage-menu-arrow">›</span></div>
-        <div class="mypage-menu-item"><span class="mypage-menu-icon"></span><span class="mypage-menu-text">개인정보 처리방침</span><span class="mypage-menu-arrow">›</span></div>
+        <div class="mypage-menu-item"><span class="mypage-menu-icon">🔒</span><span class="mypage-menu-text">개인정보 처리방침</span><span class="mypage-menu-arrow">›</span></div>
       </div>
     </div>
     <div class="bottom-nav">
-      <button class="nav-item" onclick="goScreen('screen-home')"><div class="nav-item-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div><div class="nav-item-label">홈</div></button>
-      <button class="nav-item" onclick="goScreen('screen-report')"><div class="nav-item-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div><div class="nav-item-label">신고</div></button>
-      <button class="nav-item" onclick="goScreen('screen-status')"><div class="nav-item-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div><div class="nav-item-label">내 신고</div></button>
-      <button class="nav-item active"><div class="nav-item-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><div class="nav-item-label">마이</div></button>
+      <button class="nav-item" onclick="goScreen('screen-home')"><div class="nav-item-icon">🏠</div><div class="nav-item-label">홈</div></button>
+      <button class="nav-item" onclick="goScreen('screen-report')"><div class="nav-item-icon">📷</div><div class="nav-item-label">신고</div></button>
+      <button class="nav-item" onclick="goScreen('screen-status')"><div class="nav-item-icon">📋</div><div class="nav-item-label">내 신고</div></button>
+      <button class="nav-item active"><div class="nav-item-icon">👤</div><div class="nav-item-label">마이</div></button>
     </div>
   </div>
 
@@ -1770,7 +1770,7 @@ Step 10. 관할 기관 AI 전달 + GCS 포인트 적립 (§6, §7)
 #### 성분 분석 출력 형식
 
 \`\`\`
-폐기물 성분 분석 결과
+📊 폐기물 성분 분석 결과
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 총 추정 중량: {N}kg
 
@@ -1868,7 +1868,7 @@ S 소형 (드론 가동)
 표준 기준: 해안선 100~300m / 오염폭 50~200m
 타임라인:  4시간 (반일)
 투입 인력: 4명 (수거 2명 + 드론 전문 2명)
-드론 투입: HeDRA-100
+드론 투입: ✅ HeDRA-100
 
 단가 테이블:
   인건비      = 220,000원
@@ -1888,7 +1888,7 @@ M 중형 (드론 + 멀티)
 표준 기준: 해안선 300~500m / 오염폭 200~300m
 타임라인:  4시간 (반일)
 투입 인력: 7명 (수거 5명 + 드론 전문 2명)
-드론 투입: HeDRA-100 (기상 양호 시 FlyCart 보조)
+드론 투입: ✅ HeDRA-100 (기상 양호 시 FlyCart 보조)
 
 단가 테이블:
   인건비      = 370,000원
@@ -1908,7 +1908,7 @@ L 대형 (드론 풀가동, 1일 패키지)
 표준 기준: 해안선 500m~1.5km
 타임라인:  8시간 (1일) × 1일
 투입 인력: 10명↑ (정예 5명 + 민간단체/용역 5명↑ + 드론팀)
-드론 투입: HeDRA-100 + FlyCart 풀가동
+드론 투입: ✅ HeDRA-100 + FlyCart 풀가동
 
 1일 고정 단가:
   인건비      = 1,000,000원/일 (전 인력 패키지)
@@ -1925,7 +1925,7 @@ XL 초대형 (드론 풀가동, 3일 패키지)
 표준 기준: 해안선 1.5km↑ / 10개 구역 분할
 타임라인:  8시간 × 3일
 투입 인력: 동일 (일별 반복)
-드론 투입: 동일
+드론 투입: ✅ 동일
 
 1일 단가 = 2,500,000원 × 3일:
   인건비      = 1,000,000 × 3 = 3,000,000원
@@ -2193,8 +2193,8 @@ EX 기타     : {N}kg ({N}%)
 블록 ID   : {OpenHash 블록 ID}
 
 [서명]
-신고자    : ️ ECDSA P-256
-K-Cleaner : ️ AI 비서 서명
+신고자    : ✍️ ECDSA P-256
+K-Cleaner : ✍️ AI 비서 서명
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 \`\`\`
 
@@ -2255,7 +2255,7 @@ EX 기타     {N}kg × 200원 = {N}원 (매립)
 {규모별 상세 타임라인 — §4C 참조}
 
 [서명]
-산출자    : ️ K-Cleaner AI (SP-14 v1.1)
+산출자    : ✍️ K-Cleaner AI (SP-14 v1.1)
 검토자    : {담당 공무원 서명란}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 \`\`\`
@@ -2388,7 +2388,7 @@ GCS 포인트 (고팡 플랫폼)
 
 ### 7.3 커뮤니티 등급
 
-🌱 새싹(0~49) →  잎새(50~199) → 🌳 나무(200~499) → 🏔️ 산(500~999) → 바다(1000↑ — 명예의 전당)
+🌱 새싹(0~49) → 🌿 잎새(50~199) → 🌳 나무(200~499) → 🏔️ 산(500~999) → 🌊 바다(1000↑ — 명예의 전당)
 
 ═══════════════════════════════════════════════════════════════════
 ## § 8. 블루카본 행정 자산화 [v1.2 신규]
@@ -2425,7 +2425,7 @@ GCS 포인트 (고팡 플랫폼)
 \`\`\`
 [CLN] 환경·정화 — K-Cleaner 모드
 
- K-Cleaner v1.1 활성
+🌿 K-Cleaner v1.1 활성
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 [1. 작업 규모 분석]
@@ -2469,15 +2469,15 @@ WD {N}kg({N}%) EX {N}kg({N}%)
 [5. 타임라인]
 {규모별 타임라인}
 
- OpenHash 블록: KC-{날짜}-{번호}
- GCS 적립: +{N}포인트 ({등급})
+🔐 OpenHash 블록: KC-{날짜}-{번호}
+🌿 GCS 적립: +{N}포인트 ({등급})
 \`\`\`
 
 ### 8.2 긴급 대응 (S3)
 
 \`\`\`
 ⚠️ [S3 긴급] 유해물질 / 대규모 오염
-119 AI → 현장 대응팀 출동 요청
+🚨 119 AI → 현장 대응팀 출동 요청
 🏛️ 환경부 긴급대응팀 AI → 동시 신고
 현장에서 안전 거리를 유지하세요.
 \`\`\`
@@ -2491,7 +2491,7 @@ WD {N}kg({N}%) EX {N}kg({N}%)
 
 [K-Cleaner v1.1 활성]
 
-GPS: 33.3863°N, 126.2327°E / 지형: 현무암 암반 해안가
+📍 GPS: 33.3863°N, 126.2327°E / 지형: 현무암 암반 해안가
 
 📸 성분 분석 (AI Vision):
   총 추정 중량: 약 120kg (S 소형 판정)
@@ -2529,16 +2529,16 @@ GPS: 33.3863°N, 126.2327°E / 지형: 현무암 암반 해안가
 합    계: 448,860원 (VAT 별도)
 ━━━━━━━━━━━━━━━━━━━━━━━━━
 
- KC-20260523-143022-bf71fa98 (OpenHash 저장)
- GCS: +40포인트 (성분 분석 보너스 포함) → 잎새
-한림읍 행정복지센터 환경과 AI 신고 전달 완료
+🔐 KC-20260523-143022-bf71fa98 (OpenHash 저장)
+🌿 GCS: +40포인트 (성분 분석 보너스 포함) → 🌿잎새
+✅ 한림읍 행정복지센터 환경과 AI 신고 전달 완료
 \`\`\`
 
 ═══════════════════════════════════════════════════════════════════
 ## § 10. 구현 범위
 ═══════════════════════════════════════════════════════════════════
 
-현재 활성 (v1.2):
+✅ 현재 활성 (v1.2):
   - 8대 성분 분류 및 처리 단가 체계 (§2B, §2C)
   - XS/S/M/L/XL 5단계 수거 규모 판정 (§3B) — PDF 4종 통합
   - 드론 운반비 ceil(중량÷60)×50,000 자동 연산 (§3C)
@@ -2553,7 +2553,7 @@ GPS: 33.3863°N, 126.2327°E / 지형: 현무암 암반 해안가
   - 블루카본 행정 자산화 + AI 종합 행정 정산 (§8)
   - DeepSeek V4 Vision 이미지 분석
 
- 준비 중:
+🔒 준비 중:
   - 실제 OpenHash 네트워크 블록 기록
   - 지자체 AI 비서 실제 연결 (신고서 + 견적서 + 운용시나리오 전달)
   - 역지오코딩 API (좌표→주소 자동 변환)
@@ -2852,19 +2852,18 @@ function requestGPS() {
     document.getElementById('gpsSpinner').style.display = 'none';
     document.getElementById('gpsVal').textContent = `${lat}, ${lng} (±${Math.round(pos.coords.accuracy)}m)`;
     document.getElementById('gpsBar').style.background = 'var(--accent-light)';
-    // 역지오코딩
     gpsAddress = await _reverseGeocode(lat, lng);
     if (gpsAddress) {
       document.getElementById('gpsVal').textContent = gpsAddress + ` (${lat}, ${lng})`;
     }
   }, (err) => {
     document.getElementById('gpsSpinner').style.display = 'none';
-    // 권한 거부 시 시뮬레이션
-    const lat = (33.4996 + (Math.random()-0.5)*0.02).toFixed(6);
-    const lng = (126.5312 + (Math.random()-0.5)*0.02).toFixed(6);
-    gpsCoords = { lat, lng };
-    document.getElementById('gpsVal').textContent = `${lat}, ${lng} (GPS 미허용 — 시뮬레이션)`;
-    // 재시도 가능하도록 클릭 이벤트 재등록
+    // GPS 미허용 — 좌표 저장하지 않음, 사용자에게 허용 요청
+    gpsCoords = null;
+    gpsAddress = null;
+    document.getElementById('gpsVal').textContent = '⚠️ GPS 미허용 — 위치 정보를 위해 허용해 주세요';
+    document.getElementById('gpsBar').style.background = 'var(--orange-bg,#fef3c7)';
+    // 재시도 버튼 재활성화
     const bar = document.getElementById('gpsBar');
     if (bar) bar.addEventListener('click', requestGPS, { once: true });
   }, { timeout: 10000, maximumAge: 60000 });
@@ -2900,6 +2899,10 @@ function clearPhoto() {
 function submitReport() {
   const cat = document.getElementById('categorySelect').value;
   if (!cat) { alert('신고 유형을 선택해주세요.'); return; }
+  if (!gpsCoords) {
+    alert('위치 정보가 필요합니다.\n상단 GPS 바를 탭하여 위치를 허용해 주세요.');
+    return;
+  }
   goScreen('screen-analysis');
   runAIAnalysis(cat);
 }
@@ -2909,7 +2912,7 @@ async function runAIAnalysis(category) {
   const apic = document.getElementById('analysisPic');
   if (photoDataUrl) {
     apic.innerHTML = `<img src="${photoDataUrl}" style="width:100%;height:100%;object-fit:cover;">
-      <div class="analysis-photo-overlay"><div class="analysis-photo-label" style="display:flex;align-items:center;gap:4px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 4v6h6M23 20v-6h-6"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10M23 14l-4.64 4.36A9 9 0 0 1 3.51 15"/></svg> 분석 중</div></div>`;
+      <div class="analysis-photo-overlay"><div class="analysis-photo-label">🔍 AI 스캔 중</div></div>`;
   }
 
   const desc = document.getElementById('descInput')?.value || '';
@@ -2946,7 +2949,7 @@ async function runAIAnalysis(category) {
         spCode = route.sp_code || 'SP-14-IMG';
         // 응급 상황 즉각 표시
         if (route.urgent) {
-          appendBubble?.('ai', '응급 상황이 감지되었습니다. 즉각 대응팀이 출동합니다.');
+          appendBubble?.('ai', '🚨 응급 상황이 감지되었습니다. 즉각 대응팀이 출동합니다.');
         }
       } catch(e) {
         console.warn('[SP-ROUTER] 실패, 기본 SP-14-IMG 사용:', e.message);
@@ -2983,8 +2986,9 @@ async function runAIAnalysis(category) {
       id:          reportId,
       type:        category,
       type_code:   spCode,
-      location:    gpsAddress || '위치 미상',
+      location:    gpsAddress || (gps ? `GPS: ${gps}` : '위치 미상'),
       gps:         gps,
+      reporter:    null,
       reported_at: new Date().toISOString(),
       urgency:     urgencyMap[geminiResult?.risk_level] || '보통',
       status:      '접수',
@@ -3018,23 +3022,36 @@ async function runAIAnalysis(category) {
 
   } catch(e) {
     console.error('[분석 오류]', e);
-    // 오류 시 더미 데이터로 fallback
+    // 오류 시에도 기본 정보로 Supabase 저장
     const reportId = 'RPT-2026-' + (Math.floor(Math.random()*9000)+1000);
+    const fallbackPayload = {
+      id:          reportId,
+      type:        category,
+      type_code:   'SP-00-GEN',
+      location:    gpsAddress || null,
+      gps:         gps,
+      reporter:    null,
+      reported_at: new Date().toISOString(),
+      urgency:     '보통',
+      status:      '접수',
+      analysis:    { summary: '분석 오류 발생', error: e.message },
+    };
+    _saveReport(fallbackPayload).catch(se => console.warn('[Supabase fallback 저장 실패]', se.message));
     showResult(category, reportId, null, null, gpsAddress || gps);
   }
 }
 
 // ── 결과 화면 렌더링 ─────────────────────────────
 const analysisDB = {
-  '응급환자':  { urgency:'<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#9b1c1c;vertical-align:middle"></span> 최고 긴급', actions:['119 구급대 즉시 출동 요청','주변 AED 위치 안내','응급처치 가이드 SMS 전송','보호자 연락처 확인'] },
-  '해안쓰레기':{ urgency:'<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#b0c8e0;vertical-align:middle"></span> 보통',     actions:['해양환경팀 수거팀 출동 (3명)','고무보트 1척 배정','처리 보고서 자동 생성','블록체인 기록 저장'] },
-  '불법투기':  { urgency:'<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#b45309;vertical-align:middle"></span> 높음',     actions:['환경과 단속팀 출동','CCTV 분석 및 차량 추적','폐기물 수거팀 배정','과태료 부과 처리'] },
-  '식당위생':  { urgency:'<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#b0c8e0;vertical-align:middle"></span> 보통',     actions:['식품위생 담당자 점검','위생 점검표 자동 작성','처리 결과 공개 등록','재발 시 영업정지 경고'] },
-  '도로파손':  { urgency:'<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#b45309;vertical-align:middle"></span> 높음',     actions:['도로과 긴급보수팀 출동','임시 안전표지 설치','아스팔트 보수 배정','우회 안내 문자 발송'] },
-  '산불연기':  { urgency:'<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#9b1c1c;vertical-align:middle"></span> 최고 긴급', actions:['119 소방 즉시 출동','산림청 동시 신고','인근 주민 대피 안내','헬기 출동 검토'] },
-  '수질오염':  { urgency:'<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#b45309;vertical-align:middle"></span> 높음',     actions:['수질오염 대응팀 출동','현장 수질 샘플 채취','오염원 역추적 조사','취수장 모니터링 강화'] },
-  '소음진동':  { urgency:'<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#305890;vertical-align:middle"></span> 낮음',     actions:['소음 측정팀 파견','소음 데시벨 측정','민원인 처리 결과 통보','기준 초과 시 시정명령'] },
-  '기타':      { urgency:'<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#b0c8e0;vertical-align:middle"></span> 보통',     actions:['담당 부서 자동 배정','현장 점검팀 출동','처리 결과 48시간 내 통보','블록체인 기록 저장'] },
+  '응급환자':  { urgency:'🔴 최고 긴급', actions:['119 구급대 즉시 출동 요청','주변 AED 위치 안내','응급처치 가이드 SMS 전송','보호자 연락처 확인'] },
+  '해안쓰레기':{ urgency:'🟡 보통',     actions:['해양환경팀 수거팀 출동 (3명)','고무보트 1척 배정','처리 보고서 자동 생성','블록체인 기록 저장'] },
+  '불법투기':  { urgency:'🟠 높음',     actions:['환경과 단속팀 출동','CCTV 분석 및 차량 추적','폐기물 수거팀 배정','과태료 부과 처리'] },
+  '식당위생':  { urgency:'🟡 보통',     actions:['식품위생 담당자 점검','위생 점검표 자동 작성','처리 결과 공개 등록','재발 시 영업정지 경고'] },
+  '도로파손':  { urgency:'🟠 높음',     actions:['도로과 긴급보수팀 출동','임시 안전표지 설치','아스팔트 보수 배정','우회 안내 문자 발송'] },
+  '산불연기':  { urgency:'🔴 최고 긴급', actions:['119 소방 즉시 출동','산림청 동시 신고','인근 주민 대피 안내','헬기 출동 검토'] },
+  '수질오염':  { urgency:'🟠 높음',     actions:['수질오염 대응팀 출동','현장 수질 샘플 채취','오염원 역추적 조사','취수장 모니터링 강화'] },
+  '소음진동':  { urgency:'🟢 낮음',     actions:['소음 측정팀 파견','소음 데시벨 측정','민원인 처리 결과 통보','기준 초과 시 시정명령'] },
+  '기타':      { urgency:'🟡 보통',     actions:['담당 부서 자동 배정','현장 점검팀 출동','처리 결과 48시간 내 통보','블록체인 기록 저장'] },
 };
 
 function showResult(category, reportId, gemini, report, location) {
@@ -3045,7 +3062,7 @@ function showResult(category, reportId, gemini, report, location) {
   document.getElementById('resType').textContent    = category;
   document.getElementById('resTime').textContent    = new Date().toLocaleString('ko-KR');
   document.getElementById('resUrgency').textContent =
-    gemini ? { S0:'<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#305890;vertical-align:middle"></span> 낮음', S1:'<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#b0c8e0;vertical-align:middle"></span> 보통', S2:'<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#b45309;vertical-align:middle"></span> 높음', S3:'<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#9b1c1c;vertical-align:middle"></span> 긴급' }[gemini.risk_level] || db.urgency
+    gemini ? { S0:'🟢 낮음', S1:'🟡 보통', S2:'🟠 높음', S3:'🔴 긴급' }[gemini.risk_level] || db.urgency
            : db.urgency;
 
   if (gpsCoords) {
@@ -3082,9 +3099,9 @@ async function _loadStatusScreen() {
     }
     const badgeClass = { '접수':'badge-new', '처리중':'badge-active', '완료':'badge-done' };
     const typeIcon = (t='') =>
-      t.includes('해안')||t.includes('해양') ? '️' :
-      t.includes('불법') ? '️' : t.includes('응급') ? '' :
-      t.includes('도로') ? '' : t.includes('산불') ? '' : '';
+      t.includes('해안')||t.includes('해양') ? '🏖️' :
+      t.includes('불법') ? '🗑️' : t.includes('응급') ? '🚨' :
+      t.includes('도로') ? '🚧' : t.includes('산불') ? '🔥' : '📋';
     body.innerHTML = rows.map(r => {
       const st   = r.status || '접수';
       const bc   = badgeClass[st] || 'badge-new';
@@ -3102,11 +3119,11 @@ async function _loadStatusScreen() {
           </div>
           <div class="status-track"><div class="track-steps">
             <div class="track-progress-line" style="width:${prog}%"></div>
-            <div class="track-step"><div class="track-dot ${prog>=20?'done':'pending'}">${prog>=20?'':'·'}</div><div class="track-label">접수</div></div>
-            <div class="track-step"><div class="track-dot ${prog>=40?'done':'pending'}">${prog>=40?'':'·'}</div><div class="track-label">분류</div></div>
-            <div class="track-step"><div class="track-dot ${prog>=60?(prog>60?'done':'active'):'pending'}">${prog>=60?(prog>60?'':'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>'):'·'}</div><div class="track-label">출동</div></div>
-            <div class="track-step"><div class="track-dot ${prog>=80?'done':'pending'}">${prog>=80?'':'·'}</div><div class="track-label">처리</div></div>
-            <div class="track-step"><div class="track-dot ${prog>=100?'done':'pending'}">${prog>=100?'':'·'}</div><div class="track-label">완료</div></div>
+            <div class="track-step"><div class="track-dot ${prog>=20?'done':'pending'}">${prog>=20?'✓':'·'}</div><div class="track-label">접수</div></div>
+            <div class="track-step"><div class="track-dot ${prog>=40?'done':'pending'}">${prog>=40?'✓':'·'}</div><div class="track-label">분류</div></div>
+            <div class="track-step"><div class="track-dot ${prog>=60?(prog>60?'done':'active'):'pending'}">${prog>=60?(prog>60?'✓':'🚗'):'·'}</div><div class="track-label">출동</div></div>
+            <div class="track-step"><div class="track-dot ${prog>=80?'done':'pending'}">${prog>=80?'✓':'·'}</div><div class="track-label">처리</div></div>
+            <div class="track-step"><div class="track-dot ${prog>=100?'done':'pending'}">${prog>=100?'✓':'·'}</div><div class="track-label">완료</div></div>
           </div></div>
         </div>`;
     }).join('');
