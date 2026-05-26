@@ -2628,6 +2628,10 @@ async function _geminiRoute(imageFile, category, userText) {
 }
 
 async function _geminiAnalyze(imageFile, spCode) {
+  // SP-00-GEN: 전용 SP 없는 경우 → Gemini 범용 분석
+  if (!spCode || spCode === 'SP-00-GEN') {
+    return await _geminiAnalyzeGeneral(imageFile);
+  }
   // sp_code에 따라 적절한 프롬프트 선택
   const promptKey = (spCode === 'SP-15-IMG') ? 'sp15' : 'img';
   const systemPrompt = await _loadPrompt(promptKey);
@@ -2660,25 +2664,92 @@ async function _geminiAnalyze(imageFile, spCode) {
 }
 
 // ── DeepSeek 신고서 생성 (SP-14 K-Cleaner) ───────
-async function _deepseekReport(geminiJson, category, desc, gps, address, spCode) {
-  const systemPrompt = await _loadPrompt('cln');
+// ── SP-00-GEN: 범용 Gemini 이미지 분석 ──────────────
+// 전용 SP가 없을 때 Gemini가 자유롭게 이미지를 분석하고
+// 사용자 메시지를 해석하여 구조화된 결과 반환
+async function _geminiAnalyzeGeneral(imageFile) {
+  const base64 = await new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result.split(',')[1]);
+    r.onerror = rej;
+    r.readAsDataURL(imageFile);
+  });
+  const mime = imageFile.type || 'image/jpeg';
 
-  // SP-15(생활폐기물)일 때 비용 정보 포함
-  const costNote = (spCode === 'SP-15-IMG' && geminiJson.cost_estimate)
+  const systemPrompt =
+    `당신은 이미지 분석 전문가다. 사진을 보고 아래 JSON 형식으로만 출력하라. JSON 외 텍스트 금지.\n` +
+    `{\n` +
+    `  "scene_type": "사진 유형 (실내/실외/사람/사물/문서/기타)",\n` +
+    `  "main_subject": "주요 피사체 한국어 설명",\n` +
+    `  "objects_detected": ["감지된 주요 물체 목록"],\n` +
+    `  "condition": "상태 설명 (양호/불량/위험/정상 등)",\n` +
+    `  "estimated_issue": "추정되는 문제나 상황 한국어 설명",\n` +
+    `  "urgency": "낮음|보통|높음|긴급",\n` +
+    `  "recommended_action": "권고 조치 1~2문장",\n` +
+    `  "scene_description": "전체 상황 객관적 설명 2~3문장"\n` +
+    `}`;
+
+  const body = {
+    system_instruction: { parts: [{ text: systemPrompt }] },
+    contents: [{
+      parts: [
+        { inline_data: { mime_type: mime, data: base64 } },
+        { text: '이 이미지를 분석하여 지정된 JSON 형식으로만 출력하라.' }
+      ]
+    }],
+    generationConfig: { temperature: 0.2, maxOutputTokens: 512 }
+  };
+
+  const res = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`,
+    { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }
+  );
+  if (!res.ok) throw new Error('Gemini API ' + res.status);
+  const data = await res.json();
+  const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
+  const result = JSON.parse(text.replace(/```json|```/g, '').trim());
+  // SP-14/15 호환 필드 추가
+  result._sp_code     = 'SP-00-GEN';
+  result.risk_level   = { '낮음':'S0','보통':'S1','높음':'S2','긴급':'S3' }[result.urgency] || 'S0';
+  result.image_quality = 'GOOD';
+  result.confidence    = 0.75;
+  return result;
+}
+
+async function _deepseekReport(geminiJson, category, desc, gps, address, spCode) {
+  // SP-00-GEN: 범용 처리 — K-Cleaner 대신 일반 AI 비서 역할
+  const isGeneral = (!spCode || spCode === 'SP-00-GEN');
+  const systemPrompt = isGeneral
+    ? `당신은 친절한 AI 비서다. 사용자의 신고·요청을 분석하여 명확하고 실용적인 답변을 제공한다. 한국어로 답하라.`
+    : await _loadPrompt('cln');
+
+  // SP-00-GEN: 범용 메시지 구성
+  const costNote = (!isGeneral && spCode === 'SP-15-IMG' && geminiJson.cost_estimate)
     ? `\n비용산출: 수거비 ₩${(geminiJson.cost_estimate.collection_fee||0).toLocaleString()} + 처리비 ₩${(geminiJson.cost_estimate.disposal_fee||0).toLocaleString()} = 합계 ₩${(geminiJson.cost_estimate.total_est||0).toLocaleString()}\n필요차량: ${geminiJson.truck_required||'미상'} / 작업자: ${geminiJson.workers_required||'미상'}명`
     : '';
 
-  const userMsg =
-    `[이미지 분석 결과 — ${spCode||'SP-14-IMG'}-v1.0]\n` +
-    JSON.stringify(geminiJson, null, 2) +
-    `\n\n신고 유형: ${category}\n` +
-    `사용자 설명: ${desc || '없음'}\n` +
-    `GPS: ${gps || '없음'}\n` +
-    `주소: ${address || '없음'}` +
-    costNote +
-    `\n\n위 데이터를 바탕으로 신고서 요약(2~3문장)과 권고 조치 3~4가지를 작성하라.` +
-    `출력 형식: {"summary":"...","actions":["...","...","..."]}`;
-
+  const userMsg = isGeneral
+    ? `[이미지 분석 결과 — SP-00-GEN 범용]\n` +
+      `사진 유형: ${geminiJson.scene_type||'미상'}\n` +
+      `주요 피사체: ${geminiJson.main_subject||'미상'}\n` +
+      `감지 물체: ${(geminiJson.objects_detected||[]).join(', ')||'없음'}\n` +
+      `추정 상황: ${geminiJson.estimated_issue||'없음'}\n` +
+      `권고 조치: ${geminiJson.recommended_action||'없음'}\n` +
+      `전체 설명: ${geminiJson.scene_description||'없음'}\n\n` +
+      `신고 유형: ${category||'미선택'}\n` +
+      `사용자 설명: ${desc||'없음'}\n` +
+      `위치: ${address||gps||'없음'}\n\n` +
+      `위 분석을 바탕으로 사용자의 요청을 이해하고 적절한 안내를 제공하라.\n` +
+      `출력 형식: {"summary":"사용자 요청 이해 및 상황 요약 2~3문장","actions":["권고 조치 1","권고 조치 2","권고 조치 3"]}`
+    : `[이미지 분석 결과 — ${spCode||'SP-14-IMG'}-v1.0]\n` +
+      JSON.stringify(geminiJson, null, 2) +
+      `\n\n신고 유형: ${category}\n` +
+      `사용자 설명: ${desc || '없음'}\n` +
+      `GPS: ${gps || '없음'}\n` +
+      `주소: ${address || '없음'}` +
+      costNote +
+      `\n\n위 데이터를 바탕으로 신고서 요약(2~3문장)과 권고 조치 3~4가지를 작성하라.` +
+      `출력 형식: {"summary":"...","actions":["...","...","..."]}`;
   const res = await fetch('https://api.deepseek.com/v1/chat/completions', {
     method: 'POST',
     headers: {
