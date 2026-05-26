@@ -869,10 +869,10 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); font-family:
       <input type="file" id="photoInput" accept="image/*" capture="environment" onchange="handlePhoto(this)">
 
       <!-- GPS -->
-      <div class="gps-bar" id="gpsBar">
-        <div class="gps-spinner" id="gpsSpinner"></div>
+      <div class="gps-bar" id="gpsBar" onclick="requestGPS()" style="cursor:pointer;">
+        <div class="gps-spinner" id="gpsSpinner" style="display:none;"></div>
         <span style="white-space:nowrap;">📍 GPS</span>
-        <span class="gps-bar-val" id="gpsVal">위치 감지 중…</span>
+        <span class="gps-bar-val" id="gpsVal">탭하여 현재 위치 확인</span>
       </div>
 
       <!-- Category -->
@@ -1251,7 +1251,23 @@ function goBack() {
 
 // ── GPS ──────────────────────────────────────────
 function initGPS() {
-  if (!navigator.geolocation) return;
+  // 페이지 로드 시 자동 요청 안 함 — 사용자 탭 시 요청
+  const bar = document.getElementById('gpsBar');
+  if (bar) {
+    bar.style.cursor = 'pointer';
+    bar.title = '탭하여 현재 위치 확인';
+    bar.addEventListener('click', requestGPS, { once: true });
+  }
+}
+
+function requestGPS() {
+  if (!navigator.geolocation) {
+    document.getElementById('gpsVal').textContent = 'GPS 미지원 기기';
+    return;
+  }
+  document.getElementById('gpsSpinner').style.display = 'block';
+  document.getElementById('gpsVal').textContent = '위치 확인 중…';
+
   navigator.geolocation.getCurrentPosition(async pos => {
     const lat = pos.coords.latitude.toFixed(6);
     const lng = pos.coords.longitude.toFixed(6);
@@ -1264,14 +1280,17 @@ function initGPS() {
     if (gpsAddress) {
       document.getElementById('gpsVal').textContent = gpsAddress + ` (${lat}, ${lng})`;
     }
-  }, () => {
-    // 실패 시 시뮬레이션
+  }, (err) => {
+    document.getElementById('gpsSpinner').style.display = 'none';
+    // 권한 거부 시 시뮬레이션
     const lat = (33.4996 + (Math.random()-0.5)*0.02).toFixed(6);
     const lng = (126.5312 + (Math.random()-0.5)*0.02).toFixed(6);
     gpsCoords = { lat, lng };
-    document.getElementById('gpsSpinner').style.display = 'none';
-    document.getElementById('gpsVal').textContent = `${lat}, ${lng} (시뮬레이션)`;
-  });
+    document.getElementById('gpsVal').textContent = `${lat}, ${lng} (GPS 미허용 — 시뮬레이션)`;
+    // 재시도 가능하도록 클릭 이벤트 재등록
+    const bar = document.getElementById('gpsBar');
+    if (bar) bar.addEventListener('click', requestGPS, { once: true });
+  }, { timeout: 10000, maximumAge: 60000 });
 }
 
 // ── 사진 처리 ────────────────────────────────────
