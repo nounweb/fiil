@@ -2,621 +2,612 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FIIL 관리자 대시보드</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>FIIL.kr — 종합 대시보드</title>
+<script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=c7160a2d047af2808065d9e1929a66a7&libraries=services,clusterer"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendardvariable.css');
+/* ── Design tokens (Supabase light) ── */
 :root{
-  /* ── 고팡 블루 팔레트 ── */
-  --primary:    #305890;   /* GB-500 ★ 브랜드 원색 */
-  --primary-dk: #102040;   /* GB-900 최심부 */
-  --primary-bg: #eaf2fa;   /* GB-050 배경 연청 */
-  --primary-mid:#4a72a8;   /* GB-400 */
-  --primary-800:#1a3560;   /* GB-800 */
-  --primary-700:#214176;   /* GB-700 */
-  --primary-600:#284880;   /* GB-600 */
-  --primary-300:#7a9cc8;   /* GB-300 */
-  --primary-200:#b0c8e0;   /* GB-200 경계선 */
-  --primary-100:#d0e0f0;   /* GB-100 하이라이트 */
-
-  /* ── 기능색 (경고·오류만 예외 허용) ── */
-  --green:      #305890;   /* 완료·성공 → GB-500 */
-  --green-bg:   #eaf2fa;   /* 완료 배경 → GB-050 */
-  --orange:     #b45309;   /* 경고 (예외) */
-  --orange-bg:  #fef3c7;   /* 경고 배경 (예외) */
-  --red:        #9b1c1c;   /* 오류·긴급 (예외) */
-  --red-bg:     #fde8e8;   /* 오류 배경 (예외) */
-
-  /* ── 텍스트·레이아웃 ── */
-  --surface:    #f8f9fc;
-  --bg:         #f8f9fc;
-  --sidebar:    #305890;   /* GB-500 */
-  --border:     #b0c8e0;   /* GB-200 */
-  --border-dk:  #7a9cc8;   /* GB-300 */
-  --text:       #1a2535;
-  --sub:        #4a5e78;
-  --hint:       #8a9bb0;
-  --shadow-1:   0 1px 3px rgba(48,88,144,.12),0 1px 6px rgba(48,88,144,.06);
-  --r: 4px;
+  --bg:        #fff;
+  --bg-subtle: #f8f9fa;       /* sidebar / header bg */
+  --bg-hover:  #f1f3f5;
+  --bg-sel:    #e8f4fd;       /* row selected */
+  --border:    #e5e7eb;
+  --border2:   #d1d5db;
+  --text:      #171717;
+  --text2:     #6b7280;       /* muted */
+  --text3:     #9ca3af;       /* placeholder / NULL */
+  --accent:    #3ecf8e;       /* Supabase green */
+  --accent-d:  #29b978;
+  --blue:      #3b82f6;
+  --red:       #ef4444;
+  --orange:    #f59e0b;
+  --sb-w:      224px;
+  --sb-rail:   48px;
+  --top-h:     48px;
+  --font:      'Pretendard Variable','Pretendard',system-ui,sans-serif;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Noto Sans KR',sans-serif;font-size:14px;color:var(--text);background:var(--bg);-webkit-font-smoothing:antialiased}
+html,body{height:100%}
+body{font-family:var(--font);font-size:13px;color:var(--text);background:var(--bg);-webkit-font-smoothing:antialiased}
 a{text-decoration:none;color:inherit}
-.sidebar{width:240px;background:var(--sidebar);color:#fff;position:fixed;top:0;left:0;bottom:0;z-index:200;display:flex;flex-direction:column;overflow-y:auto}
-.sb-brand{display:flex;align-items:center;gap:12px;padding:18px 20px;border-bottom:1px solid rgba(255,255,255,.08);transition:background .15s}.sb-brand:hover{background:rgba(255,255,255,.04)}
-.sb-icon{width:36px;height:36px;background:var(--primary);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:#fff;flex-shrink:0}
-.sb-name{font-size:15px;font-weight:700}
-.sb-sub{font-size:11px;color:rgba(255,255,255,.45);margin-top:1px}
-.sb-nav{padding:8px 0;flex:1}
-.sb-section{padding:16px 20px 6px;font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:rgba(255,255,255,.35)}
-.sb-item{display:flex;align-items:center;gap:12px;padding:10px 20px;font-size:13px;font-weight:500;color:rgba(255,255,255,.7);cursor:pointer;transition:background .15s,color .15s;border-left:3px solid transparent}
-.sb-item:hover{background:rgba(255,255,255,.06);color:#fff}
-.sb-item.active{background:rgba(255,255,255,.12);color:#fff;font-weight:700;border-left-color:rgba(255,255,255,.7)}
-.sb-badge{margin-left:auto;background:var(--primary);color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px}
-.sb-user{padding:14px 20px;border-top:1px solid rgba(255,255,255,.08);font-size:12px;color:rgba(255,255,255,.55)}
-.sb-user strong{display:block;color:#fff;font-size:13px;margin-bottom:2px}
-.main{margin-left:240px;min-height:100vh;display:flex;flex-direction:column}
-.topbar{position:sticky;top:0;z-index:100;background:var(--surface);border-bottom:2px solid var(--primary);height:52px;display:flex;align-items:center;padding:0 24px;gap:12px;box-shadow:var(--shadow-1)}
-.breadcrumb{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--sub);flex:1}
-.breadcrumb a{color:var(--sub)}
-.breadcrumb a:hover{color:var(--primary)}
-.bc-sep{color:var(--hint)}
-.topbar-right{display:flex;align-items:center;gap:16px}
-.sys-ok{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--primary)}
-.sys-dot{width:7px;height:7px;border-radius:50%;background:var(--primary);animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
-.clock{font-size:13px;font-weight:600;color:var(--sub)}
-.btn{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:2px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;border:none;transition:background .15s}
-.btn-outline{background:transparent;border:1px solid var(--border);color:var(--text)}
-.btn-outline:hover{background:var(--bg)}
-.content{padding:24px}
-.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px}
-.stat-card{background:var(--surface);border:1px solid var(--border);border-top:3px solid var(--primary);padding:16px 18px;}
-.stat-icon{margin-bottom:8px;color:var(--primary);opacity:.8}
-.stat-val{font-size:22px;font-weight:700;line-height:1;margin-bottom:4px;color:var(--primary)}
-.stat-lbl{font-size:12px;color:var(--sub)}
-.stat-sub{font-size:12px;font-weight:600;margin-top:4px}
-.stat-sub.up{color:var(--primary-100)}
-.stat-sub.blue{color:var(--primary)}
-.row-2{display:grid;grid-template-columns:2fr 1fr;gap:14px;margin-bottom:16px}
-.row-equal{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
-.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow-1)}
-.card-head{display:flex;align-items:center;justify-content:space-between;padding:11px 18px;border-bottom:1px solid var(--border);background:var(--primary-bg)}
-.card-title{font-size:11px;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:.5px}
-.card-link{font-size:12px;color:var(--primary);font-weight:600}
-.card-link:hover{text-decoration:underline}
-.card-body{padding:16px 18px}
-.map-box{background:linear-gradient(135deg,#eaf2fa,#eaf2fa);border-radius:6px;height:200px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;margin-bottom:12px}
-.chip{display:inline-flex;align-items:center;padding:2px 10px;border-radius:2px;font-size:11px;font-weight:700;white-space:nowrap;letter-spacing:.2px}
-.chip-green   {background:var(--primary-bg);color:var(--primary)}
-.chip-approved{background:#214176;color:#ffffff;font-weight:700}
-.chip-blue    {background:var(--primary-bg);color:var(--primary)}
-.chip-orange{background:var(--orange-bg);color:#4a72a8}
-.chip-red{background:var(--red-bg);color:var(--red)}
-.chip-gray{background:#eaf2fa;color:var(--sub)}
-.report-table{width:100%;border-collapse:collapse;font-size:13px}
-.report-table th{padding:10px 12px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--hint);border-bottom:2px solid var(--border);background:var(--bg)}
-.report-table td{padding:11px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
-.report-table tr:last-child td{border-bottom:none}
-.report-table tr.new-row{background:#eaf2fa}
-.report-table tr:hover td{background:#f8f9fc}
-.rpt-id{color:var(--primary);font-weight:700;cursor:pointer}
-.rpt-id:hover{text-decoration:underline}
-.resource-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.res-item{background:var(--bg);border-radius:6px;padding:12px 14px;text-align:center}
-.res-icon{margin-bottom:4px;color:var(--primary)}
-.res-val{font-size:18px;font-weight:800}
-.res-lbl{font-size:11px;color:var(--sub);margin-top:2px}
-.res-sub{font-size:11px;color:var(--primary);font-weight:600;margin-top:2px}
-.type-item{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-size:13px}
-.type-item:last-child{margin-bottom:0}
-.type-bar{flex:1;height:8px;background:var(--border);border-radius:4px;overflow:hidden}
-.type-fill{height:100%;border-radius:4px;background:var(--primary)}
-.type-val{font-size:12px;font-weight:700;color:var(--primary);min-width:28px;text-align:right}
-.cost-row{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);font-size:13px}
-.cost-row:last-child{border-bottom:none;font-weight:700}
-.cost-lbl{color:var(--sub)}
-.cost-bar-wrap{height:8px;background:var(--border);border-radius:4px;overflow:hidden;margin-top:6px}
-.cost-bar-fill{height:100%;border-radius:4px;background:#4a72a8}
-.cost-note{font-size:11px;color:var(--sub);margin-top:6px}
-.tl{padding-left:24px;position:relative}
-.tl::before{content:'';position:absolute;left:8px;top:6px;bottom:6px;width:2px;background:#eaf2fa}
-.tl-item{position:relative;margin-bottom:18px}
-.tl-item:last-child{margin-bottom:0}
-.tl-dot{position:absolute;left:-22px;top:2px;width:16px;height:16px;border-radius:50%;border:2px solid var(--surface);display:flex;align-items:center;justify-content:center;font-size:9px}
-.tl-dot.go{background:var(--primary);color:#fff;box-shadow:0 0 0 2px #d0e0f0}
-.tl-dot.done{background:var(--primary);color:#fff;box-shadow:0 0 0 2px #eaf2fa}
-.tl-dot.wait{background:#b0c8e0;box-shadow:0 0 0 2px #eaf2fa}
-.tl-time{font-size:11px;color:var(--hint);margin-bottom:2px}
-.tl-lbl{font-size:13px;font-weight:600}
-.tl-sub{font-size:12px;color:var(--sub);margin-top:2px}
-@media(max-width:1100px){
-  .stat-grid{grid-template-columns:1fr 1fr}
-  .row-2{grid-template-columns:1fr}
-  .row-equal{grid-template-columns:1fr}
+button{font-family:var(--font);cursor:pointer;border:none;background:none}
+input{font-family:var(--font)}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+
+/* ── LAYOUT ── */
+.app{display:flex;height:100vh;overflow:hidden}
+
+/* ── SIDEBAR: icon-only rail, hover → expand ── */
+.sidebar{
+  width:var(--sb-rail);
+  flex-shrink:0;
+  background:var(--bg-subtle);
+  border-right:1px solid var(--border);
+  display:flex;flex-direction:column;
+  overflow:hidden;
+  transition:width .18s ease;
+  z-index:200;
+}
+.sidebar:hover{ width:var(--sb-w) }
+.sb-brand{
+  padding:0 13px;
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:10px;
+  height:var(--top-h);overflow:hidden;flex-shrink:0;
+  text-decoration:none;color:inherit;
+}
+.sb-icon{
+  width:22px;height:22px;flex-shrink:0;
+  background:var(--accent);border-radius:5px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:700;color:#fff;
+}
+.sb-name{font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;opacity:0;transition:opacity .12s .04s}
+.sidebar:hover .sb-name{opacity:1}
+.sb-sub{font-size:10px;color:var(--text2);white-space:nowrap}
+.sb-nav{padding:6px 6px;flex:1;overflow-y:auto;overflow-x:hidden}
+.sb-section{
+  padding:10px 10px 4px;
+  font-size:10px;font-weight:600;letter-spacing:.6px;
+  text-transform:uppercase;color:var(--text3);
+  white-space:nowrap;opacity:0;transition:opacity .1s;
+}
+.sidebar:hover .sb-section{opacity:1}
+.sb-item{
+  display:flex;align-items:center;gap:9px;
+  padding:7px 9px;border-radius:5px;
+  font-size:12px;color:var(--text2);
+  cursor:pointer;transition:background .1s,color .1s;
+  white-space:nowrap;overflow:hidden;
+  text-decoration:none;
+}
+.sb-item:hover{background:var(--bg-hover);color:var(--text)}
+.sb-item.active{background:var(--bg-hover);color:var(--text);font-weight:500}
+.sb-item svg{flex-shrink:0;opacity:.65}
+.sb-item.active svg{opacity:1}
+.sb-label{white-space:nowrap;opacity:0;transition:opacity .1s .04s}
+.sidebar:hover .sb-label{opacity:1}
+.sb-badge{
+  margin-left:auto;
+  background:#f3f4f6;color:var(--text2);
+  font-size:10px;font-weight:600;padding:1px 6px;border-radius:10px;
+  border:1px solid var(--border);
+  opacity:0;transition:opacity .1s;
+}
+.sidebar:hover .sb-badge{opacity:1}
+/* ── mobile sidebar override ── */
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:299}
+.sidebar-overlay.show{display:block}
+.sb-avatar{
+  width:22px;height:22px;border-radius:50%;flex-shrink:0;
+  background:#e5e7eb;border:1px solid var(--border2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:600;color:var(--text2);
 }
 
-/* ── 모바일 반응형 ── */
-.hamburger{ display:none; }
-.sidebar-overlay{ display:none; }
-@media(max-width:768px){
-  /* 사이드바 오프캔버스 */
-  .sidebar{
-    transform:translateX(-100%);
-    transition:transform .25s ease;
-    width:280px;
-    z-index:400;
-  }
-  .sidebar.open{ transform:translateX(0); }
+/* ── MAIN ── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 
-  /* 사이드바 열릴 때 배경 오버레이 */
-  .sidebar-overlay{
-    display:none;
-    position:fixed;inset:0;
-    background:rgba(0,0,0,.4);
+/* ── TOPBAR ── */
+.topbar{
+  height:var(--top-h);flex-shrink:0;
+  background:var(--bg);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 16px;gap:10px;
+}
+.hamburger{
+  display:none;padding:4px;border-radius:4px;color:var(--text2);
+}
+.hamburger:hover{background:var(--bg-hover)}
+.breadcrumb{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);flex:1}
+.breadcrumb a:hover{color:var(--text)}
+.bc-sep{color:var(--text3)}
+.bc-cur{color:var(--text);font-weight:500}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.sys-pill{
+  display:flex;align-items:center;gap:5px;
+  font-size:11px;color:var(--text2);
+  padding:3px 8px;border-radius:12px;
+  border:1px solid var(--border);background:var(--bg-subtle);
+}
+.sys-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.clock{font-size:11px;color:var(--text2);font-variant-numeric:tabular-nums}
+
+/* ── TOOLBAR (Supabase table toolbar) ── */
+.toolbar{
+  height:40px;flex-shrink:0;
+  background:var(--bg);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 14px;gap:8px;
+}
+.search-wrap{
+  flex:1;max-width:300px;
+  display:flex;align-items:center;gap:6px;
+  background:var(--bg-subtle);border:1px solid var(--border);
+  border-radius:4px;padding:0 8px;height:28px;
+}
+.search-wrap input{
+  border:none;background:none;font-size:12px;color:var(--text);
+  outline:none;width:100%;
+}
+.search-wrap input::placeholder{color:var(--text3)}
+.tb-right{display:flex;align-items:center;gap:6px;margin-left:auto}
+.tb-btn{
+  display:flex;align-items:center;gap:5px;
+  padding:4px 10px;border-radius:4px;font-size:12px;font-weight:500;
+  border:1px solid var(--border);background:var(--bg);color:var(--text2);
+  transition:background .1s,border-color .1s;
+}
+.tb-btn:hover{background:var(--bg-hover);color:var(--text);border-color:var(--border2)}
+.tb-btn-green{
+  background:var(--accent);border-color:var(--accent);color:#fff;
+}
+.tb-btn-green:hover{background:var(--accent-d);border-color:var(--accent-d)}
+.rls-badge{
+  display:flex;align-items:center;gap:4px;
+  padding:3px 8px;border-radius:4px;font-size:11px;font-weight:500;
+  background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0;
+}
+
+/* ── TABLE (Supabase style) ── */
+.tbl-outer{flex:1;overflow:auto}
+.tbl{width:100%;border-collapse:collapse;font-size:12px}
+.tbl thead{position:sticky;top:0;z-index:10}
+.tbl thead th{
+  background:var(--bg-subtle);
+  border-bottom:1px solid var(--border);
+  border-right:1px solid var(--border);
+  padding:0 10px;height:34px;
+  text-align:left;font-weight:400;
+  white-space:nowrap;user-select:none;
+}
+.tbl thead th:last-child{border-right:none}
+.th-inner{display:flex;align-items:center;gap:5px;color:var(--text2)}
+.th-inner svg{opacity:.5;flex-shrink:0}
+.col-name{font-size:12px;color:var(--text)}
+.col-type{
+  font-size:10px;color:var(--text3);
+  background:var(--bg-hover);border:1px solid var(--border);
+  border-radius:3px;padding:0 4px;line-height:16px;
+}
+.th-sort{margin-left:auto;opacity:0;transition:opacity .1s}
+.tbl thead th:hover .th-sort{opacity:.5}
+.tbl-cb-col{width:36px;padding:0 10px!important}
+.tbl-cb-col input[type=checkbox],.tbl tbody td input[type=checkbox]{
+  width:14px;height:14px;accent-color:var(--accent);cursor:pointer;
+}
+.tbl tbody tr{border-bottom:1px solid var(--border);cursor:pointer}
+.tbl tbody tr:hover td{background:var(--bg-sel)}
+.tbl tbody tr.selected td{background:#eff6ff}
+.tbl tbody td{
+  padding:0 10px;height:36px;
+  border-right:1px solid var(--border);
+  vertical-align:middle;color:var(--text);
+  font-size:12px;white-space:nowrap;
+  max-width:200px;overflow:hidden;text-overflow:ellipsis;
+}
+.tbl tbody td:last-child{border-right:none}
+.td-null{color:var(--text3);font-style:italic}
+.td-key{
+  display:flex;align-items:center;gap:5px;
+  font-weight:500;color:var(--text);
+}
+.td-key-icon{color:var(--text3);flex-shrink:0}
+.chip{
+  display:inline-flex;align-items:center;gap:3px;
+  padding:1px 7px;border-radius:9999px;font-size:10px;font-weight:500;
+  white-space:nowrap;border:1px solid transparent;
+}
+.chip-green  {background:#f0fdf4;color:#16a34a;border-color:#bbf7d0}
+.chip-blue   {background:#eff6ff;color:#2563eb;border-color:#bfdbfe}
+.chip-orange {background:#fffbeb;color:#d97706;border-color:#fde68a}
+.chip-red    {background:#fef2f2;color:#dc2626;border-color:#fecaca}
+.chip-gray   {background:#f9fafb;color:#6b7280;border-color:#e5e7eb}
+.chip-approved{background:#f0fdf4;color:#15803d;border-color:#86efac;font-weight:600}
+
+/* ── FOOTER ── */
+.tbl-foot{
+  height:36px;flex-shrink:0;
+  background:var(--bg-subtle);border-top:1px solid var(--border);
+  display:flex;align-items:center;padding:0 14px;gap:12px;
+  font-size:11px;color:var(--text2);
+}
+
+/* ── STAT CARDS (above table) ── */
+.stat-strip{
+  display:flex;gap:0;
+  border-bottom:1px solid var(--border);
+  background:var(--bg);flex-shrink:0;
+}
+.stat-item{
+  flex:1;padding:14px 20px;border-right:1px solid var(--border);
+}
+.stat-item:last-child{border-right:none}
+.stat-lbl{font-size:12px;color:var(--text2);margin-bottom:6px;font-weight:400}
+.stat-val{font-size:16px;font-weight:600;color:var(--text);font-variant-numeric:tabular-nums;line-height:1.2}
+.stat-sub{font-size:12px;color:var(--text3);margin-top:4px;font-weight:400}
+.stat-sub.ok{color:var(--text3)}
+.stat-sub.warn{color:var(--text3)}
+.stat-sub.danger{color:var(--text3)}
+
+/* ── MOBILE ── */
+@media(max-width:480px){
+  .stat-item{flex:0 0 100%;border-right:none}
+  .topbar{padding:0 10px;gap:6px}
+  .toolbar{padding:0 8px}
+}
+
+/* ── MOBILE ── */
+@media(max-width:768px){
+  .sidebar{
+    position:fixed;top:0;left:0;bottom:0;
+    width:var(--sb-w)!important;
+    transform:translateX(-100%);
+    transition:transform .22s ease;
     z-index:300;
   }
-  .sidebar-overlay.show{ display:block; }
-
-  /* 메인 영역 */
-  .main{ margin-left:0; }
-
-  /* 탑바 */
-  .topbar{ padding:0 14px; height:48px; }
-  .topbar-title{ font-size:13px; }
-  .topbar-right .sys-ok span:last-child{ display:none; } /* "시스템 정상" 텍스트 숨김 */
-
-  /* 햄버거 버튼 */
-  .hamburger{
-    display:flex;
-    align-items:center;justify-content:center;
-    width:36px;height:36px;
-    background:none;border:none;
-    cursor:pointer;margin-right:8px;
-    color:var(--primary);flex-shrink:0;
-  }
-
-  /* 콘텐츠 패딩 */
-  .content{ padding:14px; }
-
-  /* stat 카드 */
-  .stat-grid{ grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px; }
-  .stat-card{ padding:12px 14px; }
-  .stat-val{ font-size:18px; }
-  .stat-lbl{ font-size:11px; }
-
-  /* 그리드 1열 */
-  .row-2,.row-equal{ grid-template-columns:1fr; gap:12px; }
-
-  /* 카드 */
-  .card{ margin-bottom:12px; }
-  .card-head{ padding:10px 14px; }
-  .card-title{ font-size:10px; }
-  .card-body{ padding:12px 14px; }
-
-  /* 테이블 — 가로 스크롤 */
-  .tbl-wrap{ overflow-x:auto; -webkit-overflow-scrolling:touch; }
-  .tbl th,.tbl td{ padding:8px 10px; font-size:11px; white-space:nowrap; }
-
-  /* 미니맵 높이 */
-  #mini-map{ height:160px !important; }
-
-  /* 리소스 카드 */
-  .res-grid{ grid-template-columns:1fr 1fr !important; }
-
-  /* chip */
-  .chip{ font-size:10px; padding:2px 7px; }
+  .sidebar:hover{width:var(--sb-w)!important}
+  .sidebar.open{transform:translateX(0)}
+  .sidebar.open .sb-name,
+  .sidebar.open .sb-section,
+  .sidebar.open .sb-label,
+  .sidebar.open .sb-badge{opacity:1}
+  .sidebar-overlay.show{display:block}
+  .hamburger{display:flex}
+  .main{width:100%}
+  /* Stat strip 2열 */
+  .stat-strip{flex-wrap:wrap}
+  .stat-item{flex:0 0 50%;border-bottom:1px solid var(--border)}
+  .stat-item:nth-child(odd){border-right:1px solid var(--border)}
+  .toolbar{overflow-x:auto;gap:6px}
+  .tb-right{flex-shrink:0}
+  .tbl-outer{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .tbl-foot{font-size:10px}
+}
+@media(max-width:480px){
+  .stat-item{flex:0 0 100%;border-right:none}
+  .topbar{padding:0 10px;gap:6px}
+  .toolbar{padding:0 8px}
 }
 
-@media(max-width:400px){
-  .stat-grid{ grid-template-columns:1fr 1fr; gap:8px; }
-  .stat-val{ font-size:16px; }
-  .content{ padding:10px; }
-}
-/* .hamburger, .sidebar-overlay 기본값은 미디어쿼리 앞(아래 @media 블록 참조)에서 관리 */
 </style>
-<script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=c7160a2d047af2808065d9e1929a66a7&libraries=services,clusterer"></script>
 </head>
 <body>
-
-<aside class="sidebar">
-  <a href="index.html" class="sb-brand" style="text-decoration:none;cursor:pointer" title="메인 화면으로">
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+<aside class="sidebar" id="sidebar">
+  <a href="dashboard.html" class="sb-brand">
     <div class="sb-icon">F</div>
-    <div><div class="sb-name">FIIL.kr</div><div class="sb-sub">관리자 대시보드</div></div>
+    <div class="sb-name">FIIL.kr<div class="sb-sub" style="font-size:10px;font-weight:400">관리자 대시보드</div></div>
   </a>
   <nav class="sb-nav">
     <div class="sb-section">운영 현황</div>
-    <a class="sb-item active" href="dashboard.html"><span style="display:flex;align-items:center"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></span> 종합 대시보드</a>
-    <a class="sb-item" href="#"><span style="display:flex;align-items:center"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg></span> 신고 현황 <span class="sb-badge" id="sb-badge">0</span></a>
-    <a class="sb-item" href="map.html"><span style="display:flex;align-items:center"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg></span> 실시간 지도</a>
-    <a class="sb-item" href="dispatch.html"><span style="display:flex;align-items:center"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></span> 출동 현황</a>
+    <a class="sb-item active" href="dashboard.html">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      <span class="sb-label">종합 대시보드</span>
+    </a>
+    <a class="sb-item " href="dashboard.html">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      <span class="sb-label">신고 현황</span><span class="sb-badge" id="sb-badge">—</span>
+    </a>
+    <a class="sb-item " href="map.html">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+      <span class="sb-label">실시간 지도</span>
+    </a>
+    <a class="sb-item " href="dispatch.html">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+      <span class="sb-label">출동 현황</span>
+    </a>
     <div class="sb-section">분석 · 보고</div>
-    <a class="sb-item" href="stats.html"><span style="display:flex;align-items:center"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span> 통계 분석</a>
-    <a class="sb-item" href="budget.html"><span style="display:flex;align-items:center"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span> 예산 · 비용</a>
-    <a class="sb-item" href="results.html"><span style="display:flex;align-items:center"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><polyline points="9 15 11 17 15 13"/></svg></span> 조치 결과 보고서</a>
-    <a class="sb-item" href="openhash.html"><span style="display:flex;align-items:center"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span> 오픈해시 기록</a>
+    <a class="sb-item " href="stats.html">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      <span class="sb-label">통계 분석</span>
+    </a>
+    <a class="sb-item " href="budget.html">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      <span class="sb-label">예산 · 비용</span>
+    </a>
+    <a class="sb-item " href="results.html">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><polyline points="9 15 11 17 15 13"/></svg>
+      <span class="sb-label">조치 결과 보고서</span>
+    </a>
+    <a class="sb-item " href="openhash.html">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      <span class="sb-label">오픈해시 기록</span>
+    </a>
     <div class="sb-section">관리</div>
-    <a class="sb-item" href="resources.html"><span style="display:flex;align-items:center"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span> 인력 · 장비</a>
-    <a class="sb-item" href="settings.html"><span style="display:flex;align-items:center"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span> 시스템 설정</a>
+    <a class="sb-item " href="resources.html">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <span class="sb-label">인력 · 장비</span>
+    </a>
+    <a class="sb-item " href="settings.html">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <span class="sb-label">시스템 설정</span>
+    </a>
   </nav>
-  <div class="sb-user"><strong>관리자 · 제주시 환경정책과</strong>최종 로그인: 오늘 09:14</div>
 </aside>
 
-<!-- 모바일 사이드바 오버레이 -->
-<div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
-
+<!-- ── MAIN ── -->
 <div class="main">
+
+  <!-- Topbar -->
   <header class="topbar">
-    <!-- 햄버거 버튼 (모바일 전용) -->
-    <button class="hamburger" id="hamburger-btn" onclick="toggleSidebar()" aria-label="메뉴 열기">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
-        <line x1="3" y1="6" x2="21" y2="6"/>
-        <line x1="3" y1="12" x2="21" y2="12"/>
-        <line x1="3" y1="18" x2="21" y2="18"/>
-      </svg>
+    <button class="hamburger" onclick="toggleSidebar()" aria-label="메뉴">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
     </button>
     <nav class="breadcrumb">
       <a href="index.html">FIIL.kr</a>
-      <span class="bc-sep">›</span>
-      <strong>종합 대시보드</strong>
+      <span class="bc-sep">/</span>
+      <span class="bc-cur">종합 대시보드</span>
     </nav>
     <div class="topbar-right">
-      <div class="sys-ok"><div class="sys-dot"></div>시스템 정상</div>
-      <div class="clock" id="clock"></div>
+      <div class="sys-pill">
+        <span class="sys-dot"></span>
+        <span>시스템 정상</span>
+      </div>
+      <span class="clock" id="clock">--:--:--</span>
     </div>
   </header>
 
-  <div class="content">
-    <div class="stat-grid">
-      <div class="stat-card">
-        <div style="color:var(--primary);margin-bottom:8px;opacity:.8"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
-        <div class="stat-val" id="cnt-today">23</div>
-        <div class="stat-lbl">오늘 신고 접수</div>
-        <div class="stat-sub up">▲ 4건 전일 대비</div>
-      </div>
-      <div class="stat-card">
-        <div style="color:var(--primary);margin-bottom:8px;opacity:.8"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
-        <div class="stat-val">19</div>
-        <div class="stat-lbl">처리 완료</div>
-        <div class="stat-sub blue">처리율 82.6%</div>
-      </div>
-      <div class="stat-card">
-        <div style="color:var(--primary);margin-bottom:8px;opacity:.8"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div>
-        <div class="stat-val">3</div>
-        <div class="stat-lbl">현재 출동 중</div>
-        <div class="stat-sub blue">평균 응답 28분</div>
-      </div>
-      <div class="stat-card">
-        <div style="color:var(--primary);margin-bottom:8px;opacity:.8"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
-        <div class="stat-val">₩84만</div>
-        <div class="stat-lbl">오늘 집행 비용</div>
-        <div class="stat-sub" style="color:#4a72a8">예산 대비 73%</div>
-      </div>
+  <!-- Stat strip -->
+  <div class="stat-strip">
+    <div class="stat-item">
+      <div class="stat-lbl">오늘 신고 접수</div>
+      <div class="stat-val" id="cnt-today">—</div>
+      <div class="stat-sub ok" id="stat-sub-today">실시간 집계</div>
     </div>
-
-    <div class="row-2">
-      <div class="card">
-        <div class="card-head">
-          <div class="card-title">제주 신고 현황 실시간 지도</div>
-          <a href="map.html" style="font-size:11px;color:var(--primary);font-weight:600">전체 보기 →</a>
-        </div>
-        <div class="card-body" style="padding:0">
-          <div id="mini-map" style="width:100%;height:220px;background:var(--primary-bg)"></div>
-          <div style="padding:8px 14px;border-top:1px solid var(--border);display:flex;gap:12px;font-size:11px;color:var(--sub)">
-            <span id="mini-cnt">로딩 중…</span>
-          </div>
-          <div style="display:flex;flex-direction:column;gap:8px">
-            <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:6px 0;border-bottom:1px solid var(--border)">
-              <span>협재 해수욕장 — 해안 쓰레기 수거</span>
-              <div style="display:flex;gap:8px;align-items:center"><span style="color:var(--sub);font-size:11px">14분 전</span><span class="chip chip-blue">출동중</span></div>
-            </div>
-            <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:6px 0;border-bottom:1px solid var(--border)">
-              <span>중문 관광단지 — 불법 투기 폐기물</span>
-              <div style="display:flex;gap:8px;align-items:center"><span style="color:var(--sub);font-size:11px">32분 전</span><span class="chip chip-orange">대기중</span></div>
-            </div>
-            <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:6px 0">
-              <span>성산 일출봉 — 산림 쓰레기 수거 완료</span>
-              <div style="display:flex;gap:8px;align-items:center"><span style="color:var(--sub);font-size:11px">1시간 전</span><span class="chip chip-green">완료</span></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div style="display:flex;flex-direction:column;gap:16px">
-        <div class="card">
-          <div class="card-head"><div class="card-title">투입 인력 · 장비</div></div>
-          <div class="card-body">
-            <div class="resource-grid">
-              <div class="res-item"><div style="color:var(--primary);margin-bottom:4px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><div class="res-val">14명</div><div class="res-lbl">현장 인원</div><div class="res-sub">3팀 출동중</div></div>
-              <div class="res-item"><div style="color:var(--primary);margin-bottom:4px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div><div class="res-val">5대</div><div class="res-lbl">차량</div><div class="res-sub">3대 운행중</div></div>
-              <div class="res-item"><div style="color:var(--primary);margin-bottom:4px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 21c.6.5 1.2 1 2.5 1C7 22 7 20 9.5 20c2.4 0 2.4 2 4.5 2 2 0 2.1-2 4.5-2 1.3 0 1.9.5 2.5 1"/><path d="M19 11V7l-7-5-7 5v4"/><path d="M5 11h14"/></svg></div><div class="res-val">2척</div><div class="res-lbl">선박·보트</div><div class="res-sub">1척 출동중</div></div>
-              <div class="res-item"><div style="color:var(--primary);margin-bottom:4px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22V12"/><path d="M12 12L6 6"/><path d="M12 12l6-6"/><circle cx="6" cy="5" r="2"/><circle cx="18" cy="5" r="2"/><circle cx="12" cy="22" r="1"/><line x1="3" y1="3" x2="9" y2="3"/><line x1="15" y1="3" x2="21" y2="3"/></svg></div><div class="res-val">1대</div><div class="res-lbl">드론</div><div class="res-sub">대기중</div></div>
-            </div>
-          </div>
-        </div>
-        <div class="card">
-          <div class="card-head"><div class="card-title">유형별 현황</div></div>
-          <div class="card-body">
-            <div class="type-item"><span style="font-size:13px;min-width:80px">해안쓰레기</span><div class="type-bar"><div class="type-fill" style="width:100%;background:#305890"></div></div><span class="type-val">8</span></div>
-            <div class="type-item"><span style="font-size:13px;min-width:80px">수중쓰레기</span><div class="type-bar"><div class="type-fill" style="width:75%;background:#305890"></div></div><span class="type-val">6</span></div>
-            <div class="type-item"><span style="font-size:13px;min-width:80px">산림쓰레기</span><div class="type-bar"><div class="type-fill" style="width:62%;background:#4a72a8"></div></div><span class="type-val">5</span></div>
-            <div class="type-item"><span style="font-size:13px;min-width:80px">응급환자</span><div class="type-bar"><div class="type-fill" style="width:25%;background:#214176"></div></div><span class="type-val">2</span></div>
-            <div class="type-item"><span style="font-size:13px;min-width:80px">➕ 기타</span><div class="type-bar"><div class="type-fill" style="width:25%;background:#8a9bb0"></div></div><span class="type-val">2</span></div>
-          </div>
-        </div>
-      </div>
+    <div class="stat-item">
+      <div class="stat-lbl">긴급 신고</div>
+      <div class="stat-val" id="cnt-urgent">—</div>
+      <div class="stat-sub danger">즉각 대응 필요</div>
     </div>
-
-    <div class="card" style="margin-bottom:20px">
-      <div class="card-head">
-        <div class="card-title">신고 목록 · 조치 현황 <span style="font-weight:400;color:var(--hint)" id="table-count">오늘 전체 23건</span></div>
-        <a class="card-link" href="#">전체 보기 →</a>
-      </div>
-      <div class="tbl-wrap" style="overflow-x:auto">
-        <table class="report-table">
-          <thead>
-            <tr>
-              <th>신고번호</th><th>유형</th><th>위치</th><th>신고자</th>
-              <th>긴급도</th><th>상태</th><th>투입인원</th><th>비용</th><th>시간</th>
-            </tr>
-          </thead>
-          <tbody id="report-tbody">
-            <tr><td><a class="rpt-id" href="report.html?id=RPT-2026-2847">RPT-2026-2847</a></td><td>해안쓰레기</td><td>협재해수욕장</td><td>010-****-1234</td><td><span class="chip chip-blue">보통</span></td><td><span class="chip chip-blue">출동중</span></td><td>3명 / 보트1</td><td>₩120,000</td><td>14분 전</td></tr>
-            <tr><td><a class="rpt-id" href="report.html?id=RPT-2026-2846">RPT-2026-2846</a></td><td>응급환자</td><td>한라산 등산로</td><td>010-****-5678</td><td><span class="chip chip-red">긴급</span></td><td><span class="chip chip-green">완료</span></td><td>4명 / 구급1</td><td>₩280,000</td><td>1시간 전</td></tr>
-            <tr><td><a class="rpt-id" href="report.html?id=RPT-2026-2845">RPT-2026-2845</a></td><td>불법투기</td><td>중문관광단지</td><td>010-****-9012</td><td><span class="chip chip-orange">높음</span></td><td><span class="chip chip-orange">대기중</span></td><td>2명</td><td>₩45,000</td><td>32분 전</td></tr>
-            <tr><td><a class="rpt-id" href="report.html?id=RPT-2026-2844">RPT-2026-2844</a></td><td>산림쓰레기</td><td>애월읍 일주서로</td><td>010-****-3456</td><td><span class="chip chip-orange">높음</span></td><td><span class="chip chip-green">완료</span></td><td>3명 / 차량2</td><td>₩95,000</td><td>1.5h 전</td></tr>
-            <tr><td><a class="rpt-id" href="report.html?id=RPT-2026-2843">RPT-2026-2843</a></td><td>수중쓰레기</td><td>제주시 연동</td><td>010-****-7890</td><td><span class="chip chip-gray">낮음</span></td><td><span class="chip chip-green">완료</span></td><td>1명</td><td>₩30,000</td><td>2h 전</td></tr>
-            <tr><td><a class="rpt-id" href="report.html?id=RPT-2026-2842">RPT-2026-2842</a></td><td>해안쓰레기</td><td>표선해비치</td><td>010-****-2345</td><td><span class="chip chip-blue">보통</span></td><td><span class="chip chip-blue">출동중</span></td><td>2명 / 보트1</td><td>₩90,000</td><td>45분 전</td></tr>
-          </tbody>
-        </table>
-      </div>
+    <div class="stat-item">
+      <div class="stat-lbl">현재 출동 중</div>
+      <div class="stat-val">3</div>
+      <div class="stat-sub ok">평균 응답 28분</div>
     </div>
-
-    <div class="row-equal">
-      <div class="card">
-        <div class="card-head"><div class="card-title">오늘 비용 현황</div></div>
-        <div class="card-body">
-          <div class="cost-row"><span class="cost-lbl">인건비</span><span>₩ 420,000</span></div>
-          <div class="cost-row"><span class="cost-lbl">장비·차량</span><span>₩ 285,000</span></div>
-          <div class="cost-row"><span class="cost-lbl">소모품</span><span>₩ 78,000</span></div>
-          <div class="cost-row"><span class="cost-lbl">기타</span><span>₩ 57,000</span></div>
-          <div class="cost-row"><span>합계</span><span style="color:var(--primary)">₩ 840,000</span></div>
-          <div style="margin-top:14px">
-            <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--sub)">
-              <span>일일 예산 소진율</span><span style="font-weight:700;color:#4a72a8">73%</span>
-            </div>
-            <div class="cost-bar-wrap"><div class="cost-bar-fill" style="width:73%"></div></div>
-            <div class="cost-note">일일 예산: ₩1,150,000 / 잔액: ₩310,000</div>
-          </div>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-head"><div class="card-title">🕐 최근 활동 타임라인</div></div>
-        <div class="card-body">
-          <div class="tl">
-            <div class="tl-item"><div class="tl-dot go">▶</div><div class="tl-time">14:23</div><div class="tl-lbl">협재 해안 수거팀 출동</div><div class="tl-sub">3명 · 고무보트 1척</div></div>
-            <div class="tl-item"><div class="tl-dot done">✓</div><div class="tl-time">13:52</div><div class="tl-lbl">한라산 응급환자 이송 완료</div><div class="tl-sub">소요 34분</div></div>
-            <div class="tl-item"><div class="tl-dot done">✓</div><div class="tl-time">13:10</div><div class="tl-lbl">애월 포트홀 긴급 보수 완료</div><div class="tl-sub">소요 52분</div></div>
-            <div class="tl-item"><div class="tl-dot wait">·</div><div class="tl-time">14:05</div><div class="tl-lbl">중문 불법투기 접수 · 대기</div><div class="tl-sub">배정 대기중</div></div>
-          </div>
-        </div>
-      </div>
+    <div class="stat-item">
+      <div class="stat-lbl">오늘 집행 비용</div>
+      <div class="stat-val">₩840,000</div>
+      <div class="stat-sub warn">예산 대비 73%</div>
     </div>
   </div>
-</div>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <div class="search-wrap">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="searchInput" placeholder="신고번호, 유형, 위치 검색…" oninput="filterTable()">
+    </div>
+    <div class="tb-right">
+      <button class="tb-btn" onclick="filterTable()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+        Filter
+      </button>
+      <button class="tb-btn">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+        Sort
+      </button>
+      <div class="rls-badge">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <span id="rls-count">3</span> RLS policies
+      </div>
+      <button class="tb-btn tb-btn-green" onclick="location.href='report.html'">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Insert
+      </button>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="tbl-outer">
+    <table class="tbl" id="main-tbl">
+      <thead>
+        <tr>
+          <th class="tbl-cb-col"><input type="checkbox" id="chk-all" onchange="toggleAll(this)"></th>
+          <th>
+            <div class="th-inner">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              <span class="col-name">id</span>
+              <span class="col-type">text</span>
+              <svg class="th-sort" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
+            </div>
+          </th>
+          <th>
+            <div class="th-inner">
+              <span class="col-name">type</span><span class="col-type">text</span>
+              <svg class="th-sort" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
+            </div>
+          </th>
+          <th>
+            <div class="th-inner">
+              <span class="col-name">type_code</span><span class="col-type">text</span>
+              <svg class="th-sort" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
+            </div>
+          </th>
+          <th>
+            <div class="th-inner">
+              <span class="col-name">location</span><span class="col-type">text</span>
+              <svg class="th-sort" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
+            </div>
+          </th>
+          <th>
+            <div class="th-inner">
+              <span class="col-name">gps</span><span class="col-type">text</span>
+              <svg class="th-sort" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
+            </div>
+          </th>
+          <th>
+            <div class="th-inner">
+              <span class="col-name">reporter</span><span class="col-type">text</span>
+              <svg class="th-sort" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
+            </div>
+          </th>
+          <th>
+            <div class="th-inner">
+              <span class="col-name">urgency</span><span class="col-type">text</span>
+            </div>
+          </th>
+          <th>
+            <div class="th-inner">
+              <span class="col-name">status</span><span class="col-type">text</span>
+            </div>
+          </th>
+          <th>
+            <div class="th-inner">
+              <span class="col-name">cost</span><span class="col-type">int8</span>
+              <svg class="th-sort" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
+            </div>
+          </th>
+          <th>
+            <div class="th-inner">
+              <span class="col-name">reported_at</span><span class="col-type">timestamptz</span>
+              <svg class="th-sort" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
+            </div>
+          </th>
+        </tr>
+      </thead>
+      <tbody id="report-tbody">
+        <tr><td colspan="11" style="text-align:center;padding:48px;color:var(--text3)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="display:inline-block;vertical-align:middle;margin-right:6px;animation:spin 1s linear infinite"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.08-4.43"/></svg>
+          @keyframes spin{to{transform:rotate(360deg)}}
+          Loading…
+        </td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Footer -->
+  <div class="tbl-foot">
+    <span id="foot-count">0 rows</span>
+    <span>·</span>
+    <span>Page 1 of 1</span>
+    <span style="margin-left:auto;display:flex;align-items:center;gap:6px">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </span>
+  </div>
+
+</div><!-- /main -->
+</div><!-- /app -->
 
 <script>
-const _SB_URL = 'https://ebbecjfrwaswbdybbgiu.supabase.co';
-const _SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImViYmVjamZyd2Fzd2JkeWJiZ2l1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1NjE5ODQsImV4cCI6MjA5NTEzNzk4NH0.H2ahQKtWdSke04Pdi3hDY86pdTx7UUKPUpQMlS_zciA';
+const _SB_URL='https://ebbecjfrwaswbdybbgiu.supabase.co';
+const _SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImViYmVjamZyd2Fzd2JkeWJiZ2l1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1NjE5ODQsImV4cCI6MjA5NTEzNzk4NH0.H2ahQKtWdSke04Pdi3hDY86pdTx7UUKPUpQMlS_zciA';
 
-/* ── Clock ── */
+/* Clock */
 (function tick(){
-  const el=document.getElementById('clock');
-  if(el) el.textContent=new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  const e=document.getElementById('clock');
+  if(e)e.textContent=new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
   setTimeout(tick,1000);
 })();
 
-/* ── 카카오 역지오코딩 ── */
-const _geoCache = {};
-async function _kakaoGeocode(gps) {
-  if (!gps || _geoCache[gps]) return _geoCache[gps] || null;
-  return new Promise(resolve => {
-    try {
-      const parts = gps.split(',').map(s => s.trim());
-      if (parts.length < 2) return resolve(null);
-      const lat = parseFloat(parts[0]), lng = parseFloat(parts[1]);
-      if (isNaN(lat)||isNaN(lng)) return resolve(null);
-      if (!window.kakao||!kakao.maps||!kakao.maps.services) return resolve(null);
-      new kakao.maps.services.Geocoder().coord2Address(lng, lat, (result, status) => {
-        if (status === kakao.maps.services.Status.OK && result[0]) {
-          const addr = result[0].road_address?.address_name
-                    || result[0].address?.address_name || null;
-          if (addr) _geoCache[gps] = addr;
-          resolve(addr);
-        } else {
-          resolve(null);
-        }
-      });
-    } catch { resolve(null); }
-  });
+/* Chips */
+const urgChip ={긴급:'chip-red',높음:'chip-orange',보통:'chip-blue',낮음:'chip-gray'};
+const statChip={완료:'chip-green',승인:'chip-approved',출동중:'chip-blue',대기중:'chip-orange',접수:'chip-gray'};
+
+let _allRows=[];
+
+function td(val,cls=''){
+  if(val===null||val===undefined||val==='')
+    return `<td><span class="td-null">NULL</span></td>`;
+  return `<td class="${cls}" title="${String(val).replace(/"/g,'&quot;')}">${val}</td>`;
 }
 
-/* ── 신고 행 렌더 ── */
-const urgClass  = {긴급:'chip-red',높음:'chip-orange',보통:'chip-blue',낮음:'chip-gray'};
-const statClass = {완료:'chip-green', 승인:'chip-approved', 출동중:'chip-blue', 대기중:'chip-orange', 접수:'chip-gray'};
-
-let _sbLoaded = false;  // 최초 로드 시 더미 행 제거 플래그
-
-function renderReports(reports){
-  const tbody = document.getElementById('report-tbody');
-
-  // 최초 Supabase 데이터 수신 시 더미 행 전체 제거
-  if (!_sbLoaded) {
-    tbody.innerHTML = '';
-    _sbLoaded = true;
-  }
-
-  let added = 0;
-  reports.forEach(function(r){
-    if(document.querySelector('[data-id="'+r.id+'"]')) return;
-    const a    = r.analysis || {};
-    const cost = r.cost ? (r.cost.labor||0)+(r.cost.equipment||0)+(r.cost.supplies||0) : 0;
-    const urgency = r.urgency || (a.gemini?.risk_level
-      ? {S0:'낮음',S1:'보통',S2:'높음',S3:'긴급'}[a.gemini.risk_level] : '보통');
-    const typeIcon =
-      (r.type||'').includes('해안')||(r.type||'').includes('해양') ? '' :
-      (r.type||'').includes('불법') ? '' :
-      (r.type||'').includes('응급') ? '' :
-      (r.type||'').includes('도로') ? '' :
-      (r.type||'').includes('산불') ? '' : '';
-    const tr = document.createElement('tr');
-    tr.className = 'new-row';
-    tr.dataset.id = r.id;
-
-    // 위치: location 컬럼 우선, 없으면 GPS로 역지오코딩
-    const locDisplay = (r.location && r.location !== '위치 미상')
-      ? r.location : (r.gps || '—');
-
-    tr.innerHTML =
-      '<td><a class="rpt-id" href="report.html?id='+r.id+'">'+r.id+'</a></td>'+
-      '<td>'+typeIcon+' '+(r.type||'—')+'</td>'+
-      '<td class="loc-cell" data-gps="'+(r.gps||'')+'">'+locDisplay+'</td>'+
-      '<td>'+(r.reporter||'—')+'</td>'+
-      '<td><span class="chip '+(urgClass[urgency]||'chip-gray')+'">'+urgency+'</span></td>'+
-      '<td><span class="chip '+(statClass[r.status]||'chip-gray')+'">'+(r.status||'접수')+'</span></td>'+
-      '<td>'+(r.dispatch&&r.dispatch.personnel?r.dispatch.personnel+'명':'—')+'</td>'+
-      '<td class="amt">₩'+cost.toLocaleString()+'</td>'+
-      '<td>'+(r.reported_at
-        ? new Date(r.reported_at).toLocaleString('ko-KR',{
-            year:'numeric',month:'2-digit',day:'2-digit',
-            hour:'2-digit',minute:'2-digit',second:'2-digit',
-            hour12:false})
-        : '방금 전')+'</td>';
-    tbody.appendChild(tr);
-
-    // 위치 미상이고 GPS 있으면 → 카카오 역지오코딩 (비동기)
-    if (r.gps && (!r.location || r.location === '위치 미상')) {
-      _kakaoGeocode(r.gps).then(addr => {
-        if (addr) {
-          const cell = tr.querySelector('.loc-cell');
-          if (cell) cell.textContent = addr;
-        }
-      });
-    }  // 최신순(desc) 정렬이므로 순서대로 추가
-    added++;
-  });
-  if(added>0){
-    const el=document.getElementById('cnt-today');
-    if(el) el.textContent = reports.length;
-    const badge=document.getElementById('sb-badge');
-    if(badge) badge.textContent = added;
-    const tc=document.getElementById('table-count');
-    if(tc) tc.textContent='전체 '+reports.length+'건';
-  }
+function renderRow(r){
+  const cost=r.cost?(r.cost.total||(r.cost.labor||0)+(r.cost.equipment||0)+(r.cost.supplies||0)):null;
+  const urg=r.urgency||'보통';
+  const ts=r.reported_at?new Date(r.reported_at).toLocaleString('ko-KR',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}):null;
+  return `<tr data-id="${r.id}" onclick="rowClick('${r.id}')">
+    <td class="tbl-cb-col"><input type="checkbox" onclick="event.stopPropagation()"></td>
+    <td><a href="report.html?id=${r.id}" onclick="event.stopPropagation()" style="color:var(--blue);font-weight:500">${r.id}</a></td>
+    ${td(r.type)}
+    ${td(r.type_code)}
+    ${td(r.location&&r.location!=='위치 미상'?r.location:null)}
+    ${td(r.gps)}
+    ${td(r.reporter)}
+    <td>${r.urgency?`<span class="chip ${urgChip[urg]||'chip-gray'}">${urg}</span>`:'<span class="td-null">NULL</span>'}</td>
+    <td>${r.status?`<span class="chip ${statChip[r.status]||'chip-gray'}">${r.status}</span>`:'<span class="td-null">NULL</span>'}</td>
+    ${cost!==null?`<td style="font-variant-numeric:tabular-nums">₩${cost.toLocaleString()}</td>`:'<td><span class="td-null">NULL</span></td>'}
+    ${ts?`<td style="color:var(--text2)">${ts}</td>`:'<td><span class="td-null">NULL</span></td>'}
+  </tr>`;
 }
 
-/* ── Supabase에서 신고 로드 ── */
+function renderTable(rows){
+  const tbody=document.getElementById('report-tbody');
+  if(!rows.length){
+    tbody.innerHTML='<tr><td colspan="11" style="text-align:center;padding:48px;color:var(--text3)">No rows found</td></tr>';
+    return;
+  }
+  tbody.innerHTML=rows.map(renderRow).join('');
+  document.getElementById('foot-count').textContent=rows.length+' rows';
+  document.getElementById('cnt-today').textContent=rows.length+'건';
+  document.getElementById('sb-badge').textContent=rows.length;
+  const urg=rows.filter(r=>r.urgency==='긴급').length;
+  document.getElementById('cnt-urgent').textContent=urg+'건';
+}
+
+function filterTable(){
+  const q=document.getElementById('searchInput').value.toLowerCase();
+  if(!q){renderTable(_allRows);return;}
+  renderTable(_allRows.filter(r=>
+    (r.id||'').toLowerCase().includes(q)||
+    (r.type||'').toLowerCase().includes(q)||
+    (r.location||'').toLowerCase().includes(q)||
+    (r.reporter||'').toLowerCase().includes(q)
+  ));
+}
+
+function toggleAll(cb){
+  document.querySelectorAll('#report-tbody input[type=checkbox]').forEach(c=>c.checked=cb.checked);
+}
+
+function rowClick(id){
+  location.href='report.html?id='+id;
+}
+
 function loadReports(){
-  fetch(_SB_URL+'/rest/v1/reports?select=*&order=reported_at.desc&limit=50', {
-    headers:{
-      'apikey': _SB_KEY,
-      'Authorization': 'Bearer '+_SB_KEY
-    }
-  })
-  .then(r => r.json())
-  .then(data => {
-    if(Array.isArray(data)){
-      console.log('[FIIL] Supabase 신고', data.length, '건 로드');
-      if(data.length > 0) renderReports(data);
-      else if(!_sbLoaded) {
-        // 데이터 없을 때도 더미 제거
-        document.getElementById('report-tbody').innerHTML =
-          '<tr><td colspan="9" style="text-align:center;padding:40px;color:#aaa;">신고 데이터가 없습니다.</td></tr>';
-        _sbLoaded = true;
-      }
-    } else {
-      console.warn('[FIIL] Supabase 응답 오류:', data);
-    }
-  })
-  .catch(e => console.warn('[FIIL] Supabase 로드 오류:', e.message));
+  fetch(_SB_URL+'/rest/v1/reports?select=*&order=reported_at.desc&limit=100',{
+    headers:{'apikey':_SB_KEY,'Authorization':'Bearer '+_SB_KEY}
+  }).then(r=>r.json()).then(data=>{
+    if(Array.isArray(data)){_allRows=data;renderTable(data);}
+  }).catch(e=>console.warn('[FIIL]',e.message));
 }
 
-/* ── report.html 연동: Supabase에서 단건 조회 ── */
-function loadReportById(id){
-  return fetch(_SB_URL+'/rest/v1/reports?id=eq.'+id+'&select=*&limit=1', {
-    headers:{
-      'apikey': _SB_KEY,
-      'Authorization': 'Bearer '+_SB_KEY
-    }
-  }).then(r=>r.json()).then(d=>d[0]||null);
-}
-
-/* ── 페이지 로드 + 30초 자동 갱신 ── */
-// ── 모바일 사이드바 토글 ─────────────────────────────
+/* Sidebar mobile */
 function toggleSidebar(){
-  const sb  = document.querySelector('.sidebar');
-  const ov  = document.getElementById('sidebar-overlay');
-  const btn = document.getElementById('hamburger-btn');
-  sb.classList.toggle('open');
-  ov.classList.toggle('show');
-  btn.setAttribute('aria-expanded', sb.classList.contains('open'));
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebar-overlay').classList.toggle('show');
 }
 function closeSidebar(){
-  document.querySelector('.sidebar')?.classList.remove('open');
+  document.getElementById('sidebar')?.classList.remove('open');
   document.getElementById('sidebar-overlay')?.classList.remove('show');
 }
-// 사이드바 링크 클릭 시 자동 닫기 (모바일)
-document.querySelectorAll('.sb-item').forEach(item=>{
-  item.addEventListener('click',()=>{
-    if(window.innerWidth<=768) closeSidebar();
-  });
-});
 
 loadReports();
-setInterval(loadReports, 30000);
-
-// ── 미니맵 초기화 ───────────────────────────────────
-function _initMiniMap(rows){
-  const el=document.getElementById('mini-map');
-  if(!el||!window.kakao||!kakao.maps)return;
-  kakao.maps.load(()=>{
-    const map=new kakao.maps.Map(el,{
-      center:new kakao.maps.LatLng(33.4996,126.5312),
-      level:10,scrollwheel:false
-    });
-    const iw=new kakao.maps.InfoWindow({zIndex:10});
-    const gpsRows=rows.filter(r=>r.gps);
-    let cnt=0;
-    gpsRows.forEach(r=>{
-      const p=r.gps.replace(/\s/g,'').split(',');
-      if(p.length<2)return;
-      const lat=parseFloat(p[0]),lng=parseFloat(p[1]);
-      if(isNaN(lat)||isNaN(lng))return;
-      const color=r.urgency==='긴급'?'#9b1c1c':
-        r.type&&(r.type.includes('해안')||r.type.includes('해양'))?'#305890':
-        r.type&&r.type.includes('불법')?'#214176':'#7a9cc8';
-      const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="20" height="26" viewBox="0 0 20 26"><path d="M10 0C4.477 0 0 4.477 0 10c0 6 10 16 10 16S20 16 20 10C20 4.477 15.523 0 10 0z" fill="${color}" stroke="white" stroke-width="1.5"/></svg>`;
-      const img=new kakao.maps.MarkerImage('data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg),new kakao.maps.Size(20,26),{offset:new kakao.maps.Point(10,26)});
-      const m=new kakao.maps.Marker({position:new kakao.maps.LatLng(lat,lng),map,image:img,title:r.id});
-      kakao.maps.event.addListener(m,'click',()=>{
-        iw.setContent('<div style="padding:6px 8px;font-size:11px;font-family:\'Noto Sans KR\',sans-serif"><b style="color:#305890">'+r.id+'</b><br>'+(r.type||'—')+'</div>');
-        iw.open(map,m);
-      });
-      cnt++;
-    });
-    const ce=document.getElementById('mini-cnt');
-    if(ce)ce.textContent='GPS 신고 '+cnt+'건 표시 중';
-  });
-}
-
-// 초기 로드 시 미니맵도 함께
-(async()=>{
-  try{
-    const rows=await fetch(_SB_URL+'/rest/v1/reports?select=id,type,gps,urgency&order=reported_at.desc&limit=200',
-      {headers:{'apikey':_SB_KEY,'Authorization':'Bearer '+_SB_KEY}}).then(r=>r.json());
-    if(Array.isArray(rows))_initMiniMap(rows);
-  }catch(e){console.warn('[minimap]',e);}
-})();
+setInterval(loadReports,30000);
 </script>
 </body>
 </html>

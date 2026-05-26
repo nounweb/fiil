@@ -3,263 +3,366 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>실시간 지도 — FIIL.kr</title>
-<script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=c7160a2d047af2808065d9e1929a66a7&libraries=services"></script>
+<title>FIIL.kr — 실시간 지도</title>
+<script src="//dapi.kakao.com/v2/maps/sdk.js?appkey=c7160a2d047af2808065d9e1929a66a7&libraries=services"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendardvariable.css');
 :root{
-  --primary:    #305890;
-  --primary-dk: #102040;
-  --primary-bg: #eaf2fa;
-  --primary-mid:#4a72a8;
-  --primary-800:#1a3560;
-  --primary-700:#214176;
-  --primary-300:#7a9cc8;
-  --primary-200:#b0c8e0;
-  --primary-100:#d0e0f0;
-  --orange:     #b45309;
-  --orange-bg:  #fef3c7;
-  --red:        #9b1c1c;
-  --red-bg:     #fde8e8;
-  --surface:    #f8f9fc;
-  --bg:         #f8f9fc;
-  --border:     #b0c8e0;
-  --text:       #1a2535;
-  --sub:        #4a5e78;
-  --hint:       #8a9bb0;
-  --shadow-1:   0 1px 3px rgba(48,88,144,.12),0 1px 6px rgba(48,88,144,.06);
-  --r: 4px;
+  --bg:#fff;--bg-subtle:#f8f9fa;--bg-hover:#f1f3f5;--bg-sel:#e8f4fd;
+  --border:#e5e7eb;--border2:#d1d5db;
+  --text:#171717;--text2:#6b7280;--text3:#9ca3af;
+  --accent:#3ecf8e;--accent-d:#29b978;
+  --blue:#3b82f6;--red:#ef4444;--orange:#f59e0b;
+  --sb-w:224px;--sb-rail:48px;--top-h:48px;--font:'Pretendard Variable','Pretendard',system-ui,sans-serif;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Noto Sans KR',sans-serif;font-size:14px;color:var(--text);background:var(--bg);-webkit-font-smoothing:antialiased}
+html,body{height:100%}
+body{font-family:var(--font);font-size:13px;color:var(--text);background:var(--bg);-webkit-font-smoothing:antialiased}
 a{text-decoration:none;color:inherit}
-.sidebar{width:240px;background:var(--primary);color:#fff;position:fixed;top:0;left:0;bottom:0;z-index:200;display:flex;flex-direction:column;overflow-y:auto}
-.sb-brand{display:flex;align-items:center;gap:12px;padding:18px 20px;border-bottom:1px solid rgba(255,255,255,.08);transition:background .15s}
-.sb-brand:hover{background:rgba(255,255,255,.04)}
-.sb-icon{width:36px;height:36px;background:var(--primary);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:#fff;flex-shrink:0}
-.sb-name{font-size:15px;font-weight:700}
-.sb-sub{font-size:11px;color:rgba(255,255,255,.45);margin-top:1px}
-.sb-nav{padding:8px 0;flex:1}
-.sb-section{padding:16px 20px 6px;font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:rgba(255,255,255,.35)}
-.sb-item{display:flex;align-items:center;gap:12px;padding:10px 20px;font-size:13px;font-weight:500;color:rgba(255,255,255,.7);cursor:pointer;transition:background .15s,color .15s;border-left:3px solid transparent}
-.sb-item:hover{background:rgba(255,255,255,.06);color:#fff}
-.sb-item.active{background:rgba(255,255,255,.12);color:#fff;font-weight:700;border-left-color:rgba(255,255,255,.7)}
-.sb-badge{margin-left:auto;background:rgba(255,255,255,.15);color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px}
-.main{margin-left:240px;min-height:100vh;display:flex;flex-direction:column}
-.topbar{position:sticky;top:0;z-index:100;background:var(--surface);border-bottom:2px solid var(--primary);height:52px;display:flex;align-items:center;padding:0 24px;gap:12px;box-shadow:var(--shadow-1)}
-.breadcrumb{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--sub);flex:1}
-.breadcrumb a{color:var(--sub)}
-.breadcrumb a:hover{color:var(--primary)}
-.bc-sep{color:var(--hint)}
-.topbar-right{display:flex;align-items:center;gap:16px}
-.sys-ok{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--primary)}
-.sys-dot{width:7px;height:7px;border-radius:50%;background:var(--primary);animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
-.clock{font-size:13px;font-weight:600;color:var(--sub)}
-.content{padding:24px}
-.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px}
-.stat-card{background:var(--surface);border:1px solid var(--border);border-top:3px solid var(--primary);padding:16px 18px}
-.stat-icon{margin-bottom:8px;color:var(--primary)}
-.stat-val{font-size:22px;font-weight:700;line-height:1;margin-bottom:4px;color:var(--primary)}
-.stat-lbl{font-size:12px;color:var(--sub)}
-.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow-1);margin-bottom:16px}
-.card-head{display:flex;align-items:center;justify-content:space-between;padding:11px 18px;border-bottom:1px solid var(--border);background:var(--primary-bg)}
-.card-title{font-size:11px;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:.5px}
-.card-sub{font-size:11px;color:var(--sub)}
-.chip{display:inline-flex;align-items:center;padding:2px 10px;border-radius:2px;font-size:11px;font-weight:700;white-space:nowrap;letter-spacing:.2px}
-.chip-green  {background:var(--primary-bg);color:var(--primary)}
-.chip-approved{background:#214176;color:#fff}
-.chip-blue   {background:var(--primary-bg);color:var(--primary)}
-.chip-orange {background:var(--orange-bg);color:#b45309}
-.chip-red    {background:var(--red-bg);color:var(--red)}
-.chip-gray   {background:#eaf2fa;color:var(--sub)}
-.tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
-.tbl{width:100%;border-collapse:collapse;font-size:13px}
-.tbl th{padding:10px 14px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--hint);border-bottom:2px solid var(--border);background:var(--bg);white-space:nowrap}
-.tbl td{padding:10px 14px;border-bottom:1px solid var(--border);vertical-align:middle}
-.tbl tr:last-child td{border-bottom:none}
-.tbl tr:hover td{background:#f0f5fb}
-.rpt-id{color:var(--primary);font-weight:700}
-.rpt-id:hover{text-decoration:underline}
-.rpt-cards{display:none;flex-direction:column}
-.rpt-card{display:block;padding:14px 16px;border-bottom:1px solid var(--border);color:inherit}
-.rpt-card:last-child{border-bottom:none}
-.rpt-card:active{background:var(--primary-bg)}
-.rpt-card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
-.rpt-card-id{color:var(--primary);font-size:13px;font-weight:700}
-.rpt-card-chips{display:flex;gap:4px;flex-wrap:wrap}
-.rpt-card-loc{font-size:13px;color:var(--text);font-weight:500;margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.rpt-card-meta{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
-.rpt-card-type{font-size:11px;color:var(--hint)}
-.rpt-card-date{font-size:11px;color:var(--hint)}
-.loading{text-align:center;padding:60px;color:var(--hint)}
-.spinner{display:inline-block;width:22px;height:22px;border:3px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:10px}
-@keyframes spin{to{transform:rotate(360deg)}}
-.empty{text-align:center;padding:48px;color:var(--hint);font-size:12px}
-#kakao-map{width:100%;height:500px}
-.hamburger{display:none}
-.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:300}
-@media(max-width:1100px){.stat-grid{grid-template-columns:1fr 1fr}}
-@media(max-width:768px){
-  .sidebar{transform:translateX(-100%);transition:transform .25s ease;width:280px;z-index:400}
-  .sidebar.open{transform:translateX(0)}
-  .sidebar-overlay.show{display:block}
-  .main{margin-left:0}
-  .topbar{padding:0 14px;height:48px}
-  .topbar-right .sys-ok span:last-child{display:none}
-  .hamburger{display:flex;align-items:center;justify-content:center;width:36px;height:36px;background:none;border:none;cursor:pointer;margin-right:8px;color:var(--primary);flex-shrink:0}
-  .content{padding:12px}
-  .stat-grid{grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
-  .stat-card{padding:12px 14px}
-  .stat-val{font-size:18px}
-  .stat-lbl{font-size:11px}
-  #kakao-map{height:320px}
-  .tbl-wrap{display:none}
-  .rpt-cards{display:flex}
-  .card-head{padding:10px 14px}
+button{font-family:var(--font);cursor:pointer;border:none;background:none}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+
+.app{display:flex;height:100vh;overflow:hidden}
+
+/* ── SIDEBAR: icon-only rail, hover → expand ── */
+.sidebar{
+  width:var(--sb-rail);
+  flex-shrink:0;
+  background:var(--bg-subtle);
+  border-right:1px solid var(--border);
+  display:flex;flex-direction:column;
+  overflow:hidden;
+  transition:width .18s ease;
+  z-index:200;
 }
-@media(max-width:400px){
-  .stat-grid{grid-template-columns:1fr 1fr;gap:8px}
-  .stat-val{font-size:16px}
-  .content{padding:10px}
+.sidebar:hover{ width:var(--sb-w) }
+.sb-brand{
+  padding:0 13px;
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:10px;
+  height:var(--top-h);overflow:hidden;flex-shrink:0;
+  text-decoration:none;color:inherit;
+}
+.sb-icon{
+  width:22px;height:22px;flex-shrink:0;
+  background:var(--accent);border-radius:5px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:700;color:#fff;
+}
+.sb-name{font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;opacity:0;transition:opacity .12s .04s}
+.sidebar:hover .sb-name{opacity:1}
+.sb-sub{font-size:10px;color:var(--text2);white-space:nowrap}
+.sb-nav{padding:6px 6px;flex:1;overflow-y:auto;overflow-x:hidden}
+.sb-section{
+  padding:10px 10px 4px;
+  font-size:10px;font-weight:600;letter-spacing:.6px;
+  text-transform:uppercase;color:var(--text3);
+  white-space:nowrap;opacity:0;transition:opacity .1s;
+}
+.sidebar:hover .sb-section{opacity:1}
+.sb-item{
+  display:flex;align-items:center;gap:9px;
+  padding:7px 9px;border-radius:5px;
+  font-size:12px;color:var(--text2);
+  cursor:pointer;transition:background .1s,color .1s;
+  white-space:nowrap;overflow:hidden;
+  text-decoration:none;
+}
+.sb-item:hover{background:var(--bg-hover);color:var(--text)}
+.sb-item.active{background:var(--bg-hover);color:var(--text);font-weight:500}
+.sb-item svg{flex-shrink:0;opacity:.65}
+.sb-item.active svg{opacity:1}
+.sb-label{white-space:nowrap;opacity:0;transition:opacity .1s .04s}
+.sidebar:hover .sb-label{opacity:1}
+.sb-badge{
+  margin-left:auto;
+  background:#f3f4f6;color:var(--text2);
+  font-size:10px;font-weight:600;padding:1px 6px;border-radius:10px;
+  border:1px solid var(--border);
+  opacity:0;transition:opacity .1s;
+}
+.sidebar:hover .sb-badge{opacity:1}
+/* ── mobile sidebar override ── */
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:299}
+.sidebar-overlay.show{display:block}
+
+/* ── MAIN ── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+
+/* ── TOPBAR ── */
+.topbar{height:var(--top-h);flex-shrink:0;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;gap:10px}
+.hamburger{display:none;padding:4px;border-radius:4px;color:var(--text2)}
+.hamburger:hover{background:var(--bg-hover)}
+.breadcrumb{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);flex:1}
+.breadcrumb a:hover{color:var(--text)}
+.bc-sep{color:var(--text3)}
+.bc-cur{color:var(--text);font-weight:500}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.sys-pill{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2);padding:3px 8px;border-radius:12px;border:1px solid var(--border);background:var(--bg-subtle)}
+.sys-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.clock{font-size:11px;color:var(--text2);font-variant-numeric:tabular-nums}
+
+/* ── STAT STRIP ── */
+.stat-strip{display:flex;border-bottom:1px solid var(--border);background:var(--bg);flex-shrink:0}
+.stat-item{flex:1;padding:14px 20px;border-right:1px solid var(--border)}
+.stat-item:last-child{border-right:none}
+.stat-lbl{font-size:12px;color:var(--text2);margin-bottom:6px}
+.stat-val{font-size:16px;font-weight:600;color:var(--text);font-variant-numeric:tabular-nums;line-height:1.2}
+.stat-sub{font-size:12px;color:var(--text3);margin-top:4px}
+
+/* ── TOOLBAR ── */
+.toolbar{height:40px;flex-shrink:0;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 14px;gap:8px}
+.tb-right{display:flex;align-items:center;gap:6px;margin-left:auto}
+.tb-btn{display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:4px;font-size:12px;font-weight:500;border:1px solid var(--border);background:var(--bg);color:var(--text2);cursor:pointer;transition:background .1s}
+.tb-btn:hover{background:var(--bg-hover);color:var(--text);border-color:var(--border2)}
+
+/* ── CONTENT AREA ── */
+.content-area{flex:1;overflow-y:auto;padding:16px}
+
+/* ── MAP CARD ── */
+.card{background:var(--bg);border:1px solid var(--border);border-radius:4px;margin-bottom:16px}
+.card-head{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border);background:var(--bg-subtle)}
+.card-title{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.6px;display:flex;align-items:center;gap:6px}
+.card-sub{font-size:11px;color:var(--text3)}
+.card-link{font-size:11px;color:var(--accent)}
+.card-link:hover{text-decoration:underline}
+#kakao-map{width:100%;height:420px;display:block}
+
+/* ── TABLE (Supabase style) ── */
+.tbl-wrap{overflow-x:auto}
+.tbl{width:100%;border-collapse:collapse;font-size:12px}
+.tbl thead th{background:var(--bg-subtle);border-bottom:1px solid var(--border);border-right:1px solid var(--border);padding:0 10px;height:34px;text-align:left;font-weight:400;white-space:nowrap}
+.tbl thead th:last-child{border-right:none}
+.th-inner{display:flex;align-items:center;gap:5px;color:var(--text2)}
+.col-name{font-size:12px;color:var(--text)}
+.col-type{font-size:10px;color:var(--text3);background:var(--bg-hover);border:1px solid var(--border);border-radius:3px;padding:0 4px;line-height:16px}
+.th-sort{margin-left:auto;opacity:0;transition:opacity .1s}
+.tbl thead th:hover .th-sort{opacity:.5}
+.tbl-cb-col{width:36px;padding:0 10px!important}
+.tbl-cb-col input[type=checkbox],.tbl tbody td input[type=checkbox]{width:14px;height:14px;accent-color:var(--accent);cursor:pointer}
+.tbl tbody tr{border-bottom:1px solid var(--border);cursor:pointer}
+.tbl tbody tr:hover td{background:var(--bg-sel)}
+.tbl tbody td{padding:0 10px;height:36px;border-right:1px solid var(--border);vertical-align:middle;color:var(--text);font-size:12px;white-space:nowrap;max-width:200px;overflow:hidden;text-overflow:ellipsis}
+.tbl tbody td:last-child{border-right:none}
+.td-null{color:var(--text3);font-style:italic}
+.rpt-id{color:var(--blue);font-weight:500}
+.rpt-id:hover{text-decoration:underline}
+.chip{display:inline-flex;align-items:center;padding:1px 7px;border-radius:9999px;font-size:10px;font-weight:500;white-space:nowrap;border:1px solid transparent}
+.chip-green  {background:#f0fdf4;color:#16a34a;border-color:#bbf7d0}
+.chip-approved{background:#f0fdf4;color:#15803d;border-color:#86efac}
+.chip-blue   {background:#eff6ff;color:#2563eb;border-color:#bfdbfe}
+.chip-orange {background:#fffbeb;color:#d97706;border-color:#fde68a}
+.chip-red    {background:#fef2f2;color:#dc2626;border-color:#fecaca}
+.chip-gray   {background:#f9fafb;color:#6b7280;border-color:#e5e7eb}
+
+/* ── MOBILE CARD LIST ── */
+.rpt-cards{display:none;flex-direction:column}
+.rpt-card{display:block;padding:12px 14px;border-bottom:1px solid var(--border);color:inherit}
+.rpt-card:last-child{border-bottom:none}
+.rpt-card:active{background:var(--bg-hover)}
+.rpt-card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px}
+.rpt-card-id{color:var(--blue);font-size:12px;font-weight:500}
+.rpt-card-chips{display:flex;gap:4px;flex-wrap:wrap}
+.rpt-card-loc{font-size:12px;color:var(--text);margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rpt-card-meta{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.rpt-card-type,.rpt-card-date{font-size:11px;color:var(--text3)}
+
+/* ── LOADING / EMPTY ── */
+.tbl-loading{text-align:center;padding:48px;color:var(--text3);font-size:12px}
+.tbl-foot{height:36px;flex-shrink:0;background:var(--bg-subtle);border-top:1px solid var(--border);display:flex;align-items:center;padding:0 14px;font-size:11px;color:var(--text2)}
+
+/* ── MOBILE ── */
+@media(max-width:768px){
+  .sidebar{
+    position:fixed;top:0;left:0;bottom:0;
+    width:var(--sb-w)!important;
+    transform:translateX(-100%);
+    transition:transform .22s ease;
+    z-index:300;
+  }
+  .sidebar:hover{width:var(--sb-w)!important}
+  .sidebar.open{transform:translateX(0)}
+  .sidebar.open .sb-name,
+  .sidebar.open .sb-section,
+  .sidebar.open .sb-label,
+  .sidebar.open .sb-badge{opacity:1}
+  .sidebar-overlay.show{display:block}
+  .hamburger{display:flex}
 }
 </style>
 </head>
 <body>
-
 <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
-
-<aside class="sidebar">
+<aside class="sidebar" id="sidebar">
   <a href="dashboard.html" class="sb-brand">
     <div class="sb-icon">F</div>
-    <div><div class="sb-name">FIIL.kr</div><div class="sb-sub">관리자 대시보드</div></div>
+    <div class="sb-name">FIIL.kr<div class="sb-sub" style="font-size:10px;font-weight:400">관리자 대시보드</div></div>
   </a>
   <nav class="sb-nav">
     <div class="sb-section">운영 현황</div>
-    <a class="sb-item" href="dashboard.html">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-      종합 대시보드
+    <a class="sb-item " href="dashboard.html">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      <span class="sb-label">종합 대시보드</span>
     </a>
-    <a class="sb-item" href="#">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
-      신고 현황 <span class="sb-badge" id="sb-badge">0</span>
+    <a class="sb-item " href="dashboard.html">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      <span class="sb-label">신고 현황</span><span class="sb-badge" id="sb-badge">—</span>
     </a>
     <a class="sb-item active" href="map.html">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
-      실시간 지도
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+      <span class="sb-label">실시간 지도</span>
     </a>
-    <a class="sb-item" href="dispatch.html">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-      출동 현황
+    <a class="sb-item " href="dispatch.html">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+      <span class="sb-label">출동 현황</span>
     </a>
     <div class="sb-section">분석 · 보고</div>
-    <a class="sb-item" href="stats.html">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-      통계 분석
+    <a class="sb-item " href="stats.html">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      <span class="sb-label">통계 분석</span>
     </a>
-    <a class="sb-item" href="budget.html">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-      예산 · 비용
+    <a class="sb-item " href="budget.html">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      <span class="sb-label">예산 · 비용</span>
     </a>
-    <a class="sb-item" href="results.html">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><polyline points="9 15 11 17 15 13"/></svg>
-      조치 결과 보고서
+    <a class="sb-item " href="results.html">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><polyline points="9 15 11 17 15 13"/></svg>
+      <span class="sb-label">조치 결과 보고서</span>
     </a>
-    <a class="sb-item" href="openhash.html">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-      오픈해시 기록
+    <a class="sb-item " href="openhash.html">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      <span class="sb-label">오픈해시 기록</span>
     </a>
     <div class="sb-section">관리</div>
-    <a class="sb-item" href="resources.html">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-      인력 · 장비
+    <a class="sb-item " href="resources.html">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <span class="sb-label">인력 · 장비</span>
     </a>
-    <a class="sb-item" href="settings.html">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-      시스템 설정
+    <a class="sb-item " href="settings.html">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <span class="sb-label">시스템 설정</span>
     </a>
   </nav>
 </aside>
 
+<!-- ── MAIN ── -->
 <div class="main">
+
   <header class="topbar">
-    <button class="hamburger" id="hamburger-btn" onclick="toggleSidebar()" aria-label="메뉴 열기">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
-        <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
-      </svg>
+    <button class="hamburger" onclick="toggleSidebar()" aria-label="메뉴">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
     </button>
     <nav class="breadcrumb">
       <a href="dashboard.html">FIIL.kr</a>
-      <span class="bc-sep">›</span>
-      <strong>실시간 지도</strong>
+      <span class="bc-sep">/</span>
+      <span class="bc-cur">실시간 지도</span>
     </nav>
     <div class="topbar-right">
-      <div class="sys-ok">
-        <div class="sys-dot"></div>
-        <span>시스템 정상</span>
-      </div>
-      <div class="clock" id="clock">—</div>
+      <div class="sys-pill"><span class="sys-dot"></span><span>시스템 정상</span></div>
+      <span class="clock" id="clock">--:--:--</span>
     </div>
   </header>
 
-  <div class="content">
-
-    <div class="stat-grid">
-      <div class="stat-card">
-        <div class="stat-icon">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-        </div>
-        <div class="stat-val" id="m-total">—</div>
-        <div class="stat-lbl">전체 신고</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-        </div>
-        <div class="stat-val" id="m-urgent">—</div>
-        <div class="stat-lbl">긴급 신고</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2"/><path d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14"/></svg>
-        </div>
-        <div class="stat-val" id="m-gps">—</div>
-        <div class="stat-lbl">GPS 수신 건</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
-        </div>
-        <div class="stat-val">제주</div>
-        <div class="stat-lbl">서비스 지역</div>
-      </div>
+  <!-- Stat strip -->
+  <div class="stat-strip">
+    <div class="stat-item">
+      <div class="stat-lbl">전체 신고</div>
+      <div class="stat-val" id="m-total">—</div>
+      <div class="stat-sub">실시간 집계</div>
     </div>
+    <div class="stat-item">
+      <div class="stat-lbl">긴급 신고</div>
+      <div class="stat-val" id="m-urgent">—</div>
+      <div class="stat-sub">즉각 대응 필요</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-lbl">GPS 수신 건</div>
+      <div class="stat-val" id="m-gps">—</div>
+      <div class="stat-sub">위치 확인됨</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-lbl">서비스 지역</div>
+      <div class="stat-val">제주</div>
+      <div class="stat-sub">제주특별자치도 전역</div>
+    </div>
+  </div>
 
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+    <span style="font-size:12px;color:var(--text2)">GPS 좌표 기반 · 카카오맵</span>
+    <div class="tb-right">
+      <button class="tb-btn" onclick="location.href='dashboard.html'">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        대시보드로
+      </button>
+      <button class="tb-btn" onclick="loadMap()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 4v6h6M23 20v-6h-6"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10M23 14l-4.64 4.36A9 9 0 0 1 3.51 15"/></svg>
+        새로고침
+      </button>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="content-area">
+
+    <!-- 지도 -->
     <div class="card">
       <div class="card-head">
-        <div class="card-title">실시간 신고 위치</div>
-        <span class="card-sub">GPS 좌표 기반 · 카카오맵</span>
+        <div class="card-title">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+          실시간 신고 위치
+        </div>
+        <span class="card-sub" id="map-cnt">로딩 중…</span>
       </div>
-      <div style="padding:0"><div id="kakao-map"></div></div>
+      <div id="kakao-map"></div>
     </div>
 
+    <!-- 신고 목록 -->
     <div class="card">
       <div class="card-head">
-        <div class="card-title">신고 위치 목록</div>
+        <div class="card-title">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+          신고 위치 목록
+        </div>
         <span class="card-sub" id="list-count"></span>
       </div>
+
+      <!-- PC 테이블 -->
       <div class="tbl-wrap">
         <table class="tbl">
-          <thead><tr><th>신고번호</th><th>유형</th><th>위치</th><th>GPS</th><th>긴급도</th><th>상태</th><th>신고 일시</th></tr></thead>
-          <tbody id="tbl-body"></tbody>
+          <thead>
+            <tr>
+              <th class="tbl-cb-col"><input type="checkbox" id="chk-all" onchange="toggleAll(this)"></th>
+              <th><div class="th-inner"><span class="col-name">id</span><span class="col-type">text</span><svg class="th-sort" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg></div></th>
+              <th><div class="th-inner"><span class="col-name">type</span><span class="col-type">text</span></div></th>
+              <th><div class="th-inner"><span class="col-name">location</span><span class="col-type">text</span></div></th>
+              <th><div class="th-inner"><span class="col-name">gps</span><span class="col-type">text</span></div></th>
+              <th><div class="th-inner"><span class="col-name">urgency</span><span class="col-type">text</span></div></th>
+              <th><div class="th-inner"><span class="col-name">status</span><span class="col-type">text</span></div></th>
+              <th><div class="th-inner"><span class="col-name">reported_at</span><span class="col-type">timestamptz</span></div></th>
+            </tr>
+          </thead>
+          <tbody id="tbl-body">
+            <tr><td colspan="8" class="tbl-loading">Loading…</td></tr>
+          </tbody>
         </table>
       </div>
+
+      <!-- 모바일 카드 -->
       <div class="rpt-cards" id="rpt-cards"></div>
-      <div id="map-list-state" class="loading"><div class="spinner"></div><br>불러오는 중…</div>
+
+      <div class="tbl-foot">
+        <span id="foot-count">0 rows</span>
+      </div>
     </div>
 
-  </div>
-</div>
+  </div><!-- /content-area -->
+</div><!-- /main -->
+</div><!-- /app -->
 
 <script>
 const SB_URL='https://ebbecjfrwaswbdybbgiu.supabase.co';
@@ -267,49 +370,79 @@ const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
 
 setInterval(()=>{const e=document.getElementById('clock');if(e)e.textContent=new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});},1000);
 
-async function sbGet(path){const r=await fetch(SB_URL+'/rest/v1/'+path,{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}});if(!r.ok)throw new Error(r.status);return r.json();}
+async function sbGet(path){
+  const r=await fetch(SB_URL+'/rest/v1/'+path,{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}});
+  if(!r.ok)throw new Error(r.status);return r.json();
+}
 
-function fmtDate(s){if(!s)return'—';const d=new Date(s);return d.toLocaleString('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false});}
-function fmtDateFull(s){if(!s)return'—';return new Date(s).toLocaleString('ko-KR',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});}
-function urgClass(u){return{긴급:'chip-red',높음:'chip-orange',보통:'chip-blue',낮음:'chip-gray'}[u]||'chip-gray';}
-function statClass(s){return{완료:'chip-green',승인:'chip-approved',출동중:'chip-blue',대기중:'chip-orange',접수:'chip-gray'}[s]||'chip-gray';}
+function fmtDate(s){if(!s)return null;return new Date(s).toLocaleString('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false});}
+function fmtDateFull(s){if(!s)return null;return new Date(s).toLocaleString('ko-KR',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});}
+
+const urgChip={긴급:'chip-red',높음:'chip-orange',보통:'chip-blue',낮음:'chip-gray'};
+const statChip={완료:'chip-green',승인:'chip-approved',출동중:'chip-blue',대기중:'chip-orange',접수:'chip-gray'};
+
+function tdNull(val){
+  if(val===null||val===undefined||val===''||val==='위치 미상')
+    return `<td><span class="td-null">NULL</span></td>`;
+  return `<td title="${String(val).replace(/"/g,'&quot;')}">${val}</td>`;
+}
+
+function toggleAll(cb){
+  document.querySelectorAll('#tbl-body input[type=checkbox]').forEach(c=>c.checked=cb.checked);
+}
 
 async function loadMap(){
   const rows=await sbGet('reports?select=id,type,location,gps,urgency,status,reported_at&order=reported_at.desc&limit=100').catch(()=>[]);
+
   document.getElementById('m-total').textContent=rows.length+'건';
   document.getElementById('m-urgent').textContent=rows.filter(r=>r.urgency==='긴급').length+'건';
   const gpsRows=rows.filter(r=>r.gps);
   document.getElementById('m-gps').textContent=gpsRows.length+'건';
   document.getElementById('sb-badge').textContent=rows.length;
 
+  // 카카오맵
   const mapDiv=document.getElementById('kakao-map');
   kakao.maps.load(function(){
     const map=new kakao.maps.Map(mapDiv,{center:new kakao.maps.LatLng(33.4996,126.5312),level:10});
+    let cnt=0;
     gpsRows.forEach(r=>{
       const parts=r.gps.replace(/\s/g,'').split(',');
       if(parts.length<2)return;
       const pos=new kakao.maps.LatLng(parseFloat(parts[0]),parseFloat(parts[1]));
-      const color=r.urgency==='긴급'?'#9b1c1c':r.urgency==='높음'?'#b45309':'#305890';
+      const color=r.urgency==='긴급'?'#ef4444':r.urgency==='높음'?'#f59e0b':'#3b82f6';
       const marker=new kakao.maps.Marker({map,position:pos});
-      const iw=new kakao.maps.InfoWindow({content:`<div style="padding:8px 12px;font-size:12px;font-weight:700"><div style="color:#305890;margin-bottom:2px">${r.id}</div><div style="color:${color};font-size:11px">${r.urgency||'보통'} · ${r.type||'—'}</div></div>`});
+      const iw=new kakao.maps.InfoWindow({content:
+        `<div style="padding:8px 12px;font-size:12px;font-family:'Pretendard Variable','Pretendard',system-ui,sans-serif;min-width:140px">
+          <div style="font-weight:600;color:#171717;margin-bottom:3px">${r.id}</div>
+          <div style="font-size:11px;color:#6b7280">${r.type||'—'}</div>
+          <div style="margin-top:4px"><span style="display:inline-flex;padding:1px 7px;border-radius:9999px;font-size:10px;font-weight:500;background:${r.urgency==='긴급'?'#fef2f2':r.urgency==='높음'?'#fffbeb':'#eff6ff'};color:${color}">${r.urgency||'보통'}</span></div>
+        </div>`
+      });
       kakao.maps.event.addListener(marker,'click',()=>iw.open(map,marker));
+      cnt++;
     });
+    document.getElementById('map-cnt').textContent='마커 '+cnt+'건 표시';
   });
 
-  const state=document.getElementById('map-list-state');
-  if(!rows.length){state.className='empty';state.innerHTML='신고 데이터 없음';return;}
-  state.style.display='none';
+  // 테이블
+  if(!rows.length){
+    document.getElementById('tbl-body').innerHTML='<tr><td colspan="8" class="tbl-loading">No rows found</td></tr>';
+    document.getElementById('rpt-cards').innerHTML='';
+    return;
+  }
   document.getElementById('list-count').textContent=rows.length+'건';
+  document.getElementById('foot-count').textContent=rows.length+' rows';
 
   document.getElementById('tbl-body').innerHTML=rows.map(r=>`
-    <tr>
-      <td><a class="rpt-id" href="report.html?id=${r.id}">${r.id}</a></td>
-      <td style="font-size:12px;color:var(--sub)">${r.type||'—'}</td>
-      <td class="loc-cell" data-gps="${r.gps||''}" style="max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.location&&r.location!=='위치 미상'?r.location:(r.gps||'—')}</td>
-      <td style="font-size:11px;color:var(--hint)">${r.gps||'—'}</td>
-      <td><span class="chip ${urgClass(r.urgency)}">${r.urgency||'—'}</span></td>
-      <td><span class="chip ${statClass(r.status)}">${r.status||'접수'}</span></td>
-      <td style="font-size:11px;color:var(--sub);white-space:nowrap">${fmtDateFull(r.reported_at)}</td>
+    <tr onclick="location.href='report.html?id=${r.id}'">
+      <td class="tbl-cb-col"><input type="checkbox" onclick="event.stopPropagation()"></td>
+      <td><a class="rpt-id" href="report.html?id=${r.id}" onclick="event.stopPropagation()">${r.id}</a></td>
+      ${tdNull(r.type)}
+      <td class="loc-cell" data-gps="${r.gps||''}" style="max-width:180px;overflow:hidden;text-overflow:ellipsis">${r.location&&r.location!=='위치 미상'?r.location:`<span class="td-null">NULL</span>`}</td>
+      ${tdNull(r.gps)}
+      <td>${r.urgency?`<span class="chip ${urgChip[r.urgency]||'chip-gray'}">${r.urgency}</span>`:'<span class="td-null">NULL</span>'}</td>
+      <td>${r.status?`<span class="chip ${statChip[r.status]||'chip-gray'}">${r.status}</span>`:'<span class="td-null">NULL</span>'}</td>
+      <td style="color:var(--text2)">${fmtDateFull(r.reported_at)||'<span class="td-null">NULL</span>'}</td>
     </tr>`).join('');
 
   document.getElementById('rpt-cards').innerHTML=rows.map(r=>`
@@ -317,23 +450,22 @@ async function loadMap(){
       <div class="rpt-card-top">
         <span class="rpt-card-id">${r.id}</span>
         <div class="rpt-card-chips">
-          <span class="chip ${urgClass(r.urgency)}">${r.urgency||'—'}</span>
-          <span class="chip ${statClass(r.status)}">${r.status||'접수'}</span>
+          ${r.urgency?`<span class="chip ${urgChip[r.urgency]||'chip-gray'}">${r.urgency}</span>`:''}
+          ${r.status?`<span class="chip ${statChip[r.status]||'chip-gray'}">${r.status}</span>`:''}
         </div>
       </div>
       <div class="rpt-card-loc loc-cell" data-gps="${r.gps||''}">${r.location&&r.location!=='위치 미상'?r.location:(r.gps||'위치 미상')}</div>
       <div class="rpt-card-meta">
-        <span class="rpt-card-type">${r.type||'유형 미상'}</span>
-        <span style="color:var(--hint);font-size:11px">·</span>
-        <span class="rpt-card-date">${fmtDate(r.reported_at)}</span>
+        <span class="rpt-card-type">${r.type||'—'}</span>
+        <span style="color:var(--text3)">·</span>
+        <span class="rpt-card-date">${fmtDate(r.reported_at)||'—'}</span>
       </div>
     </a>`).join('');
 
+  // 역지오코딩
   document.querySelectorAll('.loc-cell[data-gps]').forEach(cell=>{
-    const gps=cell.dataset.gps;
-    if(!gps)return;
-    const p=gps.replace(/\s/g,'').split(',');
-    if(p.length<2)return;
+    const gps=cell.dataset.gps;if(!gps)return;
+    const p=gps.replace(/\s/g,'').split(',');if(p.length<2)return;
     (function(lat,lng,cell){
       if(!window.kakao||!kakao.maps||!kakao.maps.services)return;
       new kakao.maps.services.Geocoder().coord2Address(lng,lat,(result,status)=>{
@@ -349,14 +481,11 @@ async function loadMap(){
 kakao.maps.load(loadMap);
 
 function toggleSidebar(){
-  const sb=document.querySelector('.sidebar');
-  const ov=document.getElementById('sidebar-overlay');
-  if(!sb)return;
-  sb.classList.toggle('open');
-  ov&&ov.classList.toggle('show');
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebar-overlay').classList.toggle('show');
 }
 function closeSidebar(){
-  document.querySelector('.sidebar')?.classList.remove('open');
+  document.getElementById('sidebar')?.classList.remove('open');
   document.getElementById('sidebar-overlay')?.classList.remove('show');
 }
 document.querySelectorAll('.sb-item').forEach(i=>i.addEventListener('click',()=>{if(window.innerWidth<=768)closeSidebar();}));
