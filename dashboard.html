@@ -72,7 +72,7 @@ a{text-decoration:none;color:inherit}
 .content{padding:24px}
 .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px}
 .stat-card{background:var(--surface);border:1px solid var(--border);border-top:3px solid var(--primary);padding:16px 18px;}
-.stat-icon{font-size:20px;margin-bottom:10px}
+.stat-icon{margin-bottom:8px;color:var(--primary);opacity:.8}
 .stat-val{font-size:22px;font-weight:700;line-height:1;margin-bottom:4px;color:var(--primary)}
 .stat-lbl{font-size:12px;color:var(--sub)}
 .stat-sub{font-size:12px;font-weight:600;margin-top:4px}
@@ -104,7 +104,7 @@ a{text-decoration:none;color:inherit}
 .rpt-id:hover{text-decoration:underline}
 .resource-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .res-item{background:var(--bg);border-radius:6px;padding:12px 14px;text-align:center}
-.res-icon{font-size:20px;margin-bottom:6px}
+.res-icon{margin-bottom:4px;color:var(--primary)}
 .res-val{font-size:18px;font-weight:800}
 .res-lbl{font-size:11px;color:var(--sub);margin-top:2px}
 .res-sub{font-size:11px;color:var(--primary);font-weight:600;margin-top:2px}
@@ -144,18 +144,18 @@ a{text-decoration:none;color:inherit}
   </a>
   <nav class="sb-nav">
     <div class="sb-section">운영 현황</div>
-    <a class="sb-item active" href="dashboard.html"><span>📊</span> 종합 대시보드</a>
-    <a class="sb-item" href="#"><span>📋</span> 신고 현황 <span class="sb-badge" id="sb-badge">0</span></a>
-    <a class="sb-item" href="map.html"><span>🗺</span> 실시간 지도</a>
-    <a class="sb-item" href="dispatch.html"><span>🚗</span> 출동 현황</a>
+    <a class="sb-item active" href="dashboard.html"><span style="display:flex;align-items:center"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></span> 종합 대시보드</a>
+    <a class="sb-item" href="#"><span style="display:flex;align-items:center"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg></span> 신고 현황 <span class="sb-badge" id="sb-badge">0</span></a>
+    <a class="sb-item" href="map.html"><span style="display:flex;align-items:center"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg></span> 실시간 지도</a>
+    <a class="sb-item" href="dispatch.html"><span style="display:flex;align-items:center"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></span> 출동 현황</a>
     <div class="sb-section">분석 · 보고</div>
-    <a class="sb-item" href="stats.html"><span>📈</span> 통계 분석</a>
-    <a class="sb-item" href="budget.html"><span>💰</span> 예산 · 비용</a>
-    <a class="sb-item" href="results.html"><span>📄</span> 조치 결과 보고서</a>
-    <a class="sb-item" href="openhash.html"><span>⛓</span> 오픈해시 기록</a>
+    <a class="sb-item" href="stats.html"><span style="display:flex;align-items:center"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span> 통계 분석</a>
+    <a class="sb-item" href="budget.html"><span style="display:flex;align-items:center"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span> 예산 · 비용</a>
+    <a class="sb-item" href="results.html"><span style="display:flex;align-items:center"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><polyline points="9 15 11 17 15 13"/></svg></span> 조치 결과 보고서</a>
+    <a class="sb-item" href="openhash.html"><span style="display:flex;align-items:center"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span> 오픈해시 기록</a>
     <div class="sb-section">관리</div>
-    <a class="sb-item" href="resources.html"><span>👥</span> 인력 · 장비</a>
-    <a class="sb-item" href="settings.html"><span>⚙️</span> 시스템 설정</a>
+    <a class="sb-item" href="resources.html"><span style="display:flex;align-items:center"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span> 인력 · 장비</a>
+    <a class="sb-item" href="settings.html"><span style="display:flex;align-items:center"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span> 시스템 설정</a>
   </nav>
   <div class="sb-user"><strong>관리자 · 제주시 환경정책과</strong>최종 로그인: 오늘 09:14</div>
 </aside>
@@ -176,25 +176,25 @@ a{text-decoration:none;color:inherit}
   <div class="content">
     <div class="stat-grid">
       <div class="stat-card">
-        <div class="stat-icon">📋</div>
+        <div style="color:var(--primary);margin-bottom:8px;opacity:.8"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
         <div class="stat-val" id="cnt-today">23</div>
         <div class="stat-lbl">오늘 신고 접수</div>
         <div class="stat-sub up">▲ 4건 전일 대비</div>
       </div>
       <div class="stat-card">
-        <div class="stat-icon">✅</div>
+        <div style="color:var(--primary);margin-bottom:8px;opacity:.8"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
         <div class="stat-val">19</div>
         <div class="stat-lbl">처리 완료</div>
         <div class="stat-sub blue">처리율 82.6%</div>
       </div>
       <div class="stat-card">
-        <div class="stat-icon">🚗</div>
+        <div style="color:var(--primary);margin-bottom:8px;opacity:.8"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div>
         <div class="stat-val">3</div>
         <div class="stat-lbl">현재 출동 중</div>
         <div class="stat-sub blue">평균 응답 28분</div>
       </div>
       <div class="stat-card">
-        <div class="stat-icon">💰</div>
+        <div style="color:var(--primary);margin-bottom:8px;opacity:.8"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
         <div class="stat-val">₩84만</div>
         <div class="stat-lbl">오늘 집행 비용</div>
         <div class="stat-sub" style="color:#4a72a8">예산 대비 73%</div>
@@ -204,7 +204,7 @@ a{text-decoration:none;color:inherit}
     <div class="row-2">
       <div class="card">
         <div class="card-head">
-          <div class="card-title">🗺 제주 신고 현황 실시간 지도</div>
+          <div class="card-title">제주 신고 현황 실시간 지도</div>
           <a href="map.html" style="font-size:11px;color:var(--primary);font-weight:600">전체 보기 →</a>
         </div>
         <div class="card-body" style="padding:0">
@@ -231,23 +231,23 @@ a{text-decoration:none;color:inherit}
 
       <div style="display:flex;flex-direction:column;gap:16px">
         <div class="card">
-          <div class="card-head"><div class="card-title">👥 투입 인력 · 장비</div></div>
+          <div class="card-head"><div class="card-title">투입 인력 · 장비</div></div>
           <div class="card-body">
             <div class="resource-grid">
-              <div class="res-item"><div class="res-icon">👷</div><div class="res-val">14명</div><div class="res-lbl">현장 인원</div><div class="res-sub">3팀 출동중</div></div>
-              <div class="res-item"><div class="res-icon">🚛</div><div class="res-val">5대</div><div class="res-lbl">차량</div><div class="res-sub">3대 운행중</div></div>
-              <div class="res-item"><div class="res-icon">🚤</div><div class="res-val">2척</div><div class="res-lbl">선박·보트</div><div class="res-sub">1척 출동중</div></div>
-              <div class="res-item"><div class="res-icon">🚁</div><div class="res-val">1대</div><div class="res-lbl">드론</div><div class="res-sub">대기중</div></div>
+              <div class="res-item"><div style="color:var(--primary);margin-bottom:4px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><div class="res-val">14명</div><div class="res-lbl">현장 인원</div><div class="res-sub">3팀 출동중</div></div>
+              <div class="res-item"><div style="color:var(--primary);margin-bottom:4px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div><div class="res-val">5대</div><div class="res-lbl">차량</div><div class="res-sub">3대 운행중</div></div>
+              <div class="res-item"><div style="color:var(--primary);margin-bottom:4px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 21c.6.5 1.2 1 2.5 1C7 22 7 20 9.5 20c2.4 0 2.4 2 4.5 2 2 0 2.1-2 4.5-2 1.3 0 1.9.5 2.5 1"/><path d="M19 11V7l-7-5-7 5v4"/><path d="M5 11h14"/></svg></div><div class="res-val">2척</div><div class="res-lbl">선박·보트</div><div class="res-sub">1척 출동중</div></div>
+              <div class="res-item"><div style="color:var(--primary);margin-bottom:4px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22V12"/><path d="M12 12L6 6"/><path d="M12 12l6-6"/><circle cx="6" cy="5" r="2"/><circle cx="18" cy="5" r="2"/><circle cx="12" cy="22" r="1"/><line x1="3" y1="3" x2="9" y2="3"/><line x1="15" y1="3" x2="21" y2="3"/></svg></div><div class="res-val">1대</div><div class="res-lbl">드론</div><div class="res-sub">대기중</div></div>
             </div>
           </div>
         </div>
         <div class="card">
-          <div class="card-head"><div class="card-title">📊 유형별 현황</div></div>
+          <div class="card-head"><div class="card-title">유형별 현황</div></div>
           <div class="card-body">
-            <div class="type-item"><span style="font-size:13px;min-width:80px">🏖️ 해안쓰레기</span><div class="type-bar"><div class="type-fill" style="width:100%;background:#305890"></div></div><span class="type-val">8</span></div>
-            <div class="type-item"><span style="font-size:13px;min-width:80px">🌊 수중쓰레기</span><div class="type-bar"><div class="type-fill" style="width:75%;background:#305890"></div></div><span class="type-val">6</span></div>
-            <div class="type-item"><span style="font-size:13px;min-width:80px">🌲 산림쓰레기</span><div class="type-bar"><div class="type-fill" style="width:62%;background:#e37400"></div></div><span class="type-val">5</span></div>
-            <div class="type-item"><span style="font-size:13px;min-width:80px">🚨 응급환자</span><div class="type-bar"><div class="type-fill" style="width:25%;background:#d93025"></div></div><span class="type-val">2</span></div>
+            <div class="type-item"><span style="font-size:13px;min-width:80px">해안쓰레기</span><div class="type-bar"><div class="type-fill" style="width:100%;background:#305890"></div></div><span class="type-val">8</span></div>
+            <div class="type-item"><span style="font-size:13px;min-width:80px">수중쓰레기</span><div class="type-bar"><div class="type-fill" style="width:75%;background:#305890"></div></div><span class="type-val">6</span></div>
+            <div class="type-item"><span style="font-size:13px;min-width:80px">산림쓰레기</span><div class="type-bar"><div class="type-fill" style="width:62%;background:#4a72a8"></div></div><span class="type-val">5</span></div>
+            <div class="type-item"><span style="font-size:13px;min-width:80px">응급환자</span><div class="type-bar"><div class="type-fill" style="width:25%;background:#214176"></div></div><span class="type-val">2</span></div>
             <div class="type-item"><span style="font-size:13px;min-width:80px">➕ 기타</span><div class="type-bar"><div class="type-fill" style="width:25%;background:#8a9bb0"></div></div><span class="type-val">2</span></div>
           </div>
         </div>
@@ -256,7 +256,7 @@ a{text-decoration:none;color:inherit}
 
     <div class="card" style="margin-bottom:20px">
       <div class="card-head">
-        <div class="card-title">📋 신고 목록 · 조치 현황 <span style="font-weight:400;color:var(--hint)" id="table-count">오늘 전체 23건</span></div>
+        <div class="card-title">신고 목록 · 조치 현황 <span style="font-weight:400;color:var(--hint)" id="table-count">오늘 전체 23건</span></div>
         <a class="card-link" href="#">전체 보기 →</a>
       </div>
       <div style="overflow-x:auto">
@@ -268,12 +268,12 @@ a{text-decoration:none;color:inherit}
             </tr>
           </thead>
           <tbody id="report-tbody">
-            <tr><td><a class="rpt-id" href="report.html?id=RPT-2026-2847">RPT-2026-2847</a></td><td>🏖️ 해안쓰레기</td><td>협재해수욕장</td><td>010-****-1234</td><td><span class="chip chip-blue">보통</span></td><td><span class="chip chip-blue">출동중</span></td><td>3명 / 보트1</td><td>₩120,000</td><td>14분 전</td></tr>
-            <tr><td><a class="rpt-id" href="report.html?id=RPT-2026-2846">RPT-2026-2846</a></td><td>🚨 응급환자</td><td>한라산 등산로</td><td>010-****-5678</td><td><span class="chip chip-red">긴급</span></td><td><span class="chip chip-green">완료</span></td><td>4명 / 구급1</td><td>₩280,000</td><td>1시간 전</td></tr>
-            <tr><td><a class="rpt-id" href="report.html?id=RPT-2026-2845">RPT-2026-2845</a></td><td>🗑️ 불법투기</td><td>중문관광단지</td><td>010-****-9012</td><td><span class="chip chip-orange">높음</span></td><td><span class="chip chip-orange">대기중</span></td><td>2명</td><td>₩45,000</td><td>32분 전</td></tr>
-            <tr><td><a class="rpt-id" href="report.html?id=RPT-2026-2844">RPT-2026-2844</a></td><td>🌲 산림쓰레기</td><td>애월읍 일주서로</td><td>010-****-3456</td><td><span class="chip chip-orange">높음</span></td><td><span class="chip chip-green">완료</span></td><td>3명 / 차량2</td><td>₩95,000</td><td>1.5h 전</td></tr>
-            <tr><td><a class="rpt-id" href="report.html?id=RPT-2026-2843">RPT-2026-2843</a></td><td>🌊 수중쓰레기</td><td>제주시 연동</td><td>010-****-7890</td><td><span class="chip chip-gray">낮음</span></td><td><span class="chip chip-green">완료</span></td><td>1명</td><td>₩30,000</td><td>2h 전</td></tr>
-            <tr><td><a class="rpt-id" href="report.html?id=RPT-2026-2842">RPT-2026-2842</a></td><td>🏖️ 해안쓰레기</td><td>표선해비치</td><td>010-****-2345</td><td><span class="chip chip-blue">보통</span></td><td><span class="chip chip-blue">출동중</span></td><td>2명 / 보트1</td><td>₩90,000</td><td>45분 전</td></tr>
+            <tr><td><a class="rpt-id" href="report.html?id=RPT-2026-2847">RPT-2026-2847</a></td><td>해안쓰레기</td><td>협재해수욕장</td><td>010-****-1234</td><td><span class="chip chip-blue">보통</span></td><td><span class="chip chip-blue">출동중</span></td><td>3명 / 보트1</td><td>₩120,000</td><td>14분 전</td></tr>
+            <tr><td><a class="rpt-id" href="report.html?id=RPT-2026-2846">RPT-2026-2846</a></td><td>응급환자</td><td>한라산 등산로</td><td>010-****-5678</td><td><span class="chip chip-red">긴급</span></td><td><span class="chip chip-green">완료</span></td><td>4명 / 구급1</td><td>₩280,000</td><td>1시간 전</td></tr>
+            <tr><td><a class="rpt-id" href="report.html?id=RPT-2026-2845">RPT-2026-2845</a></td><td>불법투기</td><td>중문관광단지</td><td>010-****-9012</td><td><span class="chip chip-orange">높음</span></td><td><span class="chip chip-orange">대기중</span></td><td>2명</td><td>₩45,000</td><td>32분 전</td></tr>
+            <tr><td><a class="rpt-id" href="report.html?id=RPT-2026-2844">RPT-2026-2844</a></td><td>산림쓰레기</td><td>애월읍 일주서로</td><td>010-****-3456</td><td><span class="chip chip-orange">높음</span></td><td><span class="chip chip-green">완료</span></td><td>3명 / 차량2</td><td>₩95,000</td><td>1.5h 전</td></tr>
+            <tr><td><a class="rpt-id" href="report.html?id=RPT-2026-2843">RPT-2026-2843</a></td><td>수중쓰레기</td><td>제주시 연동</td><td>010-****-7890</td><td><span class="chip chip-gray">낮음</span></td><td><span class="chip chip-green">완료</span></td><td>1명</td><td>₩30,000</td><td>2h 전</td></tr>
+            <tr><td><a class="rpt-id" href="report.html?id=RPT-2026-2842">RPT-2026-2842</a></td><td>해안쓰레기</td><td>표선해비치</td><td>010-****-2345</td><td><span class="chip chip-blue">보통</span></td><td><span class="chip chip-blue">출동중</span></td><td>2명 / 보트1</td><td>₩90,000</td><td>45분 전</td></tr>
           </tbody>
         </table>
       </div>
@@ -281,7 +281,7 @@ a{text-decoration:none;color:inherit}
 
     <div class="row-equal">
       <div class="card">
-        <div class="card-head"><div class="card-title">💰 오늘 비용 현황</div></div>
+        <div class="card-head"><div class="card-title">오늘 비용 현황</div></div>
         <div class="card-body">
           <div class="cost-row"><span class="cost-lbl">인건비</span><span>₩ 420,000</span></div>
           <div class="cost-row"><span class="cost-lbl">장비·차량</span><span>₩ 285,000</span></div>
@@ -365,11 +365,11 @@ function renderReports(reports){
     const urgency = r.urgency || (a.gemini?.risk_level
       ? {S0:'낮음',S1:'보통',S2:'높음',S3:'긴급'}[a.gemini.risk_level] : '보통');
     const typeIcon =
-      (r.type||'').includes('해안')||(r.type||'').includes('해양') ? '🏖️' :
-      (r.type||'').includes('불법') ? '🗑️' :
-      (r.type||'').includes('응급') ? '🚨' :
-      (r.type||'').includes('도로') ? '🚧' :
-      (r.type||'').includes('산불') ? '🔥' : '📋';
+      (r.type||'').includes('해안')||(r.type||'').includes('해양') ? '' :
+      (r.type||'').includes('불법') ? '' :
+      (r.type||'').includes('응급') ? '' :
+      (r.type||'').includes('도로') ? '' :
+      (r.type||'').includes('산불') ? '' : '';
     const tr = document.createElement('tr');
     tr.className = 'new-row';
     tr.dataset.id = r.id;

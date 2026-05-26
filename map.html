@@ -94,19 +94,10 @@ a{text-decoration:none;color:inherit}
 .spinner{display:inline-block;width:24px;height:24px;border:3px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:12px}
 @keyframes spin{to{transform:rotate(360deg)}}
 .empty{text-align:center;padding:48px;color:var(--hint);font-size:12px}
-
-#kakao-map{width:100%;height:520px;background:var(--primary-bg)}
-.map-legend{display:flex;gap:16px;padding:10px 18px;background:var(--primary-bg);border-top:1px solid var(--border);flex-wrap:wrap}
-.legend-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--sub)}
-.legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
-.map-controls{display:flex;gap:6px;padding:10px 18px;border-bottom:1px solid var(--border);background:var(--primary-bg);flex-wrap:wrap;align-items:center}
-.mfb{padding:4px 12px;font-size:11px;font-weight:600;font-family:inherit;border:1px solid var(--border);background:var(--surface);color:var(--sub);cursor:pointer;border-radius:2px;transition:all .15s}
-.mfb.active,.mfb:hover{background:var(--primary);color:#fff;border-color:var(--primary)}
 </style>
-<script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=c7160a2d047af2808065d9e1929a66a7&libraries=services,clusterer"></script>
 </head>
 <body>
-<div class="sidebar"><a class="sb-brand" href="dashboard.html"><div class="sb-icon">F</div><div><div class="sb-name">FIIL.kr</div><div class="sb-sub">관리자 대시보드</div></div></a><nav class="sb-nav"><div class="sb-section">운영 현황</div><a class="sb-item" href="dashboard.html"><span>📊</span> 종합 대시보드</a><a class="sb-item" href="dashboard.html#reports"><span>📋</span> 신고 현황</a><a class="sb-item active" href="map.html"><span>🗺</span> 실시간 지도</a><a class="sb-item" href="dispatch.html"><span>🚗</span> 출동 현황</a><div class="sb-section">분석 · 보고</div><a class="sb-item" href="stats.html"><span>📈</span> 통계 분석</a><a class="sb-item" href="budget.html"><span>💰</span> 예산 · 비용</a><a class="sb-item" href="results.html"><span>📄</span> 조치 결과 보고서</a><a class="sb-item" href="openhash.html"><span>⛓</span> 오픈해시 기록</a><div class="sb-section">관리</div><a class="sb-item" href="resources.html"><span>👥</span> 인력 · 장비</a><a class="sb-item" href="settings.html"><span>⚙️</span> 시스템 설정</a></nav></div>
+<div class="sidebar"><a class="sb-brand" href="dashboard.html"><div class="sb-icon">F</div><div><div class="sb-name">FIIL.kr</div><div class="sb-sub">관리자 대시보드</div></div></a><nav class="sb-nav"><div class="sb-section">운영 현황</div><a class="sb-item" href="dashboard.html"><span style="display:flex;align-items:center"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></span> 종합 대시보드</a><a class="sb-item" href="dashboard.html#reports"><span style="display:flex;align-items:center"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span> 신고 현황</a><a class="sb-item active" href="map.html"><span style="display:flex;align-items:center"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg></span> 실시간 지도</a><a class="sb-item" href="dispatch.html"><span style="display:flex;align-items:center"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></span> 출동 현황</a><div class="sb-section">분석 · 보고</div><a class="sb-item" href="stats.html"><span style="display:flex;align-items:center"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span> 통계 분석</a><a class="sb-item" href="budget.html"><span style="display:flex;align-items:center"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span> 예산 · 비용</a><a class="sb-item" href="results.html"><span style="display:flex;align-items:center"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><polyline points="9 15 11 17 15 13"/></svg></span> 조치 결과 보고서</a><a class="sb-item" href="openhash.html"><span style="display:flex;align-items:center"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span> 오픈해시 기록</a><div class="sb-section">관리</div><a class="sb-item" href="resources.html"><span style="display:flex;align-items:center"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span> 인력 · 장비</a><a class="sb-item" href="settings.html"><span style="display:flex;align-items:center"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span> 시스템 설정</a></nav></div>
 <div class="main">
 <div class="topbar">
   <div class="breadcrumb"><a href="dashboard.html">FIIL.kr</a><span class="bc-sep">›</span><span>실시간 지도</span></div>
@@ -121,31 +112,19 @@ a{text-decoration:none;color:inherit}
   <div class="stat-card"><div style="font-size:20px;margin-bottom:8px">🗺</div><div class="stat-val" id="m-area">제주</div><div class="stat-lbl">서비스 지역</div></div>
 </div>
 <div class="card">
-  <div class="card-head">
-    <div class="card-title">🗺 실시간 신고 위치 — 제주</div>
-    <span style="font-size:11px;color:var(--primary)">● 카카오맵 연동</span>
-  </div>
-  <div class="map-controls">
-    <button class="mfb active" onclick="filterMap('all',this)">전체</button>
-    <button class="mfb" onclick="filterMap('해안',this)">🏖 해안쓰레기</button>
-    <button class="mfb" onclick="filterMap('불법',this)">🗑 불법투기</button>
-    <button class="mfb" onclick="filterMap('응급',this)">🚨 응급환자</button>
-    <button class="mfb" onclick="filterMap('기타',this)">📋 기타</button>
-    <span id="map-count" style="font-size:11px;color:var(--hint);margin-left:auto">—</span>
-  </div>
+  <div class="card-head"><div class="card-title">실시간 신고 위치</div><span style="font-size:11px;color:var(--sub)">GPS 좌표 기반 · 카카오맵</span></div>
   <div class="card-body" style="padding:0">
-    <div id="kakao-map"></div>
-    <div class="map-legend">
-      <div class="legend-item"><div class="legend-dot" style="background:#305890"></div>해안쓰레기</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#214176"></div>불법투기</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#9b1c1c"></div>응급환자</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#7a9cc8"></div>기타</div>
-      <div class="legend-item" style="margin-left:auto"><div class="legend-dot" style="background:#b45309"></div>긴급 신고</div>
+    <div id="map" style="width:100%;height:520px;border-radius:0 0 8px 8px;background:#eaf2fa;display:flex;align-items:center;justify-content:center">
+      <div style="text-align:center;color:var(--sub)">
+        <div style="font-size:40px;margin-bottom:12px">🗺</div>
+        <div style="font-weight:700;margin-bottom:6px">카카오맵 로딩 중…</div>
+        <div style="font-size:12px">신고 위치를 지도에 표시합니다</div>
+      </div>
     </div>
   </div>
 </div>
 <div class="card">
-  <div class="card-head"><div class="card-title">📋 신고 위치 목록</div></div>
+  <div class="card-head"><div class="card-title">신고 위치 목록</div></div>
   <div class="card-body" style="padding:0">
     <div id="map-list" class="loading"><div class="spinner"></div><br>불러오는 중…</div>
   </div>
@@ -156,144 +135,74 @@ a{text-decoration:none;color:inherit}
 const SB_URL='https://ebbecjfrwaswbdybbgiu.supabase.co';
 const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImViYmVjamZyd2Fzd2JkeWJiZ2l1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1NjE5ODQsImV4cCI6MjA5NTEzNzk4NH0.H2ahQKtWdSke04Pdi3hDY86pdTx7UUKPUpQMlS_zciA';
 setInterval(()=>{const e=document.getElementById('clock');if(e)e.textContent=new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});},1000);
-async function sbGet(p){const r=await fetch(SB_URL+'/rest/v1/'+p,{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}});if(!r.ok)throw new Error(r.status);return r.json();}
+async function sbGet(path){const r=await fetch(SB_URL+'/rest/v1/'+path,{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}});if(!r.ok)throw new Error(r.status);return r.json();}
+async function sbPatch(path,body){return fetch(SB_URL+'/rest/v1/'+path,{method:'PATCH',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(body)});}
 function fmt(n){return n?Math.round(n).toLocaleString():'0';}
 function fmtDate(s){return s?new Date(s).toLocaleString('ko-KR',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}):'—';}
-function urgClass(u){return{긴급:'chip-red',높음:'chip-orange',보통:'chip-blue',낮음:'chip-gray'}[u]||'chip-gray';}
-function statClass(s){return{완료:'chip-green',승인:'chip-approved',출동중:'chip-blue',대기중:'chip-orange',접수:'chip-gray'}[s]||'chip-gray';}
-function typeIcon(t){t=t||'';return t.includes('해안')||t.includes('해양')?'🏖️':t.includes('불법')?'🗑️':t.includes('응급')?'🚨':t.includes('도로')?'🚧':t.includes('산불')?'🔥':'📋';}
-
-// ── 카카오맵 ──────────────────────────────────────────
-let _map=null,_cluster=null,_iw=null,_allRows=[],_markers=[];
-
-function _color(type,urgency){
-  if(urgency==='긴급') return '#9b1c1c';
-  if(!type) return '#7a9cc8';
-  if(type.includes('해안')||type.includes('해양')) return '#305890';
-  if(type.includes('불법')) return '#214176';
-  if(type.includes('응급')) return '#9b1c1c';
-  if(type.includes('산불')) return '#b45309';
-  return '#7a9cc8';
-}
-
-function _svg(color,emoji){
-  const s=`<svg xmlns="http://www.w3.org/2000/svg" width="36" height="44" viewBox="0 0 36 44"><path d="M18 0C8.059 0 0 8.059 0 18c0 11 18 26 18 26S36 29 36 18C36 8.059 27.941 0 18 0z" fill="${color}" stroke="white" stroke-width="2.5"/><text x="18" y="22" font-size="13" text-anchor="middle" dominant-baseline="middle" fill="white">${emoji}</text></svg>`;
-  return 'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(s);
-}
-
-function _emoji(t){
-  if(!t)return'📋';
-  if(t.includes('해안')||t.includes('해양'))return'🏖';
-  if(t.includes('불법'))return'🗑';
-  if(t.includes('응급'))return'🚨';
-  if(t.includes('산불'))return'🔥';
-  if(t.includes('도로'))return'🚧';
-  return'📋';
-}
-
-function _initKakaoMap(){
-  const el=document.getElementById('kakao-map');
-  _map=new kakao.maps.Map(el,{center:new kakao.maps.LatLng(33.4996,126.5312),level:10});
-  _iw=new kakao.maps.InfoWindow({zIndex:10});
-  _cluster=new kakao.maps.MarkerClusterer({
-    map:_map,averageCenter:true,minLevel:7,
-    styles:[{width:'40px',height:'40px',background:'rgba(48,88,144,.88)',
-      borderRadius:'50%',color:'#fff',fontSize:'13px',fontWeight:'700',
-      textAlign:'center',lineHeight:'40px',border:'2px solid rgba(255,255,255,.5)'}]
-  });
-  _map.addControl(new kakao.maps.ZoomControl(),kakao.maps.ControlPosition.RIGHT);
-  _map.addControl(new kakao.maps.MapTypeControl(),kakao.maps.ControlPosition.TOPRIGHT);
-}
-
-function _renderMarkers(rows){
-  _markers.forEach(m=>m.setMap(null));
-  _markers=[];
-  if(_cluster)_cluster.clear();
-  const ms=[];
-  rows.forEach(r=>{
-    if(!r.gps)return;
-    const p=r.gps.replace(/\s/g,'').split(',');
-    if(p.length<2)return;
-    const lat=parseFloat(p[0]),lng=parseFloat(p[1]);
-    if(isNaN(lat)||isNaN(lng))return;
-    const c=_color(r.type,r.urgency),e=_emoji(r.type);
-    const m=new kakao.maps.Marker({
-      position:new kakao.maps.LatLng(lat,lng),
-      image:new kakao.maps.MarkerImage(_svg(c,e),new kakao.maps.Size(36,44),{offset:new kakao.maps.Point(18,44)}),
-      title:r.id
-    });
-    m._r=r;
-    kakao.maps.event.addListener(m,'click',function(){
-      const d=m._r;
-      const loc=d.location&&d.location!=='위치 미상'?d.location:d.gps;
-      const dt=d.reported_at?new Date(d.reported_at).toLocaleString('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}):'—';
-      _iw.setContent(`<div style="padding:12px 14px;min-width:190px;font-family:'Noto Sans KR',sans-serif;font-size:12px">
-        <div style="font-weight:700;color:#305890;margin-bottom:6px;font-size:13px">${d.id}</div>
-        <div style="margin-bottom:3px">${_emoji(d.type)} ${d.type||'—'}</div>
-        <div style="color:#4a5e78;margin-bottom:2px">📍 ${loc}</div>
-        <div style="color:#4a5e78;margin-bottom:8px">🕐 ${dt}</div>
-        <a href="report.html?id=${d.id}" style="color:#305890;font-weight:700;font-size:11px;border-bottom:1px solid #b0c8e0">상세 보기 →</a>
-      </div>`);
-      _iw.open(_map,m);
-    });
-    ms.push(m);_markers.push(m);
-  });
-  if(_cluster)_cluster.addMarkers(ms);
-  document.getElementById('map-count').textContent='GPS 신고 '+ms.length+'건 표시';
-}
-
-function filterMap(type,btn){
-  document.querySelectorAll('.mfb').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  let rows=_allRows;
-  if(type!=='all'){
-    if(type==='기타') rows=_allRows.filter(r=>!r.type||!['해안','해양','불법','응급','산불','도로'].some(k=>r.type.includes(k)));
-    else rows=_allRows.filter(r=>r.type&&r.type.includes(type));
-  }
-  _renderMarkers(rows);
-}
+function urgClass(u){return {긴급:'chip-red',높음:'chip-orange',보통:'chip-blue',낮음:'chip-gray'}[u]||'chip-gray';}
+function statClass(s){return {완료:'chip-green',승인:'chip-approved',출동중:'chip-blue',대기중:'chip-orange',접수:'chip-gray'}[s]||'chip-gray';}
+function typeIcon(t){t=t||'';return t.includes('해안')||t.includes('해양')?'':t.includes('불법')?'':t.includes('응급')?'':t.includes('도로')?'':t.includes('산불')?'':t.includes('식당')?'🍽️':t.includes('수질')?'💧':'';}
 
 async function loadMap(){
-  const rows=await sbGet('reports?select=id,type,location,gps,urgency,status,reported_at&order=reported_at.desc&limit=500').catch(()=>[]);
-  _allRows=rows;
-  document.getElementById('m-total').textContent=rows.length+'건';
-  document.getElementById('m-urgent').textContent=rows.filter(r=>r.urgency==='긴급').length+'건';
-  const gps=rows.filter(r=>r.gps);
-  document.getElementById('m-gps').textContent=gps.length+'건';
+  const rows = await sbGet('reports?select=id,type,location,gps,urgency,status,reported_at&order=reported_at.desc&limit=100').catch(()=>[]);
+  document.getElementById('m-total').textContent = rows.length+'건';
+  document.getElementById('m-urgent').textContent = rows.filter(r=>r.urgency==='긴급').length+'건';
+  const gpsRows = rows.filter(r=>r.gps);
+  document.getElementById('m-gps').textContent = gpsRows.length+'건';
 
-  if(window.kakao&&kakao.maps){
+  // 카카오맵 초기화
+  const mapDiv = document.getElementById('map');
+  if(window.kakao && kakao.maps){
     kakao.maps.load(()=>{
-      if(!_map)_initKakaoMap();
-      _renderMarkers(gps);
+      const map = new kakao.maps.Map(mapDiv,{center:new kakao.maps.LatLng(33.4996,126.5312),level:10});
+      gpsRows.forEach(r=>{
+        const parts = r.gps.replace(/\s/g,'').split(',');
+        if(parts.length<2) return;
+        const pos = new kakao.maps.LatLng(parseFloat(parts[0]),parseFloat(parts[1]));
+        const color = r.urgency==='긴급'?'#d93025':r.urgency==='높음'?'#e37400':r.urgency==='보통'?'#305890':'#4a5e78';
+        const marker = new kakao.maps.Marker({map,position:pos});
+        const iw = new kakao.maps.InfoWindow({content:`<div style="padding:6px 10px;font-size:12px;font-weight:700">${r.id}<br><span style="color:${color}">${r.urgency||'보통'}</span> · ${r.type||'—'}</div>`});
+        kakao.maps.event.addListener(marker,'click',()=>iw.open(map,marker));
+      });
     });
+  } else {
+    mapDiv.innerHTML = `<div style="text-align:center;color:var(--sub);padding:40px">
+      <div style="font-size:36px;margin-bottom:12px">🗺</div>
+      <b>GPS 신고 ${gpsRows.length}건</b> 등록됨<br>
+      <span style="font-size:12px;margin-top:8px;display:block">카카오맵 SDK 로드 후 마커가 표시됩니다</span>
+      <div style="margin-top:16px;display:flex;flex-wrap:wrap;gap:8px;justify-content:center">
+        ${gpsRows.slice(0,8).map(r=>`<span class="chip chip-blue">${r.id}</span>`).join('')}
+      </div></div>`;
   }
 
   // 목록
-  const el=document.getElementById('map-list');
+  const el = document.getElementById('map-list');
   if(!rows.length){el.innerHTML='<div class="empty">신고 데이터 없음</div>';return;}
-  el.innerHTML=`<table class="tbl"><thead><tr>
-    <th>신고번호</th><th>유형</th><th>위치</th><th>GPS</th><th>긴급도</th><th>상태</th><th>신고 일시</th>
-  </tr></thead><tbody>${rows.map(r=>`<tr>
-    <td><a class="rpt-id" href="report.html?id=${r.id}">${r.id}</a></td>
-    <td>${typeIcon(r.type)} ${r.type||'—'}</td>
-    <td class="loc-cell" data-gps="${r.gps||''}">${r.location&&r.location!=='위치 미상'?r.location:(r.gps||'—')}</td>
-    <td style="font-size:11px;color:var(--sub)">${r.gps||'—'}</td>
-    <td><span class="chip ${urgClass(r.urgency)}">${r.urgency||'—'}</span></td>
-    <td><span class="chip ${statClass(r.status)}">${r.status||'접수'}</span></td>
-    <td style="font-size:11px">${fmtDate(r.reported_at)}</td>
-  </tr>`).join('')}</tbody></table>`;
+  el.innerHTML = `<table class="tbl">
+    <thead><tr><th>신고번호</th><th>유형</th><th>위치</th><th>GPS</th><th>긴급도</th><th>상태</th><th>신고 일시</th></tr></thead>
+    <tbody>${rows.map(r=>`<tr>
+      <td><a class="rpt-id" href="report.html?id=${r.id}">${r.id}</a></td>
+      <td>${typeIcon(r.type)} ${r.type||'—'}</td>
+      <td class="loc-cell" data-gps="${r.gps||''}">${r.location&&r.location!=='위치 미상'?r.location:(r.gps||'—')}</td>
+      <td style="font-size:11px;color:var(--sub)">${r.gps||'—'}</td>
+      <td><span class="chip ${urgClass(r.urgency)}">${r.urgency||'—'}</span></td>
+      <td><span class="chip ${statClass(r.status)}">${r.status||'접수'}</span></td>
+      <td style="font-size:11px">${fmtDate(r.reported_at)}</td>
+    </tr>`).join('')}</tbody></table>`;
 
+  // 역지오코딩
   document.querySelectorAll('.loc-cell[data-gps]').forEach(cell=>{
-    const gps=cell.dataset.gps;if(!gps||cell.textContent!==gps)return;
-    const p=gps.replace(/\s/g,'').split(',');if(p.length<2)return;
+    const gps=cell.dataset.gps;
+    if(!gps||cell.textContent!==gps) return;
+    const p=gps.replace(/\s/g,'').split(',');
+    if(p.length<2) return;
     fetch(`https://dapi.kakao.com/v2/local/geo/coord2address.json?x=${p[1]}&y=${p[0]}&input_coord=WGS84`,
       {headers:{'Authorization':'KakaoAK 66648ca49f126d8752b33d542789ac56'}})
     .then(r=>r.json()).then(d=>{const a=d.documents?.[0]?.address?.address_name;if(a)cell.textContent=a;}).catch(()=>{});
   });
 }
-
 loadMap();
-setInterval(loadMap,30000);
+
 </script>
 </body>
 </html>
