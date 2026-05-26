@@ -5,21 +5,21 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FIIL 관리자 대시보드</title>
 <style>
-@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
 :root{
-  --primary:#0057A8;--primary-dk:#003C82;--primary-bg:#E8F0FA;
-  --green:#1e8e3e;--green-bg:#e6f4ea;
-  --orange:#e37400;--orange-bg:#fef7e0;
-  --red:#d93025;--red-bg:#fce8e6;
-  --surface:#fff;--bg:#f8f9fa;
-  --sidebar:#1a2332;
-  --border:#e0e0e0;--text:#202124;--sub:#5f6368;--hint:#9aa0a6;
+  --primary:#003087;--primary-dk:#001f5e;--primary-bg:#e8eef8;--primary-mid:#1351a8;
+  --green:#00703c;--green-bg:#e6f4ed;
+  --orange:#b45309;--orange-bg:#fef3c7;
+  --red:#9b1c1c;--red-bg:#fde8e8;
+  --surface:#fff;--bg:#f4f6fa;
+  --sidebar:#003087;
+  --border:#c0cde0;--text:#1a1a2e;--sub:#4a5568;--hint:#8795a8;
   --shadow-1:0 1px 2px rgba(60,64,67,.3),0 1px 3px rgba(60,64,67,.15);
   --shadow-2:0 1px 3px rgba(60,64,67,.3),0 4px 8px rgba(60,64,67,.15);
-  --r:8px;
+  --r:4px;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Pretendard',-apple-system,'Apple SD Gothic Neo',sans-serif;font-size:14px;color:var(--text);background:var(--bg);-webkit-font-smoothing:antialiased}
+body{font-family:'Noto Sans KR',sans-serif;font-size:14px;color:var(--text);background:var(--bg);-webkit-font-smoothing:antialiased}
 a{text-decoration:none;color:inherit}
 .sidebar{width:240px;background:var(--sidebar);color:#fff;position:fixed;top:0;left:0;bottom:0;z-index:200;display:flex;flex-direction:column;overflow-y:auto}
 .sb-brand{display:flex;align-items:center;gap:12px;padding:18px 20px;border-bottom:1px solid rgba(255,255,255,.08);transition:background .15s}.sb-brand:hover{background:rgba(255,255,255,.04)}
@@ -30,12 +30,12 @@ a{text-decoration:none;color:inherit}
 .sb-section{padding:16px 20px 6px;font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:rgba(255,255,255,.35)}
 .sb-item{display:flex;align-items:center;gap:12px;padding:10px 20px;font-size:13px;font-weight:500;color:rgba(255,255,255,.7);cursor:pointer;transition:background .15s,color .15s;border-left:3px solid transparent}
 .sb-item:hover{background:rgba(255,255,255,.06);color:#fff}
-.sb-item.active{background:rgba(26,115,232,.2);color:#fff;border-left-color:var(--primary)}
+.sb-item.active{background:rgba(255,255,255,.12);color:#fff;font-weight:700;border-left-color:rgba(255,255,255,.7)}
 .sb-badge{margin-left:auto;background:var(--primary);color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px}
 .sb-user{padding:14px 20px;border-top:1px solid rgba(255,255,255,.08);font-size:12px;color:rgba(255,255,255,.55)}
 .sb-user strong{display:block;color:#fff;font-size:13px;margin-bottom:2px}
 .main{margin-left:240px;min-height:100vh;display:flex;flex-direction:column}
-.topbar{position:sticky;top:0;z-index:100;background:var(--surface);border-bottom:1px solid var(--border);height:56px;display:flex;align-items:center;padding:0 24px;gap:12px;box-shadow:var(--shadow-1)}
+.topbar{position:sticky;top:0;z-index:100;background:var(--surface);border-bottom:2px solid var(--primary);height:52px;display:flex;align-items:center;padding:0 24px;gap:12px;box-shadow:var(--shadow-1)}
 .breadcrumb{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--sub);flex:1}
 .breadcrumb a{color:var(--sub)}
 .breadcrumb a:hover{color:var(--primary)}
@@ -60,13 +60,13 @@ a{text-decoration:none;color:inherit}
 .row-2{display:grid;grid-template-columns:3fr 1fr;gap:16px;margin-bottom:20px}
 .row-equal{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow-1)}
-.card-head{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border)}
-.card-title{font-size:13px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.5px}
+.card-head{display:flex;align-items:center;justify-content:space-between;padding:11px 18px;border-bottom:1px solid var(--border);background:var(--primary-bg)}
+.card-title{font-size:11px;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:.5px}
 .card-link{font-size:12px;color:var(--primary);font-weight:600}
 .card-link:hover{text-decoration:underline}
 .card-body{padding:16px 18px}
 .map-box{background:linear-gradient(135deg,#E8F0FA,#f0f9ff);border-radius:6px;height:200px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;margin-bottom:12px}
-.chip{display:inline-flex;align-items:center;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap}
+.chip{display:inline-flex;align-items:center;padding:2px 10px;border-radius:2px;font-size:11px;font-weight:700;white-space:nowrap;letter-spacing:.2px}
 .chip-green   {background:var(--green-bg);color:var(--green)}
 .chip-approved{background:#166534;color:#ffffff;font-weight:700}
 .chip-blue    {background:var(--primary-bg);color:var(--primary)}
@@ -124,16 +124,16 @@ a{text-decoration:none;color:inherit}
     <div class="sb-section">운영 현황</div>
     <a class="sb-item active" href="dashboard.html"><span>📊</span> 종합 대시보드</a>
     <a class="sb-item" href="#"><span>📋</span> 신고 현황 <span class="sb-badge" id="sb-badge">0</span></a>
-    <a class="sb-item" href="#"><span>🗺</span> 실시간 지도</a>
-    <a class="sb-item" href="#"><span>🚗</span> 출동 현황</a>
+    <a class="sb-item" href="map.html"><span>🗺</span> 실시간 지도</a>
+    <a class="sb-item" href="dispatch.html"><span>🚗</span> 출동 현황</a>
     <div class="sb-section">분석 · 보고</div>
-    <a class="sb-item" href="#"><span>📈</span> 통계 분석</a>
+    <a class="sb-item" href="stats.html"><span>📈</span> 통계 분석</a>
     <a class="sb-item" href="budget.html"><span>💰</span> 예산 · 비용</a>
-    <a class="sb-item" href="#"><span>📄</span> 조치 결과 보고서</a>
-    <a class="sb-item" href="#"><span>⛓</span> 블록체인 기록</a>
+    <a class="sb-item" href="results.html"><span>📄</span> 조치 결과 보고서</a>
+    <a class="sb-item" href="openhash.html"><span>⛓</span> 오픈해시 기록</a>
     <div class="sb-section">관리</div>
-    <a class="sb-item" href="#"><span>👥</span> 인력 · 장비</a>
-    <a class="sb-item" href="#"><span>⚙️</span> 시스템 설정</a>
+    <a class="sb-item" href="resources.html"><span>👥</span> 인력 · 장비</a>
+    <a class="sb-item" href="settings.html"><span>⚙️</span> 시스템 설정</a>
   </nav>
   <div class="sb-user"><strong>관리자 · 제주시 환경정책과</strong>최종 로그인: 오늘 09:14</div>
 </aside>

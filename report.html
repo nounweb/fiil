@@ -8,19 +8,19 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{
-  --primary:#0057A8;--primary-dk:#003C82;--primary-bg:#E8F0FA;
+  --primary:#003087;--primary-dk:#001f5e;--primary-bg:#e8eef8;
   --green:#1B6B3A;--green-bg:#E6F4EC;
-  --orange:#e37400;--orange-bg:#fef7e0;
+  --orange:#b45309;--orange-bg:#fef3c7;
   --red:#C01C28;--red-bg:#FEE2E2;
   --surface:#fff;--bg:#F4F6F9;
   --sidebar:#1C2B3A;
   --border:#D1D9E6;--text:#1A202C;--sub:#4A5568;--hint:#718096;
   --shadow:0 1px 3px rgba(0,0,0,0.08),0 1px 2px rgba(0,0,0,0.06);
   --shadow-md:0 4px 6px rgba(0,0,0,0.07),0 2px 4px rgba(0,0,0,0.06);
-  --r:8px;
+  --r:4px;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Pretendard',-apple-system,'Apple SD Gothic Neo',sans-serif;font-size:14px;color:var(--text);background:var(--bg);-webkit-font-smoothing:antialiased}
+body{font-family:'Noto Sans KR',sans-serif;font-size:14px;color:var(--text);background:var(--bg);-webkit-font-smoothing:antialiased}
 a{text-decoration:none;color:inherit}
 
 /* ── SIDEBAR ── */
@@ -41,7 +41,7 @@ a{text-decoration:none;color:inherit}
 .main{margin-left:220px;min-height:100vh;display:flex;flex-direction:column}
 
 /* ── TOPBAR ── */
-.topbar{position:sticky;top:0;z-index:100;background:var(--surface);border-bottom:1px solid var(--border);height:52px;display:flex;align-items:center;padding:0 22px;gap:10px;box-shadow:var(--shadow)}
+.topbar{position:sticky;top:0;z-index:100;background:var(--surface);border-bottom:2px solid var(--primary);height:52px;display:flex;align-items:center;padding:0 22px;gap:10px;box-shadow:var(--shadow)}
 .breadcrumb{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--hint);flex:1}
 .breadcrumb a{color:var(--hint)}
 .breadcrumb a:hover{color:var(--primary)}
@@ -98,7 +98,7 @@ a{text-decoration:none;color:inherit}
 /* ── MATERIALS TABLE ── */
 .mat-table{width:100%;border-collapse:collapse;font-size:12px}
 .mat-table th{padding:8px 10px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--hint);border-bottom:2px solid var(--border);background:var(--bg)}
-.mat-table td{padding:9px 10px;border-bottom:1px solid var(--border);vertical-align:middle}
+.mat-table td{padding:9px 10px;border-bottom:2px solid var(--primary);vertical-align:middle}
 .mat-table tr:last-child td{border-bottom:none}
 .mat-bar{width:80px;height:5px;background:var(--border);border-radius:3px;overflow:hidden;display:inline-block}
 .mat-fill{height:100%;border-radius:3px;background:var(--primary)}
@@ -112,7 +112,7 @@ a{text-decoration:none;color:inherit}
 .subtotal-chip{padding:5px 12px;border-radius:6px;font-size:11px;font-weight:600;display:flex;align-items:center;gap:5px}
 
 /* ── COST TABLE ── */
-.cost-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px}
+.cost-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:2px solid var(--primary);font-size:13px}
 .cost-row:last-child{border-bottom:none;font-weight:700;font-size:14px}
 .cost-lbl{color:var(--sub)}
 .cost-sub{font-size:10px;color:var(--hint);display:block;margin-top:1px}
@@ -415,7 +415,7 @@ function render(r) {
       <div style="display:flex;gap:8px;flex-shrink:0">
         <button class="btn btn-outline" onclick="window.print()">🖨 인쇄</button>
         <button class="btn btn-outline" onclick="copyHash()">⛓ 해시 복사</button>
-        <button class="btn btn-primary" id="approve-btn" onclick="approveReport()" style="background:#16a34a;border-color:#16a34a;">✅ 승인</button>
+        <button class="btn btn-primary" id="approve-btn" onclick="approveReport()" style="background:var(--green);border-color:var(--green);">✅ 승인</button>
       </div>
     </div>
     <div class="rh-meta">
