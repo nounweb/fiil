@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>실시간 지도 — FIIL.kr</title>
+<script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=c7160a2d047af2808065d9e1929a66a7&libraries=services"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
 :root{
@@ -225,7 +226,7 @@ async function loadMap(){
     const p=gps.replace(/\s/g,'').split(',');
     if(p.length<2) return;
     (function(lat,lng,cell){
-      if(!kakao.maps.services) return;
+      if(!window.kakao||!kakao.maps||!kakao.maps.services) return;
       new kakao.maps.services.Geocoder().coord2Address(lng,lat,(result,status)=>{
         if(status===kakao.maps.services.Status.OK&&result[0]){
           const a=result[0].road_address?.address_name||result[0].address?.address_name;
