@@ -349,7 +349,7 @@ function renderReports(reports){
       '<td>'+(r.dispatch&&r.dispatch.personnel?r.dispatch.personnel+'명':'—')+'</td>'+
       '<td>₩'+cost.toLocaleString()+'</td>'+
       '<td>'+(r.reported_at?r.reported_at.slice(0,16).replace('T',' '):'방금 전')+'</td>';
-    tbody.insertBefore(tr, tbody.firstChild);
+    tbody.appendChild(tr);  // 최신순(desc) 정렬이므로 순서대로 추가
     added++;
   });
   if(added>0){
