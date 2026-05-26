@@ -46,6 +46,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); font-family:
   transition: transform 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s;
   background: var(--bg);
   overflow-y: auto;
+  padding-bottom: 72px; /* bottom-nav 높이만큼 여백 */
 }
 .screen.hidden { transform: translateX(100%); opacity: 0; pointer-events: none; }
 .screen.slide-out { transform: translateX(-100%); opacity: 0; pointer-events: none; }
@@ -231,13 +232,17 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); font-family:
 
 /* ── BOTTOM NAV ── */
 .bottom-nav {
-  position: absolute;
-  bottom: 0; left: 0; right: 0;
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 430px;
   height: 72px;
   background: var(--white);
   border-top: 1px solid var(--border);
   display: flex;
-  z-index: 20;
+  z-index: 200;
   box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
 }
 .nav-item {
@@ -1085,25 +1090,144 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); font-family:
 </div><!-- /app -->
 
 <script>
-// ── Supabase 설정 ──────────────────────────────────────────
-const _SB_URL = 'https://ebbecjfrwaswbdybbgiu.supabase.co';
-const _SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImViYmVjamZyd2Fzd2JkeWJiZ2l1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1NjE5ODQsImV4cCI6MjA5NTEzNzk4NH0.H2ahQKtWdSke04Pdi3hDY86pdTx7UUKPUpQMlS_zciA';
+// ══════════════════════════════════════════════════
+// 설정 — API 키 하드코딩 (테스트용)
+// ══════════════════════════════════════════════════
+const DEEPSEEK_KEY = 'sk-e4a6f005aecf43d4aa60e77bb71de14c';
+const GEMINI_KEY   = 'AIzaSyDiytKUg_0MJVBM3gFYzTms7mO6Y2mhLT4';
+const SB_URL       = 'https://ebbecjfrwaswbdybbgiu.supabase.co';
+const SB_KEY       = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImViYmVjamZyd2Fzd2JkeWJiZ2l1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1NjE5ODQsImV4cCI6MjA5NTEzNzk4NH0.H2ahQKtWdSke04Pdi3hDY86pdTx7UUKPUpQMlS_zciA';
 
-async function _sbFetch(path) {
-  const res = await fetch(_SB_URL + '/rest/v1/' + path, {
-    headers: { 'apikey': _SB_KEY, 'Authorization': 'Bearer ' + _SB_KEY }
-  });
-  if (!res.ok) throw new Error('Supabase ' + res.status);
-  return res.json();
+// GitHub raw 프롬프트 URL
+const PROMPT_BASE  = 'https://raw.githubusercontent.com/nounweb/fiil/main/prompts/';
+const PROMPT_IMG   = PROMPT_BASE + 'SP-14-IMG_kcleaner_vision_prompt_v1.0.txt';
+const PROMPT_CLN   = PROMPT_BASE + 'SP-14_kcleaner_v1.2.txt';
+
+// ── 프롬프트 캐시 ─────────────────────────────────
+const _promptCache = {};
+async function _loadPrompt(url) {
+  if (_promptCache[url]) return _promptCache[url];
+  const res = await fetch(url);
+  if (!res.ok) throw new Error('프롬프트 로드 실패: ' + url);
+  _promptCache[url] = await res.text();
+  return _promptCache[url];
 }
 
-// ── 상태 ──────────────────────────────────────────────────
-let currentScreen = 'screen-home';
-let previousScreen = 'screen-home';
-let photoDataUrl = null;
-let gpsCoords = null;
+// ── Supabase 헬퍼 ─────────────────────────────────
+async function _sbFetch(path, method='GET', body=null) {
+  const opts = {
+    method,
+    headers: {
+      'apikey': SB_KEY,
+      'Authorization': 'Bearer ' + SB_KEY,
+      'Content-Type': 'application/json',
+      'Prefer': method === 'POST' ? 'return=representation' : '',
+    },
+  };
+  if (body) opts.body = JSON.stringify(body);
+  const res = await fetch(SB_URL + '/rest/v1/' + path, opts);
+  if (!res.ok) throw new Error('Supabase ' + res.status);
+  return method === 'POST' ? res.json() : res.json();
+}
 
-// ── 내비게이션 ─────────────────────────────────────────────
+// ── Gemini Vision 분석 (SP-14-IMG) ───────────────
+async function _geminiAnalyze(imageFile) {
+  const systemPrompt = await _loadPrompt(PROMPT_IMG);
+  const base64 = await new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result.split(',')[1]);
+    r.onerror = rej;
+    r.readAsDataURL(imageFile);
+  });
+  const mime = imageFile.type || 'image/jpeg';
+  const body = {
+    system_instruction: { parts: [{ text: systemPrompt }] },
+    contents: [{
+      parts: [
+        { inline_data: { mime_type: mime, data: base64 } },
+        { text: '위 이미지를 분석하여 지정된 JSON 형식으로만 출력하라.' }
+      ]
+    }],
+    generationConfig: { temperature: 0.1, maxOutputTokens: 1024 }
+  };
+  const res = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`,
+    { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }
+  );
+  if (!res.ok) throw new Error('Gemini API ' + res.status);
+  const data = await res.json();
+  const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
+  return JSON.parse(text.replace(/```json|```/g, '').trim());
+}
+
+// ── DeepSeek 신고서 생성 (SP-14 K-Cleaner) ───────
+async function _deepseekReport(geminiJson, category, desc, gps, address) {
+  const systemPrompt = await _loadPrompt(PROMPT_CLN);
+  const userMsg =
+    `[Gemini Vision 현장 분석 결과 — SP-14-IMG-v1.0]\n` +
+    JSON.stringify(geminiJson, null, 2) +
+    `\n\n신고 유형: ${category}\n` +
+    `사용자 설명: ${desc || '없음'}\n` +
+    `GPS: ${gps || '없음'}\n` +
+    `주소: ${address || '없음'}\n\n` +
+    `위 데이터를 바탕으로 K-Cleaner v1.2 방법론에 따라 신고서 요약(2~3문장)과 권고 조치 3~4가지를 작성하라.` +
+    `출력 형식: {"summary":"...","actions":["...","...","..."]}`;
+
+  const res = await fetch('https://api.deepseek.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${DEEPSEEK_KEY}`,
+    },
+    body: JSON.stringify({
+      model: 'deepseek-chat',
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user',   content: userMsg },
+      ],
+      max_tokens: 512,
+      temperature: 0.3,
+    }),
+  });
+  if (!res.ok) throw new Error('DeepSeek API ' + res.status);
+  const data = await res.json();
+  const text = data.choices?.[0]?.message?.content || '{}';
+  try {
+    return JSON.parse(text.replace(/```json|```/g, '').trim());
+  } catch {
+    return { summary: text.slice(0, 200), actions: [] };
+  }
+}
+
+// ── Supabase reports 저장 ────────────────────────
+async function _saveReport(payload) {
+  const rows = await _sbFetch('reports', 'POST', payload);
+  return rows?.[0];
+}
+
+// ── 카카오 역지오코딩 ────────────────────────────
+async function _reverseGeocode(lat, lng) {
+  try {
+    const res = await fetch(
+      `https://dapi.kakao.com/v2/local/geo/coord2address.json?x=${lng}&y=${lat}&input_coord=WGS84`,
+      { headers: { 'Authorization': 'KakaoAK 66648ca49f126d8752b33d542789ac56' } }
+    );
+    const data = await res.json();
+    return data.documents?.[0]?.address?.address_name || null;
+  } catch { return null; }
+}
+
+// ══════════════════════════════════════════════════
+// 앱 상태
+// ══════════════════════════════════════════════════
+let currentScreen  = 'screen-home';
+let previousScreen = 'screen-home';
+let photoDataUrl   = null;
+let photoFile      = null;
+let gpsCoords      = null;
+let gpsAddress     = null;
+
+// ── 내비게이션 ───────────────────────────────────
 function goScreen(id, category) {
   const prev = document.getElementById(currentScreen);
   const next = document.getElementById(id);
@@ -1121,27 +1245,40 @@ function goScreen(id, category) {
   }
   setTimeout(() => prev.classList.add('hidden'), 350);
 }
-
 function goBack() {
   goScreen(previousScreen === currentScreen ? 'screen-home' : previousScreen);
 }
 
-// GPS simulation
+// ── GPS ──────────────────────────────────────────
 function initGPS() {
-  setTimeout(() => {
-    const lat = (33.4996 + (Math.random() - 0.5) * 0.02).toFixed(6);
-    const lng = (126.5312 + (Math.random() - 0.5) * 0.02).toFixed(6);
+  if (!navigator.geolocation) return;
+  navigator.geolocation.getCurrentPosition(async pos => {
+    const lat = pos.coords.latitude.toFixed(6);
+    const lng = pos.coords.longitude.toFixed(6);
     gpsCoords = { lat, lng };
     document.getElementById('gpsSpinner').style.display = 'none';
-    document.getElementById('gpsVal').textContent = `${lat}, ${lng} (정확도 ±5m)`;
+    document.getElementById('gpsVal').textContent = `${lat}, ${lng} (±${Math.round(pos.coords.accuracy)}m)`;
     document.getElementById('gpsBar').style.background = 'var(--accent-light)';
-  }, 1800);
+    // 역지오코딩
+    gpsAddress = await _reverseGeocode(lat, lng);
+    if (gpsAddress) {
+      document.getElementById('gpsVal').textContent = gpsAddress + ` (${lat}, ${lng})`;
+    }
+  }, () => {
+    // 실패 시 시뮬레이션
+    const lat = (33.4996 + (Math.random()-0.5)*0.02).toFixed(6);
+    const lng = (126.5312 + (Math.random()-0.5)*0.02).toFixed(6);
+    gpsCoords = { lat, lng };
+    document.getElementById('gpsSpinner').style.display = 'none';
+    document.getElementById('gpsVal').textContent = `${lat}, ${lng} (시뮬레이션)`;
+  });
 }
 
-// Photo handling
+// ── 사진 처리 ────────────────────────────────────
 function handlePhoto(input) {
   const file = input.files[0];
   if (!file) return;
+  photoFile = file;
   const reader = new FileReader();
   reader.onload = e => {
     photoDataUrl = e.target.result;
@@ -1154,7 +1291,7 @@ function handlePhoto(input) {
   reader.readAsDataURL(file);
 }
 function clearPhoto() {
-  photoDataUrl = null;
+  photoDataUrl = null; photoFile = null;
   document.getElementById('previewImg').style.display = 'none';
   document.getElementById('previewImg').src = '';
   document.getElementById('uploadPrompt').style.display = 'flex';
@@ -1163,7 +1300,7 @@ function clearPhoto() {
   document.getElementById('photoInput').value = '';
 }
 
-// Submit & AI analysis flow
+// ── 신고 제출 ────────────────────────────────────
 function submitReport() {
   const cat = document.getElementById('categorySelect').value;
   if (!cat) { alert('신고 유형을 선택해주세요.'); return; }
@@ -1171,222 +1308,191 @@ function submitReport() {
   runAIAnalysis(cat);
 }
 
-function runAIAnalysis(category) {
-  // Show the submitted photo in analysis screen
+async function runAIAnalysis(category) {
+  // 분석 화면 사진 표시
   const apic = document.getElementById('analysisPic');
   if (photoDataUrl) {
-    apic.innerHTML = `<img src="${photoDataUrl}" style="width:100%;height:100%;object-fit:cover;"><div class="analysis-photo-overlay"><div class="analysis-photo-label">🔍 AI 스캔 중</div></div>`;
+    apic.innerHTML = `<img src="${photoDataUrl}" style="width:100%;height:100%;object-fit:cover;">
+      <div class="analysis-photo-overlay"><div class="analysis-photo-label">🔍 AI 스캔 중</div></div>`;
   }
 
-  const steps = [
-    {delay:400, id:'step1', dot:'dot1', sp:'sp1', ck:'ck1'},
-    {delay:1400, id:'step2', dot:'dot2', sp:'sp2', ck:'ck2'},
-    {delay:2600, id:'step3', dot:'dot3', sp:'sp3', ck:'ck3'},
-    {delay:3800, id:'step4', dot:'dot4', sp:'sp4', ck:'ck4'},
-    {delay:5000, id:'step5', dot:'dot5', sp:'sp5', ck:'ck5'},
-  ];
+  const desc = document.getElementById('descInput')?.value || '';
+  const gps  = gpsCoords ? `${gpsCoords.lat}, ${gpsCoords.lng}` : null;
 
-  steps.forEach((s, i) => {
-    setTimeout(() => {
-      document.getElementById(s.id).classList.add('visible');
-      document.getElementById(s.dot).classList.add('active');
-      document.getElementById(s.sp).style.display = 'block';
-    }, s.delay);
-    setTimeout(() => {
-      document.getElementById(s.dot).classList.remove('active');
-      document.getElementById(s.dot).classList.add('done');
-      document.getElementById(s.sp).style.display = 'none';
-      document.getElementById(s.ck).style.display = 'block';
-    }, s.delay + 900);
-  });
+  // 단계별 UI 업데이트
+  const setStep = (n, done=false) => {
+    for (let i=1; i<=5; i++) {
+      const dot = document.getElementById(`dot${i}`);
+      const sp  = document.getElementById(`sp${i}`);
+      const ck  = document.getElementById(`ck${i}`);
+      if (!dot) continue;
+      if (i < n)      { dot.className='ai-step-dot done'; sp.style.display='none'; ck.style.display='block'; }
+      else if (i===n) { dot.className='ai-step-dot active'; sp.style.display='block'; ck.style.display='none'; }
+      else            { dot.className='ai-step-dot'; sp.style.display='none'; ck.style.display='none'; }
+      document.getElementById(`step${i}`)?.classList.add('visible');
+    }
+  };
 
-  setTimeout(() => {
-    showResult(category);
-  }, 6800);
+  let geminiResult = null;
+  let reportData   = null;
+
+  try {
+    // 1단계: GPS + 발신자
+    setStep(1);
+    await new Promise(r => setTimeout(r, 600));
+    setStep(2);
+
+    // 2단계: Gemini Vision 분석
+    if (photoFile) {
+      try {
+        geminiResult = await _geminiAnalyze(photoFile);
+        console.log('[Gemini] 분석 완료:', geminiResult.scale, geminiResult.risk_level);
+      } catch(e) {
+        console.warn('[Gemini] 실패:', e.message);
+      }
+    }
+    setStep(3);
+
+    // 3단계: DeepSeek 신고서 생성
+    if (geminiResult) {
+      try {
+        reportData = await _deepseekReport(geminiResult, category, desc, gps, gpsAddress);
+        console.log('[DeepSeek] 신고서 생성 완료');
+      } catch(e) {
+        console.warn('[DeepSeek] 실패:', e.message);
+      }
+    }
+    setStep(4);
+
+    // 4단계: Supabase 저장 (백그라운드)
+    const reportId = 'RPT-2026-' + (Math.floor(Math.random()*9000)+1000);
+    const urgencyMap = {S0:'낮음', S1:'보통', S2:'높음', S3:'긴급'};
+    const payload = {
+      id:          reportId,
+      type:        category,
+      location:    gpsAddress || '위치 미상',
+      gps:         gps,
+      reported_at: new Date().toISOString(),
+      urgency:     urgencyMap[geminiResult?.risk_level] || '보통',
+      status:      '접수',
+      analysis: {
+        summary:      reportData?.summary || geminiResult?.scene_description || '',
+        actions:      reportData?.actions || [],
+        gemini:       geminiResult,
+        image_quality: geminiResult?.image_quality,
+        scale:        geminiResult?.scale,
+        risk_level:   geminiResult?.risk_level,
+        total_weight: geminiResult?.total_weight_kg_est,
+      },
+    };
+
+    // 백그라운드 저장 (UI 블로킹 없음)
+    _saveReport(payload).then(() => {
+      console.log('[Supabase] 저장 완료:', reportId);
+    }).catch(e => {
+      console.warn('[Supabase] 저장 실패:', e.message);
+    });
+
+    setStep(5);
+    await new Promise(r => setTimeout(r, 800));
+
+    // 5단계: 결과 화면
+    showResult(category, reportId, geminiResult, reportData, gpsAddress || gps);
+
+  } catch(e) {
+    console.error('[분석 오류]', e);
+    // 오류 시 더미 데이터로 fallback
+    const reportId = 'RPT-2026-' + (Math.floor(Math.random()*9000)+1000);
+    showResult(category, reportId, null, null, gpsAddress || gps);
+  }
 }
 
+// ── 결과 화면 렌더링 ─────────────────────────────
 const analysisDB = {
-  '응급환자': {
-    urgency: '🔴 최고 긴급',
-    analysis: '사진에서 쓰러진 사람 또는 의료 도움이 필요한 상황이 감지되었습니다. 119 구급대 즉시 출동을 요청하며, 주변 자동심장충격기(AED) 위치가 안내됩니다. 신고자에게 응급처치 가이드가 전송됩니다.',
-    actions: ['119 구급대 즉시 출동 요청', '주변 AED 위치 안내 (37m)', '응급처치 가이드 SMS 전송', '보호자/연락처 확인 요청']
-  },
-  '해안쓰레기': {
-    urgency: '🟡 보통',
-    analysis: '해안선에 플라스틱 폐기물, 그물망, 부유 쓰레기가 감지되었습니다. 규모는 중간 수준(예상 100~300kg)으로 판단됩니다. 해양환경팀 수거 차량 및 고무보트 출동이 배정되었습니다.',
-    actions: ['해양환경팀 수거팀 출동 (3명)', '고무보트 1척 배정', '수거 완료 후 처리 보고서 자동 생성', '블록체인 기록 저장']
-  },
-  '불법투기': {
-    urgency: '🟠 높음',
-    analysis: '지정되지 않은 장소에 대규모 폐기물이 무단 투기된 정황이 확인됩니다. CCTV 분석을 통해 차량번호 추적이 시작되었으며, 환경과 단속팀이 출동합니다.',
-    actions: ['환경과 단속팀 출동', 'CCTV 분석 및 차량번호 추적', '폐기물 수거팀 2차 배정', '과태료 부과 처리 시작']
-  },
-  '식당위생': {
-    urgency: '🟡 보통',
-    analysis: '식당 내 위생 관련 문제가 사진에서 감지되었습니다. 주방 청결 상태, 식품 보관 방식 등에서 위생 기준 미달 가능성이 있습니다. 식품위생 담당자가 현장 점검을 위해 배정되었습니다.',
-    actions: ['식품위생 담당자 현장 점검 배정', '영업소 위생 점검표 자동 작성', '처리 결과 공개 등록', '재발 시 영업정지 경고']
-  },
-  '도로파손': {
-    urgency: '🟠 높음',
-    analysis: '도로면에 포트홀(지름 약 30~50cm, 깊이 10cm 이상)이 감지되었습니다. 차량 파손 및 사고 위험이 높습니다. 도로과 긴급보수팀이 배정되며 임시 안전 표지 설치가 선행됩니다.',
-    actions: ['도로과 긴급보수팀 출동', '임시 안전표지 설치 (30분 내)', '아스팔트 보수 작업 배정', '인근 운전자 우회 안내 문자 발송']
-  },
-  '산불연기': {
-    urgency: '🔴 최고 긴급',
-    analysis: '연기 또는 화재 징후가 감지되었습니다. 산림청 및 소방서에 동시 신고가 접수되었습니다. 헬기 출동 여부를 즉시 검토합니다.',
-    actions: ['119 소방 즉시 출동 요청', '산림청 동시 신고 접수', '인근 주민 대피 안내 발송', '헬기 출동 여부 검토']
-  },
-  '수질오염': {
-    urgency: '🟠 높음',
-    analysis: '수체에서 이상 색상, 오염물질 유입 등의 징후가 감지되었습니다. 환경부 수질오염 대응팀이 즉시 샘플 채취를 위해 출동합니다.',
-    actions: ['환경부 수질오염 대응팀 출동', '현장 수질 샘플 채취', '오염원 역추적 조사 시작', '인근 취수장 모니터링 강화']
-  },
-  '소음진동': {
-    urgency: '🟢 낮음',
-    analysis: '사진 및 부가 정보를 기반으로 소음·진동 관련 민원이 접수되었습니다. 소음 측정팀이 현장에 파견되어 기준치 초과 여부를 측정합니다.',
-    actions: ['소음 측정팀 현장 파견', '소음 데시벨 기준치 측정', '민원인에게 처리 결과 통보', '기준 초과 시 시정명령 발부']
-  },
-  '기타': {
-    urgency: '🟡 보통',
-    analysis: 'AI가 사진을 분석하여 신고 내용을 자동 분류하였습니다. 담당 부서로 즉시 전달되며 24시간 내에 처리 결과가 안내됩니다.',
-    actions: ['담당 부서 자동 배정 완료', '현장 점검팀 출동 요청', '처리 결과 48시간 내 통보', '블록체인 기록 저장']
-  }
+  '응급환자':  { urgency:'🔴 최고 긴급', actions:['119 구급대 즉시 출동 요청','주변 AED 위치 안내','응급처치 가이드 SMS 전송','보호자 연락처 확인'] },
+  '해안쓰레기':{ urgency:'🟡 보통',     actions:['해양환경팀 수거팀 출동 (3명)','고무보트 1척 배정','처리 보고서 자동 생성','블록체인 기록 저장'] },
+  '불법투기':  { urgency:'🟠 높음',     actions:['환경과 단속팀 출동','CCTV 분석 및 차량 추적','폐기물 수거팀 배정','과태료 부과 처리'] },
+  '식당위생':  { urgency:'🟡 보통',     actions:['식품위생 담당자 점검','위생 점검표 자동 작성','처리 결과 공개 등록','재발 시 영업정지 경고'] },
+  '도로파손':  { urgency:'🟠 높음',     actions:['도로과 긴급보수팀 출동','임시 안전표지 설치','아스팔트 보수 배정','우회 안내 문자 발송'] },
+  '산불연기':  { urgency:'🔴 최고 긴급', actions:['119 소방 즉시 출동','산림청 동시 신고','인근 주민 대피 안내','헬기 출동 검토'] },
+  '수질오염':  { urgency:'🟠 높음',     actions:['수질오염 대응팀 출동','현장 수질 샘플 채취','오염원 역추적 조사','취수장 모니터링 강화'] },
+  '소음진동':  { urgency:'🟢 낮음',     actions:['소음 측정팀 파견','소음 데시벨 측정','민원인 처리 결과 통보','기준 초과 시 시정명령'] },
+  '기타':      { urgency:'🟡 보통',     actions:['담당 부서 자동 배정','현장 점검팀 출동','처리 결과 48시간 내 통보','블록체인 기록 저장'] },
 };
 
-function showResult(category) {
+function showResult(category, reportId, gemini, report, location) {
   goScreen('screen-result');
   const db = analysisDB[category] || analysisDB['기타'];
-  const code = 'RPT-2026-' + (Math.floor(Math.random() * 9000) + 1000);
-  document.getElementById('resultCode').textContent = code;
-  document.getElementById('resType').textContent = category;
-  document.getElementById('resUrgency').textContent = db.urgency;
-  document.getElementById('resTime').textContent = new Date().toLocaleString('ko-KR');
+
+  document.getElementById('resultCode').textContent = reportId || 'RPT-2026-????';
+  document.getElementById('resType').textContent    = category;
+  document.getElementById('resTime').textContent    = new Date().toLocaleString('ko-KR');
+  document.getElementById('resUrgency').textContent =
+    gemini ? { S0:'🟢 낮음', S1:'🟡 보통', S2:'🟠 높음', S3:'🔴 긴급' }[gemini.risk_level] || db.urgency
+           : db.urgency;
+
   if (gpsCoords) {
     document.getElementById('resGps').textContent = `${gpsCoords.lat}, ${gpsCoords.lng}`;
-    document.getElementById('resLoc').textContent = '제주시 연동 일대 (GPS 자동입력)';
   }
-  document.getElementById('aiAnalysisText').textContent = db.analysis;
+  document.getElementById('resLoc').textContent = location || '위치 미상';
 
-  const al = document.getElementById('actionList');
-  al.innerHTML = '';
-  db.actions.forEach((a, i) => {
-    al.innerHTML += `<div class="action-item"><div class="action-num">${i+1}</div><div class="action-text">${a}</div></div>`;
-  });
-}
-
-// ── Supabase 신고 데이터 → result 화면 렌더링 ──────────────
-function _renderReport(row) {
-  goScreen('screen-result');
-
-  // 신고 번호
-  document.getElementById('resultCode').textContent = row.id || '—';
-
-  // 신고 정보
-  document.getElementById('resType').textContent    = row.type || row.type_code || '—';
-  document.getElementById('resTime').textContent    = row.reported_at
-    ? new Date(row.reported_at).toLocaleString('ko-KR') : '—';
-  document.getElementById('resGps').textContent     = row.gps || '—';
-  document.getElementById('resLoc').textContent     = row.location || '—';
-
-  // 긴급도
-  const urgencyMap = { '낮음':'🟢 낮음', '보통':'🟡 보통', '높음':'🟠 높음', '긴급':'🔴 긴급' };
-  document.getElementById('resUrgency').textContent = urgencyMap[row.urgency] || row.urgency || '—';
-
-  // AI 분석 결과
-  const analysis = row.analysis || {};
+  // AI 분석 결과 — DeepSeek 요약 우선, 없으면 Gemini scene_description
   document.getElementById('aiAnalysisText').textContent =
-    analysis.summary || row.gopangAnalysis?.summary || '분석 결과 없음';
+    report?.summary || gemini?.scene_description ||
+    (analysisDB[category] ? `${category} 신고가 접수되었습니다. 담당팀이 배정됩니다.` : '분석 완료');
 
-  // 권고 조치 사항 — Supabase 데이터 기반
+  // 권고 조치 — DeepSeek actions 우선
+  const actions = (report?.actions?.length > 0) ? report.actions : db.actions;
   const al = document.getElementById('actionList');
   al.innerHTML = '';
-  const actions = _buildActions(row);
   actions.forEach((a, i) => {
     al.innerHTML += `<div class="action-item"><div class="action-num">${i+1}</div><div class="action-text">${a}</div></div>`;
   });
-
-  // 신고자 (더미 유지 — 개인정보 보호)
-  // resReporter 는 별도 표시 없음
-
-  // 이미지 (있을 경우)
-  if (row.image_url) {
-    const imgEl = document.createElement('img');
-    imgEl.src = row.image_url;
-    imgEl.style.cssText = 'width:100%;border-radius:var(--radius);margin-bottom:14px;max-height:220px;object-fit:cover;';
-    const body = document.querySelector('.result-body');
-    if (body) body.insertBefore(imgEl, body.firstChild);
-  }
 }
 
-function _buildActions(row) {
-  const type = row.type || '';
-  const db   = analysisDB[
-    type.includes('해안') || type.includes('해양') ? '해안쓰레기' :
-    type.includes('불법') ? '불법투기' :
-    type.includes('응급') ? '응급환자' :
-    type.includes('도로') ? '도로파손' :
-    type.includes('산불') ? '산불연기' :
-    type.includes('수질') ? '수질오염' :
-    type.includes('소음') ? '소음진동' :
-    type.includes('식당') ? '식당위생' : '기타'
-  ] || analysisDB['기타'];
-  return db.actions;
-}
-
-// ── Supabase → 내 신고 현황(status) 화면 ──────────────────
+// ── Supabase → 내 신고 현황 화면 ─────────────────
 async function _loadStatusScreen() {
   const body = document.querySelector('#screen-status .status-body');
   if (!body) return;
   body.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted);">불러오는 중…</div>';
-
   try {
-    // 최근 10건 조회
     const rows = await _sbFetch(
       'reports?select=id,type,location,reported_at,urgency,status&order=reported_at.desc&limit=10'
     );
-
     if (!rows.length) {
       body.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted);">신고 내역이 없습니다.</div>';
       return;
     }
-
-    const statusMap  = { '접수':'접수', '처리중':'출동중', '완료':'완료' };
     const badgeClass = { '접수':'badge-new', '처리중':'badge-active', '완료':'badge-done' };
-    const typeIcon   = (t='') =>
+    const typeIcon = (t='') =>
       t.includes('해안')||t.includes('해양') ? '🏖️' :
-      t.includes('불법') ? '🗑️' :
-      t.includes('응급') ? '🚨' :
-      t.includes('도로') ? '🚧' :
-      t.includes('산불') ? '🔥' : '📋';
-
+      t.includes('불법') ? '🗑️' : t.includes('응급') ? '🚨' :
+      t.includes('도로') ? '🚧' : t.includes('산불') ? '🔥' : '📋';
     body.innerHTML = rows.map(r => {
-      const st    = statusMap[r.status] || r.status || '접수';
-      const bc    = badgeClass[r.status] || 'badge-new';
-      const date  = r.reported_at ? new Date(r.reported_at).toLocaleDateString('ko-KR') : '';
-      const prog  = r.status === '완료' ? 100 : r.status === '처리중' ? 60 : 20;
+      const st   = r.status || '접수';
+      const bc   = badgeClass[st] || 'badge-new';
+      const date = r.reported_at ? new Date(r.reported_at).toLocaleDateString('ko-KR') : '';
+      const prog = st==='완료' ? 100 : st==='처리중' ? 60 : 20;
       return `
-        <div class="status-card" onclick="_openReport('${r.id}')">
+        <div class="status-card" onclick="_openReport('${r.id}')" style="cursor:pointer;">
           <div class="status-card-top">
             <div class="status-card-img">${typeIcon(r.type)}</div>
             <div class="status-card-info">
-              <div class="status-card-title">${r.type || '신고'}</div>
+              <div class="status-card-title">${r.type||'신고'}</div>
               <div class="status-card-meta">${r.id} · ${date}</div>
             </div>
             <span class="recent-badge ${bc}">${st}</span>
           </div>
-          <div class="status-track">
-            <div class="track-steps">
-              <div class="track-progress-line" style="width:${prog}%"></div>
-              <div class="track-step"><div class="track-dot ${prog>=20?'done':'pending'}">${prog>=20?'✓':'·'}</div><div class="track-label">접수</div></div>
-              <div class="track-step"><div class="track-dot ${prog>=40?'done':'pending'}">${prog>=40?'✓':'·'}</div><div class="track-label">분류</div></div>
-              <div class="track-step"><div class="track-dot ${prog>=60?(prog>60?'done':'active'):'pending'}">${prog>=60?(prog>60?'✓':'🚗'):'·'}</div><div class="track-label">출동</div></div>
-              <div class="track-step"><div class="track-dot ${prog>=80?'done':'pending'}">${prog>=80?'✓':'·'}</div><div class="track-label">처리</div></div>
-              <div class="track-step"><div class="track-dot ${prog>=100?'done':'pending'}">${prog>=100?'✓':'·'}</div><div class="track-label">완료</div></div>
-            </div>
-          </div>
+          <div class="status-track"><div class="track-steps">
+            <div class="track-progress-line" style="width:${prog}%"></div>
+            <div class="track-step"><div class="track-dot ${prog>=20?'done':'pending'}">${prog>=20?'✓':'·'}</div><div class="track-label">접수</div></div>
+            <div class="track-step"><div class="track-dot ${prog>=40?'done':'pending'}">${prog>=40?'✓':'·'}</div><div class="track-label">분류</div></div>
+            <div class="track-step"><div class="track-dot ${prog>=60?(prog>60?'done':'active'):'pending'}">${prog>=60?(prog>60?'✓':'🚗'):'·'}</div><div class="track-label">출동</div></div>
+            <div class="track-step"><div class="track-dot ${prog>=80?'done':'pending'}">${prog>=80?'✓':'·'}</div><div class="track-label">처리</div></div>
+            <div class="track-step"><div class="track-dot ${prog>=100?'done':'pending'}">${prog>=100?'✓':'·'}</div><div class="track-label">완료</div></div>
+          </div></div>
         </div>`;
     }).join('');
-
   } catch(e) {
     body.innerHTML = `<div style="text-align:center;padding:40px;color:var(--muted);">불러오기 실패<br><small>${e.message}</small></div>`;
   }
@@ -1395,33 +1501,40 @@ async function _loadStatusScreen() {
 async function _openReport(id) {
   try {
     const rows = await _sbFetch(`reports?id=eq.${encodeURIComponent(id)}&limit=1`);
-    if (rows[0]) _renderReport(rows[0]);
-  } catch(e) {
-    alert('신고 데이터를 불러올 수 없습니다.');
-  }
+    if (!rows[0]) return;
+    const r = rows[0];
+    const a = r.analysis || {};
+    showResult(r.type, r.id, a.gemini, { summary: a.summary, actions: a.actions }, r.location);
+    document.getElementById('resTime').textContent =
+      r.reported_at ? new Date(r.reported_at).toLocaleString('ko-KR') : '—';
+    document.getElementById('resGps').textContent = r.gps || '—';
+  } catch(e) { alert('신고 데이터를 불러올 수 없습니다.'); }
 }
 
-// ── Init ─────────────────────────────────────────────────
+// ── URL 파라미터 처리 (gopang.net → fiil.kr 링크) ─
+async function _handleUrlParams() {
+  const params   = new URLSearchParams(location.search);
+  const reportId = params.get('id');
+  if (!reportId) return false;
+  try {
+    const rows = await _sbFetch(`reports?id=eq.${encodeURIComponent(reportId)}&limit=1`);
+    if (rows[0]) {
+      const r = rows[0];
+      const a = r.analysis || {};
+      showResult(r.type, r.id, a.gemini, { summary: a.summary, actions: a.actions }, r.location);
+      document.getElementById('resTime').textContent =
+        r.reported_at ? new Date(r.reported_at).toLocaleString('ko-KR') : '—';
+      document.getElementById('resGps').textContent = r.gps || '—';
+      return true;
+    }
+  } catch(e) { console.warn('신고 조회 실패:', e.message); }
+  return false;
+}
+
+// ── Init ──────────────────────────────────────────
 window.addEventListener('load', async () => {
   initGPS();
-
-  // A) URL 파라미터 ?id=RPT-XXX → 해당 신고 바로 표시
-  const params = new URLSearchParams(location.search);
-  const reportId = params.get('id');
-  if (reportId) {
-    try {
-      const rows = await _sbFetch(`reports?id=eq.${encodeURIComponent(reportId)}&limit=1`);
-      if (rows[0]) {
-        _renderReport(rows[0]);
-        return;
-      }
-    } catch(e) {
-      console.warn('신고 조회 실패:', e.message);
-    }
-  }
-
-  // B) 파라미터 없으면 홈 화면 (기본)
-  // status 화면 진입 시 실데이터 로드
+  await _handleUrlParams();
 });
 </script>
 </body>
