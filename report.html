@@ -273,14 +273,53 @@ function render(r) {
   const statClass = {완료:'chip-green',출동중:'chip-blue',대기중:'chip-orange',접수:'chip-gray'};
 
   // ── 성분 테이블 ────────────────────────────────────────
-  const matHTML = (a.materials||[]).length > 0
+  // materials 없으면 gemini.components에서 변환
+  let materials = a.materials || [];
+  if (materials.length === 0 && a.gemini?.components) {
+    const codeMap = {
+      ST:'스티로폼', PL:'경질플라스틱', VI:'비닐', GL:'유리',
+      ME:'금속·캔', NT:'폐어구·그물', WD:'목재', EX:'기타'
+    };
+    const disposalMap = {
+      ST:'재활용', PL:'재활용', VI:'매립', GL:'재활용',
+      ME:'재활용', NT:'전문처리', WD:'매립', EX:'매립'
+    };
+    materials = Object.entries(a.gemini.components)
+      .filter(([,v]) => v.visible && v.ratio_pct > 0)
+      .map(([k,v]) => ({
+        code: k,
+        name: codeMap[k] || k,
+        pct:  v.ratio_pct,
+        weight_kg: v.weight_kg_est,
+        disposal: disposalMap[k] || '매립'
+      }));
+  }
+  // SP-15 items 변환
+  if (materials.length === 0 && a.gemini?.items) {
+    const itemMap = {
+      HA:'대형가전', SA:'소형가전', FU:'가구류', MA:'매트리스',
+      CL:'의류·섬유', KI:'주방용품', TO:'장난감', BK:'서적',
+      MX:'혼합쓰레기', HZ:'유해폐기물'
+    };
+    materials = Object.entries(a.gemini.items)
+      .filter(([,v]) => v.visible && v.ratio_pct > 0)
+      .map(([k,v]) => ({
+        code: k,
+        name: itemMap[k] || k,
+        pct:  v.ratio_pct,
+        weight_kg: v.weight_kg_est,
+        disposal: k==='HZ' ? '전문처리' : k==='HA'||k==='SA' ? '재활용' : '매립'
+      }));
+  }
+
+  const matHTML = materials.length > 0
     ? `<div style="overflow-x:auto">
       <table class="mat-table">
         <thead><tr>
           <th>성분</th><th>비율</th><th>추정 중량</th><th>처리 경로</th>
         </tr></thead>
         <tbody>
-          ${(a.materials||[]).map(m => {
+          ${materials.map(m => {
             const dClass = m.disposal === '재활용' ? 'd-recycle' : m.disposal === '전문처리' ? 'd-special' : 'd-landfill';
             return `<tr>
               <td><strong>${m.name||m.code||'—'}</strong></td>
@@ -379,8 +418,8 @@ function render(r) {
       </div>
     </div>
     <div class="rh-meta">
-      <div class="meta-f"><span class="meta-l">신고 일시</span><span class="meta-v" style="font-size:11px">${r.reportedAt||'—'}</span></div>
-      <div class="meta-f"><span class="meta-l">GPS</span><span class="meta-v" style="font-size:11px">${r.gps||'—'}</span></div>
+      <div class="meta-f"><span class="meta-l">신고 일시</span><span class="meta-v" style="font-size:11px">${r.reportedAt ? new Date(r.reportedAt).toLocaleString('ko-KR',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}) : '—'}</span></div>
+      <div class="meta-f"><span class="meta-l">GPS</span><span class="meta-v" id="gps-display" style="font-size:11px">${r.gps||'—'}</span></div>
       <div class="meta-f"><span class="meta-l">신고자</span><span class="meta-v">${r.reporter||'—'}</span></div>
       <div class="meta-f"><span class="meta-l">긴급도</span><span class="chip ${urgClass[r.urgency]||'chip-gray'}">${r.urgency||'—'}</span></div>
       <div class="meta-f"><span class="meta-l">처리 상태</span><span class="chip ${statClass[r.status]||'chip-gray'}">${r.status||'접수'}</span></div>
@@ -406,19 +445,18 @@ function render(r) {
       <div class="card-body">
         <div class="summary-box">
           <div class="summary-box-lbl">현장 상황</div>
-          <p>${a.summary||'분석 데이터 없음'}</p>
+          <p>${a.summary || a.gemini?.scene_description || a.gopangAnalysis?.summary || '분석 데이터 없음'}</p>
         </div>
-        ${a.disposal_site ? `
-        <div class="disposal-card">
-          <div class="disposal-pin">📍</div>
-          <div>
-            <div class="disposal-name">최적 배출처: ${a.disposal_site}</div>
-            <div class="disposal-meta">${a.disposal_gps||''}</div>
-          </div>
+        ${(a.actions||[]).length > 0 ? `
+        <div class="summary-box" style="margin-top:8px;">
+          <div class="summary-box-lbl">권고 조치</div>
+          ${(a.actions||[]).map((ac,i)=>`<p style="margin:2px 0">${i+1}. ${ac}</p>`).join('')}
         </div>` : ''}
         <div style="display:flex;gap:16px;margin-top:10px;flex-wrap:wrap">
-          ${a.volume ? `<div class="meta-f"><span class="meta-l">총 추정 중량</span><span class="meta-v">${a.volume}</span></div>` : ''}
-          <div class="meta-f"><span class="meta-l">유해 여부</span><span class="meta-v">${a.hazard||'미상'}</span></div>
+          ${a.volume||a.gemini?.total_weight_kg_est ? `<div class="meta-f"><span class="meta-l">총 추정 중량</span><span class="meta-v">${a.volume||(a.gemini?.total_weight_kg_est+'kg')||'—'}</span></div>` : ''}
+          <div class="meta-f"><span class="meta-l">유해 여부</span><span class="meta-v">${a.hazard||(a.gemini?.hazard_detected?'⚠️ 감지':'없음')||'미상'}</span></div>
+          ${a.gemini?.scale ? `<div class="meta-f"><span class="meta-l">규모</span><span class="meta-v">${a.gemini.scale}</span></div>` : ''}
+          ${a.gemini?.risk_level ? `<div class="meta-f"><span class="meta-l">위험도</span><span class="meta-v">${a.gemini.risk_level}</span></div>` : ''}
           ${a.openhash_block_id ? `<div class="meta-f"><span class="meta-l">OpenHash 블록</span><span class="meta-v" style="font-size:10px;font-family:monospace">${a.openhash_block_id}</span></div>` : ''}
         </div>
       </div>
@@ -473,7 +511,23 @@ function copyHash(){
 
 // Init
 loadReport().then(r => {
-  if (r) { render(r); }
+  if (r) {
+    render(r);
+    // GPS → 카카오 역지오코딩 (비동기)
+    if (r.gps) {
+      const parts = r.gps.replace(/\s/g,'').split(',');
+      if (parts.length >= 2) {
+        fetch(
+          `https://dapi.kakao.com/v2/local/geo/coord2address.json?x=${parts[1]}&y=${parts[0]}&input_coord=WGS84`,
+          { headers: { 'Authorization': 'KakaoAK 66648ca49f126d8752b33d542789ac56' } }
+        ).then(res => res.json()).then(data => {
+          const addr = data.documents?.[0]?.address?.address_name;
+          const el = document.getElementById('gps-display');
+          if (addr && el) el.textContent = addr + ' (' + r.gps + ')';
+        }).catch(() => {});
+      }
+    }
+  }
   else {
     document.getElementById('content').innerHTML=`
       <div style="text-align:center;padding:80px 20px">
