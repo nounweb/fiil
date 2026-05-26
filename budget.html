@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>예산·비용 — FIIL.kr</title>
+<style>
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css');
+:root{
+  --primary:#0057A8;--primary-dk:#003C82;--primary-bg:#E8F0FA;
+  --green:#1e8e3e;--green-bg:#e6f4ea;
+  --orange:#e37400;--orange-bg:#fef7e0;
+  --red:#d93025;--red-bg:#fce8e6;
+  --surface:#fff;--bg:#f8f9fa;
+  --sidebar:#1a2332;
+  --border:#e0e0e0;--text:#202124;--sub:#5f6368;--hint:#9aa0a6;
+  --shadow-1:0 1px 2px rgba(60,64,67,.3),0 1px 3px rgba(60,64,67,.15);
+  --r:8px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Pretendard',-apple-system,sans-serif;font-size:14px;color:var(--text);background:var(--bg)}
+a{text-decoration:none;color:inherit}
+
+/* ── 사이드바 ── */
+.sidebar{width:240px;background:var(--sidebar);color:#fff;position:fixed;top:0;left:0;bottom:0;z-index:200;display:flex;flex-direction:column;overflow-y:auto}
+.sb-brand{display:flex;align-items:center;gap:12px;padding:18px 20px;border-bottom:1px solid rgba(255,255,255,.08)}
+.sb-icon{width:36px;height:36px;background:var(--primary);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:#fff}
+.sb-name{font-size:15px;font-weight:700}
+.sb-sub{font-size:11px;color:rgba(255,255,255,.45);margin-top:1px}
+.sb-nav{padding:8px 0;flex:1}
+.sb-section{padding:16px 20px 6px;font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:rgba(255,255,255,.35)}
+.sb-item{display:flex;align-items:center;gap:12px;padding:10px 20px;font-size:13px;font-weight:500;color:rgba(255,255,255,.7);cursor:pointer;transition:background .15s;border-left:3px solid transparent}
+.sb-item:hover{background:rgba(255,255,255,.06);color:#fff}
+.sb-item.active{background:rgba(26,115,232,.2);color:#fff;border-left-color:var(--primary)}
+
+/* ── 메인 ── */
+.main{margin-left:240px;min-height:100vh}
+.topbar{position:sticky;top:0;z-index:100;background:var(--surface);border-bottom:1px solid var(--border);height:56px;display:flex;align-items:center;padding:0 24px;gap:12px;box-shadow:var(--shadow-1)}
+.breadcrumb{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--sub);flex:1}
+.bc-sep{color:var(--hint)}
+.topbar-right{display:flex;align-items:center;gap:16px}
+.sys-ok{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--green)}
+.sys-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.clock{font-size:13px;font-weight:600;color:var(--sub)}
+.content{padding:24px}
+
+/* ── 카드 ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow-1);margin-bottom:20px}
+.card-head{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border)}
+.card-title{font-size:13px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.5px}
+.card-body{padding:18px}
+.row-2{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px}
+@media(max-width:900px){.row-2{grid-template-columns:1fr}}
+
+/* ── 요약 통계 ── */
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px}
+@media(max-width:1100px){.stat-grid{grid-template-columns:repeat(2,1fr)}}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px 20px;box-shadow:var(--shadow-1)}
+.stat-val{font-size:22px;font-weight:800;line-height:1;margin-bottom:4px}
+.stat-lbl{font-size:12px;color:var(--sub)}
+.stat-sub{font-size:12px;font-weight:600;margin-top:4px;color:var(--green)}
+
+/* ── 재무제표 테이블 ── */
+.fs-table{width:100%;border-collapse:collapse}
+.fs-table th{text-align:left;padding:8px 12px;font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--sub);border-bottom:2px solid var(--border)}
+.fs-table td{padding:10px 12px;border-bottom:1px solid var(--border);font-size:13px}
+.fs-table tr:last-child td{border-bottom:none}
+.fs-table .row-total td{font-weight:700;background:var(--primary-bg);color:var(--primary)}
+.fs-table .row-income td{font-weight:800;font-size:14px;background:var(--green-bg);color:var(--green)}
+.fs-table .row-section td{font-weight:700;background:var(--bg);color:var(--text);font-size:12px;letter-spacing:.3px}
+.fs-table .row-indent td:first-child{padding-left:28px;color:var(--sub)}
+.fs-amt{text-align:right;font-variant-numeric:tabular-nums;font-family:monospace}
+.fs-pct{text-align:right;color:var(--hint);font-size:12px}
+
+/* ── 칩 ── */
+.chip{display:inline-flex;align-items:center;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700}
+.chip-green{background:var(--green-bg);color:var(--green)}
+.chip-approved{background:#166534;color:#fff}
+.chip-blue{background:var(--primary-bg);color:var(--primary)}
+.chip-gray{background:#f1f3f4;color:var(--sub)}
+
+/* ── 기간 선택 ── */
+.period-bar{display:flex;gap:8px;margin-bottom:16px}
+.period-btn{padding:5px 14px;border-radius:16px;border:1px solid var(--border);background:var(--surface);font-size:12px;font-weight:600;cursor:pointer;transition:background .15s,color .15s}
+.period-btn.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.period-btn:hover:not(.active){background:var(--primary-bg)}
+
+/* ── 승인 신고 목록 ── */
+.approved-table{width:100%;border-collapse:collapse}
+.approved-table th{text-align:left;padding:8px 12px;font-size:11px;font-weight:700;color:var(--sub);border-bottom:2px solid var(--border)}
+.approved-table td{padding:9px 12px;border-bottom:1px solid var(--border);font-size:12px}
+.approved-table tbody tr:hover{background:var(--bg)}
+.rpt-id{color:var(--primary);font-weight:700}
+.rpt-id:hover{text-decoration:underline}
+
+/* ── 로딩 ── */
+.loading{text-align:center;padding:60px;color:var(--hint)}
+.spinner{display:inline-block;width:24px;height:24px;border:3px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:12px}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<!-- ── 사이드바 ── -->
+<div class="sidebar">
+  <a class="sb-brand" href="dashboard.html">
+    <div class="sb-icon">F</div>
+    <div><div class="sb-name">FIIL.kr</div><div class="sb-sub">관리자 대시보드</div></div>
+  </a>
+  <nav class="sb-nav">
+    <div class="sb-section">운영 현황</div>
+    <a class="sb-item" href="dashboard.html"><span>📊</span> 종합 대시보드</a>
+    <a class="sb-item" href="dashboard.html#reports"><span>📋</span> 신고 현황</a>
+    <a class="sb-item" href="#"><span>🗺</span> 실시간 지도</a>
+    <a class="sb-item" href="#"><span>🚗</span> 출동 현황</a>
+    <div class="sb-section">분석 · 보고</div>
+    <a class="sb-item" href="#"><span>📈</span> 통계 분석</a>
+    <a class="sb-item active" href="budget.html"><span>💰</span> 예산 · 비용</a>
+    <a class="sb-item" href="#"><span>📄</span> 조치 결과 보고서</a>
+    <a class="sb-item" href="#"><span>⛓</span> 블록체인 기록</a>
+    <div class="sb-section">관리</div>
+    <a class="sb-item" href="#"><span>👥</span> 인력 · 장비</a>
+    <a class="sb-item" href="#"><span>⚙️</span> 시스템 설정</a>
+  </nav>
+</div>
+
+<!-- ── 메인 ── -->
+<div class="main">
+  <div class="topbar">
+    <div class="breadcrumb">
+      <a href="dashboard.html">FIIL.kr</a>
+      <span class="bc-sep">›</span>
+      <span>예산 · 비용</span>
+    </div>
+    <div class="topbar-right">
+      <div class="sys-ok"><div class="sys-dot"></div>시스템 정상</div>
+      <div class="clock" id="clock">—</div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- 기간 선택 -->
+    <div class="period-bar">
+      <button class="period-btn active" onclick="setPeriod('all',this)">전체</button>
+      <button class="period-btn" onclick="setPeriod('month',this)">이번 달</button>
+      <button class="period-btn" onclick="setPeriod('week',this)">이번 주</button>
+      <button class="period-btn" onclick="setPeriod('today',this)">오늘</button>
+    </div>
+
+    <!-- 요약 통계 -->
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div style="font-size:20px;margin-bottom:8px">✅</div>
+        <div class="stat-val" id="stat-approved">—</div>
+        <div class="stat-lbl">승인 신고 건수</div>
+      </div>
+      <div class="stat-card">
+        <div style="font-size:20px;margin-bottom:8px">💰</div>
+        <div class="stat-val" id="stat-revenue">—</div>
+        <div class="stat-lbl">총 처리 비용</div>
+        <div class="stat-sub" id="stat-revenue-sub"></div>
+      </div>
+      <div class="stat-card">
+        <div style="font-size:20px;margin-bottom:8px">🏗</div>
+        <div class="stat-val" id="stat-cost">—</div>
+        <div class="stat-lbl">비용 (70%)</div>
+        <div class="stat-sub" style="color:var(--orange)" id="stat-cost-sub"></div>
+      </div>
+      <div class="stat-card">
+        <div style="font-size:20px;margin-bottom:8px">📈</div>
+        <div class="stat-val" style="color:var(--green)" id="stat-income">—</div>
+        <div class="stat-lbl">세전 수입 (30%)</div>
+        <div class="stat-sub" id="stat-income-sub"></div>
+      </div>
+    </div>
+
+    <!-- 손익계산서 + 대차대조표 -->
+    <div class="row-2">
+
+      <!-- 손익계산서 -->
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">📊 손익계산서 (Income Statement)</div>
+          <span id="pl-period" style="font-size:11px;color:var(--sub)"></span>
+        </div>
+        <div class="card-body">
+          <div id="pl-content" class="loading">
+            <div class="spinner"></div><br>불러오는 중…
+          </div>
+        </div>
+      </div>
+
+      <!-- 대차대조표 -->
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">⚖️ 대차대조표 (Balance Sheet)</div>
+          <span id="bs-period" style="font-size:11px;color:var(--sub)"></span>
+        </div>
+        <div class="card-body">
+          <div id="bs-content" class="loading">
+            <div class="spinner"></div><br>불러오는 중…
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 승인 신고 목록 -->
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">✅ 승인된 신고 목록</div>
+        <span id="approved-count" style="font-size:12px;color:var(--sub)"></span>
+      </div>
+      <div class="card-body" style="padding:0">
+        <div id="approved-list" class="loading" style="padding:40px">
+          <div class="spinner"></div><br>불러오는 중…
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ── Supabase 설정 ─────────────────────────────────
+const SB_URL = 'https://ebbecjfrwaswbdybbgiu.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImViYmVjamZyd2Fzd2JkeWJiZ2l1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1NjE5ODQsImV4cCI6MjA5NTEzNzk4NH0.H2ahQKtWdSke04Pdi3hDY86pdTx7UUKPUpQMlS_zciA';
+
+// ── 시계 ─────────────────────────────────────────
+setInterval(() => {
+  const el = document.getElementById('clock');
+  if (el) el.textContent = new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+}, 1000);
+
+// ── 기간 필터 ─────────────────────────────────────
+let _period = 'all';
+function setPeriod(p, btn) {
+  _period = p;
+  document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  loadData();
+}
+
+function _getPeriodFilter() {
+  const now = new Date();
+  if (_period === 'today') {
+    const start = new Date(now); start.setHours(0,0,0,0);
+    return `&approved_at=gte.${start.toISOString()}`;
+  }
+  if (_period === 'week') {
+    const start = new Date(now); start.setDate(now.getDate() - now.getDay());
+    start.setHours(0,0,0,0);
+    return `&approved_at=gte.${start.toISOString()}`;
+  }
+  if (_period === 'month') {
+    const start = new Date(now.getFullYear(), now.getMonth(), 1);
+    return `&approved_at=gte.${start.toISOString()}`;
+  }
+  return '';
+}
+
+function _periodLabel() {
+  const labels = {all:'전체 기간',month:'이번 달',week:'이번 주',today:'오늘'};
+  return labels[_period] || '전체';
+}
+
+function fmt(n) { return n ? Math.round(n).toLocaleString() : '0'; }
+
+// ── Supabase 데이터 로드 ──────────────────────────
+async function loadData() {
+  const pf = _getPeriodFilter();
+  try {
+    const res = await fetch(
+      SB_URL+'/rest/v1/reports?select=id,type,location,reported_at,approved_at,approved_cost,income_before_tax,status&status=eq.승인'+pf+'&order=approved_at.desc&limit=200',
+      { headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer '+SB_KEY } }
+    );
+    const data = await res.json();
+    if (!Array.isArray(data)) throw new Error('데이터 오류');
+    renderAll(data);
+  } catch(e) {
+    console.error('[재무제표] 로드 오류:', e);
+    ['pl-content','bs-content','approved-list'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.innerHTML = `<div style="text-align:center;padding:40px;color:var(--hint)">불러오기 실패: ${e.message}</div>`;
+    });
+  }
+}
+
+function renderAll(rows) {
+  // ── 집계 ─────────────────────────────────────
+  const totalRevenue = rows.reduce((s,r) => s + ((r.approved_cost||0) + (r.income_before_tax||0)), 0);
+  const totalCost    = rows.reduce((s,r) => s + (r.approved_cost||0), 0);
+  const totalIncome  = rows.reduce((s,r) => s + (r.income_before_tax||0), 0);
+  const count        = rows.length;
+
+  // ── 요약 통계 ────────────────────────────────
+  document.getElementById('stat-approved').textContent   = count + '건';
+  document.getElementById('stat-revenue').textContent    = '₩' + fmt(totalRevenue);
+  document.getElementById('stat-revenue-sub').textContent = _periodLabel();
+  document.getElementById('stat-cost').textContent       = '₩' + fmt(totalCost);
+  document.getElementById('stat-cost-sub').textContent   = `${count}건 × 70%`;
+  document.getElementById('stat-income').textContent     = '₩' + fmt(totalIncome);
+  document.getElementById('stat-income-sub').textContent = `${count}건 × 30%`;
+
+  // ── 손익계산서 ───────────────────────────────
+  const profitMargin = totalRevenue > 0 ? (totalIncome / totalRevenue * 100).toFixed(1) : '0.0';
+  document.getElementById('pl-period').textContent = _periodLabel();
+  document.getElementById('pl-content').innerHTML = `
+    <table class="fs-table">
+      <thead><tr>
+        <th>항목</th>
+        <th class="fs-amt">금액 (₩)</th>
+        <th class="fs-pct">비율</th>
+      </tr></thead>
+      <tbody>
+        <tr class="row-section"><td colspan="3">매출</td></tr>
+        <tr class="row-indent">
+          <td>처리 서비스 수익</td>
+          <td class="fs-amt">${fmt(totalRevenue)}</td>
+          <td class="fs-pct">100.0%</td>
+        </tr>
+        <tr class="row-total">
+          <td>매출 합계</td>
+          <td class="fs-amt">${fmt(totalRevenue)}</td>
+          <td class="fs-pct">100.0%</td>
+        </tr>
+
+        <tr class="row-section"><td colspan="3">매출원가 · 비용</td></tr>
+        <tr class="row-indent">
+          <td>수거 · 처리 비용 (70%)</td>
+          <td class="fs-amt" style="color:var(--orange)">${fmt(totalCost)}</td>
+          <td class="fs-pct">70.0%</td>
+        </tr>
+        <tr class="row-total" style="background:var(--orange-bg)">
+          <td style="color:var(--orange)">비용 합계</td>
+          <td class="fs-amt" style="color:var(--orange)">${fmt(totalCost)}</td>
+          <td class="fs-pct" style="color:var(--orange)">70.0%</td>
+        </tr>
+
+        <tr class="row-income">
+          <td>세전 수입 (Income before tax)</td>
+          <td class="fs-amt">₩${fmt(totalIncome)}</td>
+          <td class="fs-pct">${profitMargin}%</td>
+        </tr>
+      </tbody>
+    </table>
+    <div style="margin-top:14px;padding:12px;background:var(--green-bg);border-radius:6px;font-size:12px;color:var(--green)">
+      <strong>순이익률 ${profitMargin}%</strong> — 승인 ${count}건 기준 · ${_periodLabel()}
+    </div>`;
+
+  // ── 대차대조표 ───────────────────────────────
+  // 자산: 수입 누적 (세전 수입)
+  // 부채: 처리 비용 미지급 추정 (비용의 20% — 미지급)
+  const assets      = totalIncome;
+  const liabilities = Math.round(totalCost * 0.2);
+  const equity      = assets - liabilities;
+  document.getElementById('bs-period').textContent = _periodLabel();
+  document.getElementById('bs-content').innerHTML = `
+    <table class="fs-table">
+      <thead><tr>
+        <th>항목</th>
+        <th class="fs-amt">금액 (₩)</th>
+      </tr></thead>
+      <tbody>
+        <tr class="row-section"><td colspan="2">자산 (Assets)</td></tr>
+        <tr class="row-indent">
+          <td>현금 · 수익금</td>
+          <td class="fs-amt">${fmt(totalIncome)}</td>
+        </tr>
+        <tr class="row-indent">
+          <td>미수금 (처리 비용 청구)</td>
+          <td class="fs-amt">${fmt(totalCost)}</td>
+        </tr>
+        <tr class="row-total">
+          <td>자산 합계</td>
+          <td class="fs-amt">${fmt(totalIncome + totalCost)}</td>
+        </tr>
+
+        <tr class="row-section"><td colspan="2">부채 (Liabilities)</td></tr>
+        <tr class="row-indent">
+          <td>미지급 처리 비용 (추정 20%)</td>
+          <td class="fs-amt" style="color:var(--orange)">${fmt(liabilities)}</td>
+        </tr>
+        <tr class="row-indent">
+          <td>집행 처리 비용 (80%)</td>
+          <td class="fs-amt">${fmt(totalCost - liabilities)}</td>
+        </tr>
+        <tr class="row-total" style="background:var(--orange-bg)">
+          <td style="color:var(--orange)">부채 합계</td>
+          <td class="fs-amt" style="color:var(--orange)">${fmt(totalCost)}</td>
+        </tr>
+
+        <tr class="row-income">
+          <td>자본 (세전 수입 누계)</td>
+          <td class="fs-amt">₩${fmt(totalIncome)}</td>
+        </tr>
+      </tbody>
+    </table>
+    <div style="margin-top:14px;padding:12px;background:var(--primary-bg);border-radius:6px;font-size:12px;color:var(--primary)">
+      <strong>부채비율 ${totalIncome > 0 ? (totalCost/totalIncome*100).toFixed(0) : '—'}%</strong>
+      &nbsp;·&nbsp; 자기자본 ₩${fmt(totalIncome)}
+    </div>`;
+
+  // ── 승인 신고 목록 ────────────────────────────
+  document.getElementById('approved-count').textContent = `전체 ${count}건`;
+  if (count === 0) {
+    document.getElementById('approved-list').innerHTML =
+      '<div style="text-align:center;padding:40px;color:var(--hint)">승인된 신고가 없습니다.</div>';
+    return;
+  }
+  document.getElementById('approved-list').innerHTML = `
+    <table class="approved-table">
+      <thead><tr>
+        <th>신고번호</th><th>유형</th><th>위치</th>
+        <th style="text-align:right">처리 비용</th>
+        <th style="text-align:right">비용(70%)</th>
+        <th style="text-align:right">세전수입(30%)</th>
+        <th>승인 일시</th>
+      </tr></thead>
+      <tbody>
+        ${rows.map(r => `
+          <tr>
+            <td><a class="rpt-id" href="report.html?id=${r.id}">${r.id}</a></td>
+            <td>${r.type||'—'}</td>
+            <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.location||'—'}</td>
+            <td class="fs-amt">₩${fmt((r.approved_cost||0)+(r.income_before_tax||0))}</td>
+            <td class="fs-amt" style="color:var(--orange)">₩${fmt(r.approved_cost||0)}</td>
+            <td class="fs-amt" style="color:var(--green);font-weight:700">₩${fmt(r.income_before_tax||0)}</td>
+            <td style="font-size:11px;color:var(--sub)">${r.approved_at ? new Date(r.approved_at).toLocaleString('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}) : '—'}</td>
+          </tr>`).join('')}
+      </tbody>
+      <tfoot>
+        <tr style="background:var(--primary-bg);font-weight:700">
+          <td colspan="3">합계 (${count}건)</td>
+          <td class="fs-amt">₩${fmt(totalRevenue)}</td>
+          <td class="fs-amt" style="color:var(--orange)">₩${fmt(totalCost)}</td>
+          <td class="fs-amt" style="color:var(--green)">₩${fmt(totalIncome)}</td>
+          <td></td>
+        </tr>
+      </tfoot>
+    </table>`;
+}
+
+// ── 초기 로드 ─────────────────────────────────────
+loadData();
+setInterval(loadData, 60000);
+</script>
+</body>
+</html>

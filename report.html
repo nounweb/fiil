@@ -414,7 +414,8 @@ function render(r) {
       </div>
       <div style="display:flex;gap:8px;flex-shrink:0">
         <button class="btn btn-outline" onclick="window.print()">🖨 인쇄</button>
-        <button class="btn btn-primary" onclick="copyHash()">⛓ 해시 복사</button>
+        <button class="btn btn-outline" onclick="copyHash()">⛓ 해시 복사</button>
+        <button class="btn btn-primary" id="approve-btn" onclick="approveReport()" style="background:#16a34a;border-color:#16a34a;">✅ 승인</button>
       </div>
     </div>
     <div class="rh-meta">
@@ -509,10 +510,105 @@ function copyHash(){
   if(el) navigator.clipboard.writeText(el.textContent).then(()=>alert('해시 복사 완료'));
 }
 
+// ── 승인 처리 ─────────────────────────────────────────
+async function approveReport() {
+  const btn = document.getElementById('approve-btn');
+  if (!reportId) return;
+
+  // 이미 승인된 경우 확인
+  if (btn.dataset.approved === 'true') {
+    alert('이미 승인된 신고입니다.');
+    return;
+  }
+
+  if (!confirm(`${reportId} 신고를 승인하시겠습니까?\n\n처리 비용의 70%가 비용으로,\n30%가 세전 수입으로 기록됩니다.`)) return;
+
+  btn.disabled = true;
+  btn.textContent = '승인 중…';
+
+  try {
+    // 현재 신고 데이터 조회 (비용 계산용)
+    const res = await fetch(
+      SB_URL+'/rest/v1/reports?id=eq.'+encodeURIComponent(reportId)+'&select=analysis,cost&limit=1',
+      { headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer '+SB_KEY } }
+    );
+    const data = await res.json();
+    const r = data[0] || {};
+    const a = r.analysis || {};
+
+    // 총 비용 산출 (analysis.cost.total_est 또는 cost 컬럼)
+    const totalCost =
+      a.cost?.total_est ||
+      a.gemini?.cost_estimate?.total_est ||
+      (r.cost ? (r.cost.labor||0)+(r.cost.equipment||0)+(r.cost.supplies||0) : 0) ||
+      0;
+
+    const approvedCost    = Math.round(totalCost * 0.7);
+    const incomeBeforeTax = Math.round(totalCost * 0.3);
+
+    // Supabase 업데이트
+    const updateRes = await fetch(
+      SB_URL+'/rest/v1/reports?id=eq.'+encodeURIComponent(reportId),
+      {
+        method: 'PATCH',
+        headers: {
+          'apikey': SB_KEY,
+          'Authorization': 'Bearer '+SB_KEY,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal',
+        },
+        body: JSON.stringify({
+          status:             '승인',
+          approved_at:        new Date().toISOString(),
+          approved_by:        'admin',
+          approved_cost:      approvedCost,
+          income_before_tax:  incomeBeforeTax,
+        }),
+      }
+    );
+
+    if (!updateRes.ok) throw new Error('업데이트 실패: ' + updateRes.status);
+
+    // UI 업데이트
+    btn.textContent  = '✅ 승인됨';
+    btn.style.background = '#15803d';
+    btn.dataset.approved = 'true';
+
+    // 상태 칩 업데이트
+    const statEl = document.querySelector('.chip[class*="chip-"]');
+    if (statEl) {
+      statEl.className = 'chip chip-green';
+      statEl.textContent = '승인';
+    }
+
+    // 비용 요약 표시
+    alert(`승인 완료!\n\n처리 비용: ₩${totalCost.toLocaleString()}\n비용 (70%): ₩${approvedCost.toLocaleString()}\n세전 수입 (30%): ₩${incomeBeforeTax.toLocaleString()}`);
+
+  } catch(e) {
+    console.error('[승인 오류]', e);
+    alert('승인 처리 중 오류가 발생했습니다: ' + e.message);
+    btn.disabled = false;
+    btn.textContent = '✅ 승인';
+  }
+}
+
+// 페이지 로드 시 이미 승인된 신고면 버튼 상태 변경
+function _checkApprovalStatus(r) {
+  if (r.status === '승인') {
+    const btn = document.getElementById('approve-btn');
+    if (btn) {
+      btn.textContent     = '✅ 승인됨';
+      btn.style.background = '#15803d';
+      btn.dataset.approved = 'true';
+    }
+  }
+}
+
 // Init
 loadReport().then(r => {
   if (r) {
     render(r);
+    _checkApprovalStatus(r);
     // GPS → 카카오 역지오코딩 (비동기)
     if (r.gps) {
       const parts = r.gps.replace(/\s/g,'').split(',');

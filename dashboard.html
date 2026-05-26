@@ -67,8 +67,9 @@ a{text-decoration:none;color:inherit}
 .card-body{padding:16px 18px}
 .map-box{background:linear-gradient(135deg,#E8F0FA,#f0f9ff);border-radius:6px;height:200px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;margin-bottom:12px}
 .chip{display:inline-flex;align-items:center;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap}
-.chip-green{background:var(--green-bg);color:var(--green)}
-.chip-blue{background:var(--primary-bg);color:var(--primary)}
+.chip-green   {background:var(--green-bg);color:var(--green)}
+.chip-approved{background:#166534;color:#ffffff;font-weight:700}
+.chip-blue    {background:var(--primary-bg);color:var(--primary)}
 .chip-orange{background:var(--orange-bg);color:var(--orange)}
 .chip-red{background:var(--red-bg);color:var(--red)}
 .chip-gray{background:#f1f3f4;color:var(--sub)}
@@ -127,7 +128,7 @@ a{text-decoration:none;color:inherit}
     <a class="sb-item" href="#"><span>🚗</span> 출동 현황</a>
     <div class="sb-section">분석 · 보고</div>
     <a class="sb-item" href="#"><span>📈</span> 통계 분석</a>
-    <a class="sb-item" href="#"><span>💰</span> 예산 · 비용</a>
+    <a class="sb-item" href="budget.html"><span>💰</span> 예산 · 비용</a>
     <a class="sb-item" href="#"><span>📄</span> 조치 결과 보고서</a>
     <a class="sb-item" href="#"><span>⛓</span> 블록체인 기록</a>
     <div class="sb-section">관리</div>
@@ -329,7 +330,7 @@ async function _kakaoGeocode(gps) {
 
 /* ── 신고 행 렌더 ── */
 const urgClass  = {긴급:'chip-red',높음:'chip-orange',보통:'chip-blue',낮음:'chip-gray'};
-const statClass = {완료:'chip-green',출동중:'chip-blue',대기중:'chip-orange',접수:'chip-gray'};
+const statClass = {완료:'chip-green', 승인:'chip-approved', 출동중:'chip-blue', 대기중:'chip-orange', 접수:'chip-gray'};
 
 let _sbLoaded = false;  // 최초 로드 시 더미 행 제거 플래그
 
