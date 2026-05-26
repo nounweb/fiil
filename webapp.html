@@ -822,7 +822,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); font-family:
     <div class="bottom-nav">
       <button class="nav-item active" onclick="showNav('home')"><div class="nav-item-icon">🏠</div><div class="nav-item-label">홈</div></button>
       <button class="nav-item" onclick="goScreen('screen-report')"><div class="nav-item-icon">📷</div><div class="nav-item-label">신고</div></button>
-      <button class="nav-item" onclick="goScreen('screen-status')"><div class="nav-item-icon">📋</div><div class="nav-item-label">내 신고</div></button>
+      <button class="nav-item" onclick="goScreen('screen-status');_loadStatusScreen()"><div class="nav-item-icon">📋</div><div class="nav-item-label">내 신고</div></button>
       <button class="nav-item" onclick="goScreen('screen-mypage')"><div class="nav-item-icon">👤</div><div class="nav-item-label">마이</div></button>
     </div>
   </div>
@@ -1042,7 +1042,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); font-family:
     <div class="bottom-nav">
       <button class="nav-item" onclick="goScreen('screen-home')"><div class="nav-item-icon">🏠</div><div class="nav-item-label">홈</div></button>
       <button class="nav-item" onclick="goScreen('screen-report')"><div class="nav-item-icon">📷</div><div class="nav-item-label">신고</div></button>
-      <button class="nav-item active"><div class="nav-item-icon">📋</div><div class="nav-item-label">내 신고</div></button>
+      <button class="nav-item active" onclick="_loadStatusScreen()"><div class="nav-item-icon">📋</div><div class="nav-item-label">내 신고</div></button>
       <button class="nav-item" onclick="goScreen('screen-mypage')"><div class="nav-item-icon">👤</div><div class="nav-item-label">마이</div></button>
     </div>
   </div>
@@ -1085,12 +1085,25 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); font-family:
 </div><!-- /app -->
 
 <script>
+// ── Supabase 설정 ──────────────────────────────────────────
+const _SB_URL = 'https://ebbecjfrwaswbdybbgiu.supabase.co';
+const _SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImViYmVjamZyd2Fzd2JkeWJiZ2l1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1NjE5ODQsImV4cCI6MjA5NTEzNzk4NH0.H2ahQKtWdSke04Pdi3hDY86pdTx7UUKPUpQMlS_zciA';
+
+async function _sbFetch(path) {
+  const res = await fetch(_SB_URL + '/rest/v1/' + path, {
+    headers: { 'apikey': _SB_KEY, 'Authorization': 'Bearer ' + _SB_KEY }
+  });
+  if (!res.ok) throw new Error('Supabase ' + res.status);
+  return res.json();
+}
+
+// ── 상태 ──────────────────────────────────────────────────
 let currentScreen = 'screen-home';
 let previousScreen = 'screen-home';
 let photoDataUrl = null;
 let gpsCoords = null;
 
-// Navigation
+// ── 내비게이션 ─────────────────────────────────────────────
 function goScreen(id, category) {
   const prev = document.getElementById(currentScreen);
   const next = document.getElementById(id);
@@ -1261,9 +1274,154 @@ function showResult(category) {
   });
 }
 
-// Init
-window.addEventListener('load', () => {
+// ── Supabase 신고 데이터 → result 화면 렌더링 ──────────────
+function _renderReport(row) {
+  goScreen('screen-result');
+
+  // 신고 번호
+  document.getElementById('resultCode').textContent = row.id || '—';
+
+  // 신고 정보
+  document.getElementById('resType').textContent    = row.type || row.type_code || '—';
+  document.getElementById('resTime').textContent    = row.reported_at
+    ? new Date(row.reported_at).toLocaleString('ko-KR') : '—';
+  document.getElementById('resGps').textContent     = row.gps || '—';
+  document.getElementById('resLoc').textContent     = row.location || '—';
+
+  // 긴급도
+  const urgencyMap = { '낮음':'🟢 낮음', '보통':'🟡 보통', '높음':'🟠 높음', '긴급':'🔴 긴급' };
+  document.getElementById('resUrgency').textContent = urgencyMap[row.urgency] || row.urgency || '—';
+
+  // AI 분석 결과
+  const analysis = row.analysis || {};
+  document.getElementById('aiAnalysisText').textContent =
+    analysis.summary || row.gopangAnalysis?.summary || '분석 결과 없음';
+
+  // 권고 조치 사항 — Supabase 데이터 기반
+  const al = document.getElementById('actionList');
+  al.innerHTML = '';
+  const actions = _buildActions(row);
+  actions.forEach((a, i) => {
+    al.innerHTML += `<div class="action-item"><div class="action-num">${i+1}</div><div class="action-text">${a}</div></div>`;
+  });
+
+  // 신고자 (더미 유지 — 개인정보 보호)
+  // resReporter 는 별도 표시 없음
+
+  // 이미지 (있을 경우)
+  if (row.image_url) {
+    const imgEl = document.createElement('img');
+    imgEl.src = row.image_url;
+    imgEl.style.cssText = 'width:100%;border-radius:var(--radius);margin-bottom:14px;max-height:220px;object-fit:cover;';
+    const body = document.querySelector('.result-body');
+    if (body) body.insertBefore(imgEl, body.firstChild);
+  }
+}
+
+function _buildActions(row) {
+  const type = row.type || '';
+  const db   = analysisDB[
+    type.includes('해안') || type.includes('해양') ? '해안쓰레기' :
+    type.includes('불법') ? '불법투기' :
+    type.includes('응급') ? '응급환자' :
+    type.includes('도로') ? '도로파손' :
+    type.includes('산불') ? '산불연기' :
+    type.includes('수질') ? '수질오염' :
+    type.includes('소음') ? '소음진동' :
+    type.includes('식당') ? '식당위생' : '기타'
+  ] || analysisDB['기타'];
+  return db.actions;
+}
+
+// ── Supabase → 내 신고 현황(status) 화면 ──────────────────
+async function _loadStatusScreen() {
+  const body = document.querySelector('#screen-status .status-body');
+  if (!body) return;
+  body.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted);">불러오는 중…</div>';
+
+  try {
+    // 최근 10건 조회
+    const rows = await _sbFetch(
+      'reports?select=id,type,location,reported_at,urgency,status&order=reported_at.desc&limit=10'
+    );
+
+    if (!rows.length) {
+      body.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted);">신고 내역이 없습니다.</div>';
+      return;
+    }
+
+    const statusMap  = { '접수':'접수', '처리중':'출동중', '완료':'완료' };
+    const badgeClass = { '접수':'badge-new', '처리중':'badge-active', '완료':'badge-done' };
+    const typeIcon   = (t='') =>
+      t.includes('해안')||t.includes('해양') ? '🏖️' :
+      t.includes('불법') ? '🗑️' :
+      t.includes('응급') ? '🚨' :
+      t.includes('도로') ? '🚧' :
+      t.includes('산불') ? '🔥' : '📋';
+
+    body.innerHTML = rows.map(r => {
+      const st    = statusMap[r.status] || r.status || '접수';
+      const bc    = badgeClass[r.status] || 'badge-new';
+      const date  = r.reported_at ? new Date(r.reported_at).toLocaleDateString('ko-KR') : '';
+      const prog  = r.status === '완료' ? 100 : r.status === '처리중' ? 60 : 20;
+      return `
+        <div class="status-card" onclick="_openReport('${r.id}')">
+          <div class="status-card-top">
+            <div class="status-card-img">${typeIcon(r.type)}</div>
+            <div class="status-card-info">
+              <div class="status-card-title">${r.type || '신고'}</div>
+              <div class="status-card-meta">${r.id} · ${date}</div>
+            </div>
+            <span class="recent-badge ${bc}">${st}</span>
+          </div>
+          <div class="status-track">
+            <div class="track-steps">
+              <div class="track-progress-line" style="width:${prog}%"></div>
+              <div class="track-step"><div class="track-dot ${prog>=20?'done':'pending'}">${prog>=20?'✓':'·'}</div><div class="track-label">접수</div></div>
+              <div class="track-step"><div class="track-dot ${prog>=40?'done':'pending'}">${prog>=40?'✓':'·'}</div><div class="track-label">분류</div></div>
+              <div class="track-step"><div class="track-dot ${prog>=60?(prog>60?'done':'active'):'pending'}">${prog>=60?(prog>60?'✓':'🚗'):'·'}</div><div class="track-label">출동</div></div>
+              <div class="track-step"><div class="track-dot ${prog>=80?'done':'pending'}">${prog>=80?'✓':'·'}</div><div class="track-label">처리</div></div>
+              <div class="track-step"><div class="track-dot ${prog>=100?'done':'pending'}">${prog>=100?'✓':'·'}</div><div class="track-label">완료</div></div>
+            </div>
+          </div>
+        </div>`;
+    }).join('');
+
+  } catch(e) {
+    body.innerHTML = `<div style="text-align:center;padding:40px;color:var(--muted);">불러오기 실패<br><small>${e.message}</small></div>`;
+  }
+}
+
+async function _openReport(id) {
+  try {
+    const rows = await _sbFetch(`reports?id=eq.${encodeURIComponent(id)}&limit=1`);
+    if (rows[0]) _renderReport(rows[0]);
+  } catch(e) {
+    alert('신고 데이터를 불러올 수 없습니다.');
+  }
+}
+
+// ── Init ─────────────────────────────────────────────────
+window.addEventListener('load', async () => {
   initGPS();
+
+  // A) URL 파라미터 ?id=RPT-XXX → 해당 신고 바로 표시
+  const params = new URLSearchParams(location.search);
+  const reportId = params.get('id');
+  if (reportId) {
+    try {
+      const rows = await _sbFetch(`reports?id=eq.${encodeURIComponent(reportId)}&limit=1`);
+      if (rows[0]) {
+        _renderReport(rows[0]);
+        return;
+      }
+    } catch(e) {
+      console.warn('신고 조회 실패:', e.message);
+    }
+  }
+
+  // B) 파라미터 없으면 홈 화면 (기본)
+  // status 화면 진입 시 실데이터 로드
 });
 </script>
 </body>
