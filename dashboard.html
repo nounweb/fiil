@@ -133,6 +133,7 @@ a{text-decoration:none;color:inherit}
 @media(max-width:1100px){.stat-grid{grid-template-columns:1fr 1fr}.row-2{grid-template-columns:1fr}}
 @media(max-width:720px){.sidebar{display:none}.main{margin-left:0}.row-equal{grid-template-columns:1fr}}
 </style>
+<script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=c7160a2d047af2808065d9e1929a66a7&libraries=services,clusterer"></script>
 </head>
 <body>
 
@@ -204,20 +205,12 @@ a{text-decoration:none;color:inherit}
       <div class="card">
         <div class="card-head">
           <div class="card-title">🗺 제주 신고 현황 실시간 지도</div>
-          <span style="font-size:12px;color:var(--sub)">오늘 23건</span>
+          <a href="map.html" style="font-size:11px;color:var(--primary);font-weight:600">전체 보기 →</a>
         </div>
-        <div class="card-body">
-          <div class="map-box">
-            <span style="position:absolute;top:10px;left:10px;font-size:11px;font-weight:700;color:var(--primary)">제주도 전역</span>
-            <span style="position:absolute;top:30%;left:30%;font-size:11px;color:var(--sub)">한라산</span>
-            <span style="position:absolute;top:25%;left:20%;font-size:11px;color:var(--sub)">제주시</span>
-            <span style="position:absolute;top:60%;left:55%;font-size:11px;color:var(--sub)">서귀포시</span>
-            <span style="position:absolute;top:28%;left:18%;width:12px;height:12px;border-radius:50%;background:var(--primary);display:inline-block"></span>
-            <span style="position:absolute;top:45%;left:60%;width:12px;height:12px;border-radius:50%;background:var(--primary);display:inline-block"></span>
-            <span style="position:absolute;top:35%;left:75%;width:12px;height:12px;border-radius:50%;background:var(--primary);display:inline-block"></span>
-            <div style="position:absolute;bottom:10px;right:12px;display:flex;gap:12px;font-size:11px">
-              <span>🔵 출동중</span><span>🟢 완료</span>
-            </div>
+        <div class="card-body" style="padding:0">
+          <div id="mini-map" style="width:100%;height:220px;background:var(--primary-bg)"></div>
+          <div style="padding:8px 14px;border-top:1px solid var(--border);display:flex;gap:12px;font-size:11px;color:var(--sub)">
+            <span id="mini-cnt">로딩 중…</span>
           </div>
           <div style="display:flex;flex-direction:column;gap:8px">
             <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:6px 0;border-bottom:1px solid var(--border)">
@@ -462,6 +455,49 @@ function loadReportById(id){
 /* ── 페이지 로드 + 30초 자동 갱신 ── */
 loadReports();
 setInterval(loadReports, 30000);
+
+// ── 미니맵 초기화 ───────────────────────────────────
+function _initMiniMap(rows){
+  const el=document.getElementById('mini-map');
+  if(!el||!window.kakao||!kakao.maps)return;
+  kakao.maps.load(()=>{
+    const map=new kakao.maps.Map(el,{
+      center:new kakao.maps.LatLng(33.4996,126.5312),
+      level:10,scrollwheel:false
+    });
+    const iw=new kakao.maps.InfoWindow({zIndex:10});
+    const gpsRows=rows.filter(r=>r.gps);
+    let cnt=0;
+    gpsRows.forEach(r=>{
+      const p=r.gps.replace(/\s/g,'').split(',');
+      if(p.length<2)return;
+      const lat=parseFloat(p[0]),lng=parseFloat(p[1]);
+      if(isNaN(lat)||isNaN(lng))return;
+      const color=r.urgency==='긴급'?'#9b1c1c':
+        r.type&&(r.type.includes('해안')||r.type.includes('해양'))?'#305890':
+        r.type&&r.type.includes('불법')?'#214176':'#7a9cc8';
+      const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="20" height="26" viewBox="0 0 20 26"><path d="M10 0C4.477 0 0 4.477 0 10c0 6 10 16 10 16S20 16 20 10C20 4.477 15.523 0 10 0z" fill="${color}" stroke="white" stroke-width="1.5"/></svg>`;
+      const img=new kakao.maps.MarkerImage('data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg),new kakao.maps.Size(20,26),{offset:new kakao.maps.Point(10,26)});
+      const m=new kakao.maps.Marker({position:new kakao.maps.LatLng(lat,lng),map,image:img,title:r.id});
+      kakao.maps.event.addListener(m,'click',()=>{
+        iw.setContent('<div style="padding:6px 8px;font-size:11px;font-family:\'Noto Sans KR\',sans-serif"><b style="color:#305890">'+r.id+'</b><br>'+(r.type||'—')+'</div>');
+        iw.open(map,m);
+      });
+      cnt++;
+    });
+    const ce=document.getElementById('mini-cnt');
+    if(ce)ce.textContent='GPS 신고 '+cnt+'건 표시 중';
+  });
+}
+
+// 초기 로드 시 미니맵도 함께
+(async()=>{
+  try{
+    const rows=await fetch(_SB_URL+'/rest/v1/reports?select=id,type,gps,urgency&order=reported_at.desc&limit=200',
+      {headers:{'apikey':_SB_KEY,'Authorization':'Bearer '+_SB_KEY}}).then(r=>r.json());
+    if(Array.isArray(rows))_initMiniMap(rows);
+  }catch(e){console.warn('[minimap]',e);}
+})();
 </script>
 </body>
 </html>
