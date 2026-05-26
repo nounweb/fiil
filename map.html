@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>실시간 지도 — FIIL.kr</title>
-<script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=c7160a2d047af2808065d9e1929a66a7&libraries=services"></script>
+<script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=c7160a2d047af2808065d9e1929a66a7&libraries=services&autoload=false"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
 :root{
@@ -181,28 +181,18 @@ async function loadMap(){
 
   // 카카오맵 초기화
   const mapDiv = document.getElementById('kakao-map');
-  if(window.kakao && kakao.maps){
-    kakao.maps.load(()=>{
-      const map = new kakao.maps.Map(mapDiv,{center:new kakao.maps.LatLng(33.4996,126.5312),level:10});
-      gpsRows.forEach(r=>{
-        const parts = r.gps.replace(/\s/g,'').split(',');
-        if(parts.length<2) return;
-        const pos = new kakao.maps.LatLng(parseFloat(parts[0]),parseFloat(parts[1]));
-        const color = r.urgency==='긴급'?'#d93025':r.urgency==='높음'?'#e37400':r.urgency==='보통'?'#305890':'#4a5e78';
-        const marker = new kakao.maps.Marker({map,position:pos});
-        const iw = new kakao.maps.InfoWindow({content:`<div style="padding:6px 10px;font-size:12px;font-weight:700">${r.id}<br><span style="color:${color}">${r.urgency||'보통'}</span> · ${r.type||'—'}</div>`});
-        kakao.maps.event.addListener(marker,'click',()=>iw.open(map,marker));
-      });
+  kakao.maps.load(()=>{
+    const map = new kakao.maps.Map(mapDiv,{center:new kakao.maps.LatLng(33.4996,126.5312),level:10});
+    gpsRows.forEach(r=>{
+      const parts = r.gps.replace(/\s/g,'').split(',');
+      if(parts.length<2) return;
+      const pos = new kakao.maps.LatLng(parseFloat(parts[0]),parseFloat(parts[1]));
+      const color = r.urgency==='긴급'?'#d93025':r.urgency==='높음'?'#e37400':r.urgency==='보통'?'#305890':'#4a5e78';
+      const marker = new kakao.maps.Marker({map,position:pos});
+      const iw = new kakao.maps.InfoWindow({content:`<div style="padding:6px 10px;font-size:12px;font-weight:700">${r.id}<br><span style="color:${color}">${r.urgency||'보통'}</span> · ${r.type||'—'}</div>`});
+      kakao.maps.event.addListener(marker,'click',()=>iw.open(map,marker));
     });
-  } else {
-    mapDiv.innerHTML = `<div style="text-align:center;color:var(--sub);padding:40px">
-      <div style="font-size:36px;margin-bottom:12px">🗺</div>
-      <b>GPS 신고 ${gpsRows.length}건</b> 등록됨<br>
-      <span style="font-size:12px;margin-top:8px;display:block">카카오맵 SDK 로드 후 마커가 표시됩니다</span>
-      <div style="margin-top:16px;display:flex;flex-wrap:wrap;gap:8px;justify-content:center">
-        ${gpsRows.slice(0,8).map(r=>`<span class="chip chip-blue">${r.id}</span>`).join('')}
-      </div></div>`;
-  }
+  });
 
   // 목록
   const el = document.getElementById('map-list');
