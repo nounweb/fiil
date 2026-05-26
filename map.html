@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>실시간 지도 — FIIL.kr</title>
-<script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=c7160a2d047af2808065d9e1929a66a7&libraries=services&autoload=false"></script>
+<script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=c7160a2d047af2808065d9e1929a66a7&libraries=services" onload="kakao.maps.load(loadMap)"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
 :root{
@@ -179,9 +179,9 @@ async function loadMap(){
   const gpsRows = rows.filter(r=>r.gps);
   document.getElementById('m-gps').textContent = gpsRows.length+'건';
 
-  // 카카오맵 초기화
+  // 카카오맵 초기화 — SDK 준비 보장 후 지도 생성
   const mapDiv = document.getElementById('kakao-map');
-  {
+  kakao.maps.load(function(){
     const map = new kakao.maps.Map(mapDiv,{center:new kakao.maps.LatLng(33.4996,126.5312),level:10});
     gpsRows.forEach(r=>{
       const parts = r.gps.replace(/\s/g,'').split(',');
@@ -192,7 +192,7 @@ async function loadMap(){
       const iw = new kakao.maps.InfoWindow({content:`<div style="padding:6px 10px;font-size:12px;font-weight:700">${r.id}<br><span style="color:${color}">${r.urgency||'보통'}</span> · ${r.type||'—'}</div>`});
       kakao.maps.event.addListener(marker,'click',()=>iw.open(map,marker));
     });
-  }
+  });
 
   // 목록
   const el = document.getElementById('map-list');
@@ -226,9 +226,7 @@ async function loadMap(){
     })(p[0],p[1],cell);
   });
 }
-document.addEventListener("DOMContentLoaded", function(){
-  kakao.maps.load(loadMap);
-});
+// loadMap은 SDK onload에서 호출됨
 
 
 // ── 모바일 사이드바 ──────────────────────────────────
