@@ -312,21 +312,39 @@ const _SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsIn
 const urgClass  = {긴급:'chip-red',높음:'chip-orange',보통:'chip-blue',낮음:'chip-gray'};
 const statClass = {완료:'chip-green',출동중:'chip-blue',대기중:'chip-orange',접수:'chip-gray'};
 
+let _sbLoaded = false;  // 최초 로드 시 더미 행 제거 플래그
+
 function renderReports(reports){
   const tbody = document.getElementById('report-tbody');
+
+  // 최초 Supabase 데이터 수신 시 더미 행 전체 제거
+  if (!_sbLoaded) {
+    tbody.innerHTML = '';
+    _sbLoaded = true;
+  }
+
   let added = 0;
   reports.forEach(function(r){
     if(document.querySelector('[data-id="'+r.id+'"]')) return;
+    const a    = r.analysis || {};
     const cost = r.cost ? (r.cost.labor||0)+(r.cost.equipment||0)+(r.cost.supplies||0) : 0;
+    const urgency = r.urgency || (a.gemini?.risk_level
+      ? {S0:'낮음',S1:'보통',S2:'높음',S3:'긴급'}[a.gemini.risk_level] : '보통');
+    const typeIcon =
+      (r.type||'').includes('해안')||(r.type||'').includes('해양') ? '🏖️' :
+      (r.type||'').includes('불법') ? '🗑️' :
+      (r.type||'').includes('응급') ? '🚨' :
+      (r.type||'').includes('도로') ? '🚧' :
+      (r.type||'').includes('산불') ? '🔥' : '📋';
     const tr = document.createElement('tr');
     tr.className = 'new-row';
     tr.dataset.id = r.id;
     tr.innerHTML =
       '<td><a class="rpt-id" href="report.html?id='+r.id+'">'+r.id+'</a></td>'+
-      '<td>'+(r.type||'—')+'</td>'+
+      '<td>'+typeIcon+' '+(r.type||'—')+'</td>'+
       '<td>'+(r.location||'—')+'</td>'+
       '<td>'+(r.reporter||'—')+'</td>'+
-      '<td><span class="chip '+(urgClass[r.urgency]||'chip-gray')+'">'+(r.urgency||'—')+'</span></td>'+
+      '<td><span class="chip '+(urgClass[urgency]||'chip-gray')+'">'+urgency+'</span></td>'+
       '<td><span class="chip '+(statClass[r.status]||'chip-gray')+'">'+(r.status||'접수')+'</span></td>'+
       '<td>'+(r.dispatch&&r.dispatch.personnel?r.dispatch.personnel+'명':'—')+'</td>'+
       '<td>₩'+cost.toLocaleString()+'</td>'+
@@ -336,17 +354,17 @@ function renderReports(reports){
   });
   if(added>0){
     const el=document.getElementById('cnt-today');
-    if(el) el.textContent=parseInt(el.textContent)+added;
+    if(el) el.textContent = reports.length;
     const badge=document.getElementById('sb-badge');
-    if(badge) badge.textContent=added;
+    if(badge) badge.textContent = added;
     const tc=document.getElementById('table-count');
-    if(tc) tc.textContent='오늘 전체 '+(23+added)+'건';
+    if(tc) tc.textContent='전체 '+reports.length+'건';
   }
 }
 
 /* ── Supabase에서 신고 로드 ── */
 function loadReports(){
-  fetch(_SB_URL+'/rest/v1/reports?select=*&order=created_at.desc&limit=50', {
+  fetch(_SB_URL+'/rest/v1/reports?select=*&order=reported_at.desc&limit=50', {
     headers:{
       'apikey': _SB_KEY,
       'Authorization': 'Bearer '+_SB_KEY
@@ -354,9 +372,17 @@ function loadReports(){
   })
   .then(r => r.json())
   .then(data => {
-    if(Array.isArray(data) && data.length > 0){
+    if(Array.isArray(data)){
       console.log('[FIIL] Supabase 신고', data.length, '건 로드');
-      renderReports(data);
+      if(data.length > 0) renderReports(data);
+      else if(!_sbLoaded) {
+        // 데이터 없을 때도 더미 제거
+        document.getElementById('report-tbody').innerHTML =
+          '<tr><td colspan="9" style="text-align:center;padding:40px;color:#aaa;">신고 데이터가 없습니다.</td></tr>';
+        _sbLoaded = true;
+      }
+    } else {
+      console.warn('[FIIL] Supabase 응답 오류:', data);
     }
   })
   .catch(e => console.warn('[FIIL] Supabase 로드 오류:', e.message));
