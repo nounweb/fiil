@@ -1321,7 +1321,7 @@ img{max-width:100%}
       </div>
       <!-- 실제 gopang.net iframe (로딩 후) -->
       <iframe id="appIframe" src="" allow="geolocation; camera; microphone"
-        allowfullscreen style="display:none" onload="onIframeLoad()"></iframe>
+        allowfullscreen style="display:none"></iframe>
     </div>
     <div class="app-modal-label">고팡 — AI 환경 민원 상담 앱 &nbsp;·&nbsp; gopang.net</div>
   </div>
@@ -1374,6 +1374,12 @@ function launchApp() {
 function onIframeLoad() {
   // iframe 로드 완료 — 이미 표시 중
 }
+
+// iframe onload를 JS에서 안전하게 연결 (인라인 onload 제거 대체)
+document.addEventListener('DOMContentLoaded', () => {
+  const iframe = document.getElementById('appIframe');
+  if (iframe) iframe.addEventListener('load', onIframeLoad);
+});
 
 function openAppModal() {
   // 모바일(768px 이하)이면 새 탭으로 직접 열기
