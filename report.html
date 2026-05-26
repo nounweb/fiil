@@ -8,16 +8,29 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{
-  --primary:#003087;--primary-dk:#001f5e;--primary-bg:#e8eef8;
-  --green:#1B6B3A;--green-bg:#E6F4EC;
-  --orange:#b45309;--orange-bg:#fef3c7;
-  --red:#C01C28;--red-bg:#FEE2E2;
-  --surface:#fff;--bg:#F4F6F9;
-  --sidebar:#1C2B3A;
-  --border:#D1D9E6;--text:#1A202C;--sub:#4A5568;--hint:#718096;
-  --shadow:0 1px 3px rgba(0,0,0,0.08),0 1px 2px rgba(0,0,0,0.06);
-  --shadow-md:0 4px 6px rgba(0,0,0,0.07),0 2px 4px rgba(0,0,0,0.06);
-  --r:4px;
+  /* ── 고팡 블루 팔레트 ── */
+  --primary:    #305890;
+  --primary-dk: #102040;
+  --primary-bg: #eaf2fa;
+  --primary-mid:#4a72a8;
+  --primary-800:#1a3560;
+  --primary-700:#214176;
+  --primary-600:#284880;
+  --primary-300:#7a9cc8;
+  --primary-200:#b0c8e0;
+  --primary-100:#d0e0f0;
+
+  /* 기능색 — 경고·오류만 예외 */
+  --green:      #305890;
+  --green-bg:   #eaf2fa;
+  --orange:     #b45309;
+  --orange-bg:  #fef3c7;
+  --red:        #9b1c1c;
+  --red-bg:     #fde8e8;
+
+  --surface:#f8f9fc;--bg:#f4f6fa;--sidebar:#305890;
+  --border:#b0c8e0;--text:#1a2535;--sub:#4a5e78;--hint:#8a9bb0;
+  --shadow-1:0 1px 3px rgba(48,88,144,.12);--r:4px;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Noto Sans KR',sans-serif;font-size:14px;color:var(--text);background:var(--bg);-webkit-font-smoothing:antialiased}
@@ -47,8 +60,8 @@ a{text-decoration:none;color:inherit}
 .breadcrumb a:hover{color:var(--primary)}
 .bc-sep{color:var(--border)}
 .topbar-right{display:flex;align-items:center;gap:14px}
-.sys-ok{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:var(--green)}
-.sys-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+.sys-ok{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:var(--primary)}
+.sys-dot{width:6px;height:6px;border-radius:50%;background:var(--primary-800);animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
 .clock{font-size:12px;font-weight:600;color:var(--hint)}
 .btn{display:inline-flex;align-items:center;gap:5px;padding:6px 13px;border-radius:4px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;border:none;transition:background .15s}
@@ -78,11 +91,11 @@ a{text-decoration:none;color:inherit}
 
 /* ── CHIPS ── */
 .chip{display:inline-flex;align-items:center;padding:2px 9px;border-radius:10px;font-size:10px;font-weight:700;white-space:nowrap}
-.chip-green {background:var(--green-bg);color:var(--green)}
+.chip-green {background:var(--primary-bg);color:var(--primary)}
 .chip-blue  {background:var(--primary-bg);color:var(--primary)}
-.chip-orange{background:var(--orange-bg);color:var(--orange)}
+.chip-orange{background:var(--orange-bg);color:#4a72a8}
 .chip-red   {background:var(--red-bg);color:var(--red)}
-.chip-gray  {background:#f1f3f4;color:var(--sub)}
+.chip-gray  {background:#eaf2fa;color:var(--sub)}
 
 /* ── GRID ── */
 .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
@@ -103,9 +116,9 @@ a{text-decoration:none;color:inherit}
 .mat-bar{width:80px;height:5px;background:var(--border);border-radius:3px;overflow:hidden;display:inline-block}
 .mat-fill{height:100%;border-radius:3px;background:var(--primary)}
 .disposal-tag{font-size:10px;padding:1px 7px;border-radius:8px;font-weight:600}
-.d-recycle{background:#dcfce7;color:#166534}
-.d-landfill{background:#f3f4f6;color:#374151}
-.d-special {background:#fee2e2;color:#991b1b}
+.d-recycle{background:#eaf2fa;color:#214176}
+.d-landfill{background:#f8f9fc;color:#4a5e78}
+.d-special {background:#fde8e8;color:#9b1c1c}
 
 /* ── SUBTOTAL CHIPS ── */
 .subtotal-row{display:flex;gap:10px;margin-top:10px;flex-wrap:wrap}
@@ -123,12 +136,12 @@ a{text-decoration:none;color:inherit}
 
 /* ── TIMELINE ── */
 .tl{padding-left:22px;position:relative}
-.tl::before{content:'';position:absolute;left:7px;top:6px;bottom:6px;width:2px;background:#e5e7eb}
+.tl::before{content:'';position:absolute;left:7px;top:6px;bottom:6px;width:2px;background:#eaf2fa}
 .tl-item{position:relative;margin-bottom:16px}
 .tl-item:last-child{margin-bottom:0}
 .tl-dot{position:absolute;left:-20px;top:1px;width:14px;height:14px;border-radius:50%;border:2px solid var(--surface);display:flex;align-items:center;justify-content:center;font-size:8px}
-.tl-dot.done{background:var(--green);color:#fff;box-shadow:0 0 0 2px #bbf7d0}
-.tl-dot.pend{background:#d1d5db;box-shadow:0 0 0 2px #e5e7eb}
+.tl-dot.done{background:var(--primary-800);color:#fff;box-shadow:0 0 0 2px #eaf2fa}
+.tl-dot.pend{background:#b0c8e0;box-shadow:0 0 0 2px #eaf2fa}
 .tl-time{font-size:10px;color:var(--hint);margin-bottom:1px;font-weight:600}
 .tl-desc{font-size:12px;color:var(--text);line-height:1.5}
 
@@ -140,27 +153,27 @@ a{text-decoration:none;color:inherit}
 .wx-lbl{font-size:10px;color:var(--hint);margin-top:1px}
 
 /* ── BLOCKCHAIN ── */
-.chain{background:#0f1923;border-radius:var(--r);padding:16px}
-.chain-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(27,107,58,.25);border:1px solid rgba(27,107,58,.4);color:#4ade80;padding:4px 10px;border-radius:10px;font-size:10px;font-weight:700;margin-bottom:12px}
+.chain{background:#102040;border-radius:var(--r);padding:16px}
+.chain-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(27,107,58,.25);border:1px solid rgba(27,107,58,.4);color:#d0e0f0;padding:4px 10px;border-radius:10px;font-size:10px;font-weight:700;margin-bottom:12px}
 .chain-row{display:flex;gap:10px;margin-bottom:7px;font-size:11px;font-family:'JetBrains Mono','Courier New',monospace}
 .chain-row:last-child{margin-bottom:0}
-.chain-k{color:#4a6072;min-width:110px;flex-shrink:0}
-.chain-v{color:#c9d5e0;word-break:break-all}
-.chain-hash{color:#38bdf8}
-.chain-ok{color:#4ade80}
+.chain-k{color:#4a5e78;min-width:110px;flex-shrink:0}
+.chain-v{color:#b0c8e0;word-break:break-all}
+.chain-hash{color:#7a9cc8}
+.chain-ok{color:#d0e0f0}
 
 /* ── GCS BADGE ── */
-.gcs-badge{display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,var(--primary-bg),#e6f4ec);border:1px solid #b8d0f0;border-radius:var(--r);padding:12px 16px;margin-bottom:16px}
+.gcs-badge{display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,var(--primary-bg),#eaf2fa);border:1px solid #d0e0f0;border-radius:var(--r);padding:12px 16px;margin-bottom:16px}
 .gcs-icon{font-size:24px}
 .gcs-text strong{display:block;font-size:13px;color:var(--primary)}
 .gcs-text span{font-size:11px;color:var(--sub)}
-.gcs-pts{margin-left:auto;font-size:20px;font-weight:800;color:var(--green)}
+.gcs-pts{margin-left:auto;font-size:20px;font-weight:800;color:var(--primary)}
 
 /* ── SUMMARY BOXES ── */
-.summary-box{background:var(--primary-bg);border-left:3px solid var(--primary);border-radius:0 6px 6px 0;padding:12px 14px;margin-bottom:10px}
-.summary-box.green{background:var(--green-bg);border-left-color:var(--green)}
+.summary-box{background:var(--primary-bg);border-left:4px solid var(--primary);border-radius:0 6px 6px 0;padding:12px 14px;margin-bottom:10px}
+.summary-box.green{background:var(--primary-bg);border-left-color:var(--primary)}
 .summary-box-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--primary);margin-bottom:5px}
-.summary-box.green .summary-box-lbl{color:var(--green)}
+.summary-box.green .summary-box-lbl{color:var(--primary)}
 .summary-box p{font-size:12px;line-height:1.7;color:var(--text)}
 
 /* ── DISPOSAL SITE ── */
@@ -335,9 +348,9 @@ function render(r) {
       </table>
       ${(a.recycling_kg||a.landfill_kg||a.special_kg) ? `
       <div class="subtotal-row">
-        <div class="subtotal-chip" style="background:#dcfce7;color:#166534">♻️ 재활용 ${a.recycling_kg||0}kg</div>
-        <div class="subtotal-chip" style="background:#f3f4f6;color:#374151">🗑 매립 ${a.landfill_kg||0}kg</div>
-        <div class="subtotal-chip" style="background:#fee2e2;color:#991b1b">⚠️ 전문처리 ${a.special_kg||0}kg</div>
+        <div class="subtotal-chip" style="background:#eaf2fa;color:#214176">♻️ 재활용 ${a.recycling_kg||0}kg</div>
+        <div class="subtotal-chip" style="background:#f8f9fc;color:#4a5e78">🗑 매립 ${a.landfill_kg||0}kg</div>
+        <div class="subtotal-chip" style="background:#fde8e8;color:#9b1c1c">⚠️ 전문처리 ${a.special_kg||0}kg</div>
       </div>` : ''}
       </div>`
     : '<p style="color:var(--hint);font-size:12px;padding:8px 0">성분 데이터 없음 (AI 분석 대기 중)</p>';
@@ -415,7 +428,7 @@ function render(r) {
       <div style="display:flex;gap:8px;flex-shrink:0">
         <button class="btn btn-outline" onclick="window.print()">🖨 인쇄</button>
         <button class="btn btn-outline" onclick="copyHash()">⛓ 해시 복사</button>
-        <button class="btn btn-primary" id="approve-btn" onclick="approveReport()" style="background:var(--green);border-color:var(--green);">✅ 승인</button>
+        <button class="btn btn-primary" id="approve-btn" onclick="approveReport()" style="background:var(--primary-800);border-color:var(--primary-800);">✅ 승인</button>
       </div>
     </div>
     <div class="rh-meta">
@@ -571,7 +584,7 @@ async function approveReport() {
 
     // UI 업데이트
     btn.textContent  = '✅ 승인됨';
-    btn.style.background = '#15803d';
+    btn.style.background = '#284880';
     btn.dataset.approved = 'true';
 
     // 상태 칩 업데이트
@@ -598,7 +611,7 @@ function _checkApprovalStatus(r) {
     const btn = document.getElementById('approve-btn');
     if (btn) {
       btn.textContent     = '✅ 승인됨';
-      btn.style.background = '#15803d';
+      btn.style.background = '#284880';
       btn.dataset.approved = 'true';
     }
   }

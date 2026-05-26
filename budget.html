@@ -9,22 +9,30 @@
 <style>
 /* ── 정부 디자인 시스템 변수 ── */
 :root {
-  --gov-blue:      #003087;   /* 행정안전부 표준 청색 */
-  --gov-blue-mid:  #1351a8;
-  --gov-blue-lt:   #e8eef8;
-  --gov-line:      #c0cde0;
-  --gov-line-dk:   #8fa3be;
-  --gov-bg:        #f4f6fa;
+  /* ── 고팡 블루 팔레트 ── */
+  --gov-blue:      #305890;   /* GB-500 ★ */
+  --gov-blue-dk:   #102040;   /* GB-900 */
+  --gov-blue-mid:  #4a72a8;   /* GB-400 */
+  --gov-blue-800:  #1a3560;   /* GB-800 */
+  --gov-blue-700:  #214176;   /* GB-700 */
+  --gov-blue-600:  #284880;   /* GB-600 */
+  --gov-blue-300:  #7a9cc8;   /* GB-300 */
+  --gov-line:      #b0c8e0;   /* GB-200 */
+  --gov-line-dk:   #7a9cc8;   /* GB-300 */
+  --gov-blue-lt:   #eaf2fa;   /* GB-050 */
+  --gov-bg:        #f8f9fc;
   --gov-surface:   #ffffff;
-  --gov-text:      #1a1a2e;
-  --gov-sub:       #4a5568;
-  --gov-hint:      #8795a8;
-  --gov-green:     #00703c;
-  --gov-green-lt:  #e6f4ed;
-  --gov-orange:    #b45309;
-  --gov-orange-lt: #fef3c7;
-  --gov-red:       #9b1c1c;
-  --gov-red-lt:    #fde8e8;
+  --gov-text:      #1a2535;
+  --gov-sub:       #4a5e78;
+  --gov-hint:      #8a9bb0;
+
+  /* ── 기능색: 경고·오류만 예외 ── */
+  --gov-green:     #305890;   /* 완료·수입 → GB-500 */
+  --gov-green-lt:  #eaf2fa;   /* → GB-050 */
+  --gov-orange:    #b45309;   /* 경고 예외 */
+  --gov-orange-lt: #fef3c7;   /* 경고 배경 예외 */
+  --gov-red:       #9b1c1c;   /* 오류 예외 */
+  --gov-red-lt:    #fde8e8;   /* 오류 배경 예외 */
   --sidebar-w:     240px;
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -111,11 +119,11 @@ a { text-decoration: none; color: inherit; }
 }
 .sys-ok  {
   display: flex; align-items: center; gap: 5px;
-  font-weight: 700; color: var(--gov-green);
+  font-weight: 700; color: var(--gov-blue-lt);
 }
 .sys-dot {
   width: 6px; height: 6px; border-radius: 50%;
-  background: var(--gov-green);
+  background: var(--gov-blue);
   animation: blink 2s ease-in-out infinite;
 }
 @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.4} }
@@ -162,7 +170,7 @@ a { text-decoration: none; color: inherit; }
 .kpi-label { font-size: 11px; color: var(--gov-sub); margin-bottom: 8px; font-weight: 500; }
 .kpi-value { font-size: 22px; font-weight: 700; color: var(--gov-blue); letter-spacing: -.5px; }
 .kpi-sub   { font-size: 11px; color: var(--gov-hint); margin-top: 5px; }
-.kpi-card.income .kpi-value { color: var(--gov-green); }
+.kpi-card.income .kpi-value { color: var(--gov-blue); }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 /* 패널 레이아웃                                    */
@@ -211,42 +219,46 @@ a { text-decoration: none; color: inherit; }
 }
 .fs-tbl td {
   padding: 9px 16px;
-  border-bottom: 1px solid #edf0f5;
+  border-bottom: 1px solid #eaf2fa;
   font-size: 12px;
 }
 .fs-tbl tr:last-child td { border-bottom: none; }
 .fs-tbl .r-section td {
-  background: #f0f4fa;
+  background: var(--gov-blue-lt);
   font-weight: 700; font-size: 11px;
   color: var(--gov-blue);
-  letter-spacing: .3px;
+  letter-spacing: .5px;
   text-transform: uppercase;
   border-bottom: 1px solid var(--gov-line);
-  padding-left: 16px;
+  border-left: 4px solid var(--gov-blue);
+  padding-left: 12px;
 }
-.fs-tbl .r-indent td:first-child { padding-left: 30px; color: var(--gov-sub); }
+.fs-tbl .r-indent td:first-child { padding-left: 28px; color: var(--gov-sub); text-align: left; }
 .fs-tbl .r-total td {
   background: var(--gov-blue);
   color: #fff; font-weight: 700;
   border-bottom: none;
+  text-align: left;
 }
 .fs-tbl .r-total-orange td {
-  background: var(--gov-orange); color: #fff; font-weight: 700;
+  background: #4a72a8; color: #fff; font-weight: 700;
 }
 .fs-tbl .r-income td {
-  background: var(--gov-green);
+  background: var(--gov-blue);
   color: #fff; font-weight: 700; font-size: 13px;
+  border-top: 3px solid #102040;
   border-bottom: none;
 }
 .fs-tbl .r-equity td {
-  background: var(--gov-green);
+  background: var(--gov-blue);
   color: #fff; font-weight: 700;
+  border-top: 3px solid #102040;
   border-bottom: none;
 }
 .amt  { text-align: right; font-variant-numeric: tabular-nums; }
 .pct  { text-align: right; font-size: 11px; color: var(--gov-hint); }
-.amt-orange { color: var(--gov-orange); font-weight: 700; }
-.amt-green  { color: var(--gov-green);  font-weight: 700; }
+.amt-orange { color: #4a72a8; font-weight: 700; }
+.amt-green  { color: var(--gov-blue-lt);  font-weight: 700; }
 
 /* 인사이트 바 */
 .insight {
@@ -296,10 +308,10 @@ a { text-decoration: none; color: inherit; }
 }
 .list-tbl td {
   padding: 8px 14px;
-  border-bottom: 1px solid #edf0f5;
+  border-bottom: 1px solid #eaf2fa;
   font-size: 12px;
 }
-.list-tbl tbody tr:hover { background: #f8faff; }
+.list-tbl tbody tr:hover { background: #f8f9fc; }
 .list-tbl tfoot td {
   padding: 9px 14px;
   background: var(--gov-blue-lt);
@@ -560,7 +572,7 @@ function render(rows) {
         </tr>
         <tr class="r-section"><td colspan="3">III. 영업 결과</td></tr>
         <tr class="r-income">
-          <td>세전 수입 (Income before tax)</td>
+          <td style="white-space:nowrap">세전 수입 (Income before tax)</td>
           <td class="amt">₩${fmt(inc)}</td>
           <td class="pct" style="color:rgba(255,255,255,.8)">${margin}%</td>
         </tr>
@@ -609,7 +621,7 @@ function render(rows) {
         </tr>
         <tr class="r-section"><td colspan="2">III. 자본 (Equity)</td></tr>
         <tr class="r-equity">
-          <td>자본 합계 (세전 수입 누계)</td>
+          <td style="white-space:nowrap">자본 합계 (세전 수입 누계)</td>
           <td class="amt">₩${fmt(inc)}</td>
         </tr>
       </tbody>
@@ -648,8 +660,8 @@ function render(rows) {
             <td>${r.type||'—'}</td>
             <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--gov-sub)">${r.location||'—'}</td>
             <td class="amt">${total > 0 ? fmt(total) : '—'}</td>
-            <td class="amt" style="color:var(--gov-orange)">${r.approved_cost > 0 ? fmt(r.approved_cost) : '—'}</td>
-            <td class="amt" style="color:var(--gov-green);font-weight:700">${r.income_before_tax > 0 ? fmt(r.income_before_tax) : '—'}</td>
+            <td class="amt" style="color:#4a72a8">${r.approved_cost > 0 ? fmt(r.approved_cost) : '—'}</td>
+            <td class="amt" style="color:var(--gov-blue-800);font-weight:700">${r.income_before_tax > 0 ? fmt(r.income_before_tax) : '—'}</td>
             <td style="color:var(--gov-sub)">${fmtDate(r.approved_at)}</td>
           </tr>`;
         }).join('')}

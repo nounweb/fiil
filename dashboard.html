@@ -7,16 +7,37 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
 :root{
-  --primary:#003087;--primary-dk:#001f5e;--primary-bg:#e8eef8;--primary-mid:#1351a8;
-  --green:#00703c;--green-bg:#e6f4ed;
-  --orange:#b45309;--orange-bg:#fef3c7;
-  --red:#9b1c1c;--red-bg:#fde8e8;
-  --surface:#fff;--bg:#f4f6fa;
-  --sidebar:#003087;
-  --border:#c0cde0;--text:#1a1a2e;--sub:#4a5568;--hint:#8795a8;
-  --shadow-1:0 1px 2px rgba(60,64,67,.3),0 1px 3px rgba(60,64,67,.15);
-  --shadow-2:0 1px 3px rgba(60,64,67,.3),0 4px 8px rgba(60,64,67,.15);
-  --r:4px;
+  /* ── 고팡 블루 팔레트 ── */
+  --primary:    #305890;   /* GB-500 ★ 브랜드 원색 */
+  --primary-dk: #102040;   /* GB-900 최심부 */
+  --primary-bg: #eaf2fa;   /* GB-050 배경 연청 */
+  --primary-mid:#4a72a8;   /* GB-400 */
+  --primary-800:#1a3560;   /* GB-800 */
+  --primary-700:#214176;   /* GB-700 */
+  --primary-600:#284880;   /* GB-600 */
+  --primary-300:#7a9cc8;   /* GB-300 */
+  --primary-200:#b0c8e0;   /* GB-200 경계선 */
+  --primary-100:#d0e0f0;   /* GB-100 하이라이트 */
+
+  /* ── 기능색 (경고·오류만 예외 허용) ── */
+  --green:      #305890;   /* 완료·성공 → GB-500 */
+  --green-bg:   #eaf2fa;   /* 완료 배경 → GB-050 */
+  --orange:     #b45309;   /* 경고 (예외) */
+  --orange-bg:  #fef3c7;   /* 경고 배경 (예외) */
+  --red:        #9b1c1c;   /* 오류·긴급 (예외) */
+  --red-bg:     #fde8e8;   /* 오류 배경 (예외) */
+
+  /* ── 텍스트·레이아웃 ── */
+  --surface:    #f8f9fc;
+  --bg:         #f8f9fc;
+  --sidebar:    #305890;   /* GB-500 */
+  --border:     #b0c8e0;   /* GB-200 */
+  --border-dk:  #7a9cc8;   /* GB-300 */
+  --text:       #1a2535;
+  --sub:        #4a5e78;
+  --hint:       #8a9bb0;
+  --shadow-1:   0 1px 3px rgba(48,88,144,.12),0 1px 6px rgba(48,88,144,.06);
+  --r: 4px;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Noto Sans KR',sans-serif;font-size:14px;color:var(--text);background:var(--bg);-webkit-font-smoothing:antialiased}
@@ -41,23 +62,23 @@ a{text-decoration:none;color:inherit}
 .breadcrumb a:hover{color:var(--primary)}
 .bc-sep{color:var(--hint)}
 .topbar-right{display:flex;align-items:center;gap:16px}
-.sys-ok{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--green)}
-.sys-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+.sys-ok{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--primary)}
+.sys-dot{width:7px;height:7px;border-radius:50%;background:var(--primary);animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
 .clock{font-size:13px;font-weight:600;color:var(--sub)}
-.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:4px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;border:none;transition:background .15s}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:2px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;border:none;transition:background .15s}
 .btn-outline{background:transparent;border:1px solid var(--border);color:var(--text)}
 .btn-outline:hover{background:var(--bg)}
 .content{padding:24px}
 .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px}
-.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px 20px;box-shadow:var(--shadow-1)}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-top:3px solid var(--primary);padding:16px 18px;}
 .stat-icon{font-size:20px;margin-bottom:10px}
-.stat-val{font-size:26px;font-weight:800;line-height:1;margin-bottom:4px}
+.stat-val{font-size:22px;font-weight:700;line-height:1;margin-bottom:4px;color:var(--primary)}
 .stat-lbl{font-size:12px;color:var(--sub)}
 .stat-sub{font-size:12px;font-weight:600;margin-top:4px}
-.stat-sub.up{color:var(--green)}
+.stat-sub.up{color:var(--primary-100)}
 .stat-sub.blue{color:var(--primary)}
-.row-2{display:grid;grid-template-columns:3fr 1fr;gap:16px;margin-bottom:20px}
+.row-2{display:grid;grid-template-columns:2fr 1fr;gap:14px;margin-bottom:16px}
 .row-equal{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow-1)}
 .card-head{display:flex;align-items:center;justify-content:space-between;padding:11px 18px;border-bottom:1px solid var(--border);background:var(--primary-bg)}
@@ -65,20 +86,20 @@ a{text-decoration:none;color:inherit}
 .card-link{font-size:12px;color:var(--primary);font-weight:600}
 .card-link:hover{text-decoration:underline}
 .card-body{padding:16px 18px}
-.map-box{background:linear-gradient(135deg,#E8F0FA,#f0f9ff);border-radius:6px;height:200px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;margin-bottom:12px}
+.map-box{background:linear-gradient(135deg,#eaf2fa,#eaf2fa);border-radius:6px;height:200px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;margin-bottom:12px}
 .chip{display:inline-flex;align-items:center;padding:2px 10px;border-radius:2px;font-size:11px;font-weight:700;white-space:nowrap;letter-spacing:.2px}
-.chip-green   {background:var(--green-bg);color:var(--green)}
-.chip-approved{background:#166534;color:#ffffff;font-weight:700}
+.chip-green   {background:var(--primary-bg);color:var(--primary)}
+.chip-approved{background:#214176;color:#ffffff;font-weight:700}
 .chip-blue    {background:var(--primary-bg);color:var(--primary)}
-.chip-orange{background:var(--orange-bg);color:var(--orange)}
+.chip-orange{background:var(--orange-bg);color:#4a72a8}
 .chip-red{background:var(--red-bg);color:var(--red)}
-.chip-gray{background:#f1f3f4;color:var(--sub)}
+.chip-gray{background:#eaf2fa;color:var(--sub)}
 .report-table{width:100%;border-collapse:collapse;font-size:13px}
 .report-table th{padding:10px 12px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--hint);border-bottom:2px solid var(--border);background:var(--bg)}
 .report-table td{padding:11px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
 .report-table tr:last-child td{border-bottom:none}
-.report-table tr.new-row{background:#fffde7}
-.report-table tr:hover td{background:#f8f9fa}
+.report-table tr.new-row{background:#eaf2fa}
+.report-table tr:hover td{background:#f8f9fc}
 .rpt-id{color:var(--primary);font-weight:700;cursor:pointer}
 .rpt-id:hover{text-decoration:underline}
 .resource-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -96,16 +117,16 @@ a{text-decoration:none;color:inherit}
 .cost-row:last-child{border-bottom:none;font-weight:700}
 .cost-lbl{color:var(--sub)}
 .cost-bar-wrap{height:8px;background:var(--border);border-radius:4px;overflow:hidden;margin-top:6px}
-.cost-bar-fill{height:100%;border-radius:4px;background:var(--orange)}
+.cost-bar-fill{height:100%;border-radius:4px;background:#4a72a8}
 .cost-note{font-size:11px;color:var(--sub);margin-top:6px}
 .tl{padding-left:24px;position:relative}
-.tl::before{content:'';position:absolute;left:8px;top:6px;bottom:6px;width:2px;background:#e5e7eb}
+.tl::before{content:'';position:absolute;left:8px;top:6px;bottom:6px;width:2px;background:#eaf2fa}
 .tl-item{position:relative;margin-bottom:18px}
 .tl-item:last-child{margin-bottom:0}
 .tl-dot{position:absolute;left:-22px;top:2px;width:16px;height:16px;border-radius:50%;border:2px solid var(--surface);display:flex;align-items:center;justify-content:center;font-size:9px}
-.tl-dot.go{background:var(--primary);color:#fff;box-shadow:0 0 0 2px #bfdbfe}
-.tl-dot.done{background:var(--green);color:#fff;box-shadow:0 0 0 2px #bbf7d0}
-.tl-dot.wait{background:#d1d5db;box-shadow:0 0 0 2px #e5e7eb}
+.tl-dot.go{background:var(--primary);color:#fff;box-shadow:0 0 0 2px #d0e0f0}
+.tl-dot.done{background:var(--primary);color:#fff;box-shadow:0 0 0 2px #eaf2fa}
+.tl-dot.wait{background:#b0c8e0;box-shadow:0 0 0 2px #eaf2fa}
 .tl-time{font-size:11px;color:var(--hint);margin-bottom:2px}
 .tl-lbl{font-size:13px;font-weight:600}
 .tl-sub{font-size:12px;color:var(--sub);margin-top:2px}
@@ -175,7 +196,7 @@ a{text-decoration:none;color:inherit}
         <div class="stat-icon">💰</div>
         <div class="stat-val">₩84만</div>
         <div class="stat-lbl">오늘 집행 비용</div>
-        <div class="stat-sub" style="color:var(--orange)">예산 대비 73%</div>
+        <div class="stat-sub" style="color:#4a72a8">예산 대비 73%</div>
       </div>
     </div>
 
@@ -193,7 +214,7 @@ a{text-decoration:none;color:inherit}
             <span style="position:absolute;top:60%;left:55%;font-size:11px;color:var(--sub)">서귀포시</span>
             <span style="position:absolute;top:28%;left:18%;width:12px;height:12px;border-radius:50%;background:var(--primary);display:inline-block"></span>
             <span style="position:absolute;top:45%;left:60%;width:12px;height:12px;border-radius:50%;background:var(--primary);display:inline-block"></span>
-            <span style="position:absolute;top:35%;left:75%;width:12px;height:12px;border-radius:50%;background:var(--green);display:inline-block"></span>
+            <span style="position:absolute;top:35%;left:75%;width:12px;height:12px;border-radius:50%;background:var(--primary);display:inline-block"></span>
             <div style="position:absolute;bottom:10px;right:12px;display:flex;gap:12px;font-size:11px">
               <span>🔵 출동중</span><span>🟢 완료</span>
             </div>
@@ -230,11 +251,11 @@ a{text-decoration:none;color:inherit}
         <div class="card">
           <div class="card-head"><div class="card-title">📊 유형별 현황</div></div>
           <div class="card-body">
-            <div class="type-item"><span style="font-size:13px;min-width:80px">🏖️ 해안쓰레기</span><div class="type-bar"><div class="type-fill" style="width:100%;background:#0057A8"></div></div><span class="type-val">8</span></div>
-            <div class="type-item"><span style="font-size:13px;min-width:80px">🌊 수중쓰레기</span><div class="type-bar"><div class="type-fill" style="width:75%;background:#1e8e3e"></div></div><span class="type-val">6</span></div>
+            <div class="type-item"><span style="font-size:13px;min-width:80px">🏖️ 해안쓰레기</span><div class="type-bar"><div class="type-fill" style="width:100%;background:#305890"></div></div><span class="type-val">8</span></div>
+            <div class="type-item"><span style="font-size:13px;min-width:80px">🌊 수중쓰레기</span><div class="type-bar"><div class="type-fill" style="width:75%;background:#305890"></div></div><span class="type-val">6</span></div>
             <div class="type-item"><span style="font-size:13px;min-width:80px">🌲 산림쓰레기</span><div class="type-bar"><div class="type-fill" style="width:62%;background:#e37400"></div></div><span class="type-val">5</span></div>
             <div class="type-item"><span style="font-size:13px;min-width:80px">🚨 응급환자</span><div class="type-bar"><div class="type-fill" style="width:25%;background:#d93025"></div></div><span class="type-val">2</span></div>
-            <div class="type-item"><span style="font-size:13px;min-width:80px">➕ 기타</span><div class="type-bar"><div class="type-fill" style="width:25%;background:#9aa0a6"></div></div><span class="type-val">2</span></div>
+            <div class="type-item"><span style="font-size:13px;min-width:80px">➕ 기타</span><div class="type-bar"><div class="type-fill" style="width:25%;background:#8a9bb0"></div></div><span class="type-val">2</span></div>
           </div>
         </div>
       </div>
@@ -276,7 +297,7 @@ a{text-decoration:none;color:inherit}
           <div class="cost-row"><span>합계</span><span style="color:var(--primary)">₩ 840,000</span></div>
           <div style="margin-top:14px">
             <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--sub)">
-              <span>일일 예산 소진율</span><span style="font-weight:700;color:var(--orange)">73%</span>
+              <span>일일 예산 소진율</span><span style="font-weight:700;color:#4a72a8">73%</span>
             </div>
             <div class="cost-bar-wrap"><div class="cost-bar-fill" style="width:73%"></div></div>
             <div class="cost-note">일일 예산: ₩1,150,000 / 잔액: ₩310,000</div>
@@ -372,7 +393,7 @@ function renderReports(reports){
       '<td><span class="chip '+(urgClass[urgency]||'chip-gray')+'">'+urgency+'</span></td>'+
       '<td><span class="chip '+(statClass[r.status]||'chip-gray')+'">'+(r.status||'접수')+'</span></td>'+
       '<td>'+(r.dispatch&&r.dispatch.personnel?r.dispatch.personnel+'명':'—')+'</td>'+
-      '<td>₩'+cost.toLocaleString()+'</td>'+
+      '<td class="amt">₩'+cost.toLocaleString()+'</td>'+
       '<td>'+(r.reported_at
         ? new Date(r.reported_at).toLocaleString('ko-KR',{
             year:'numeric',month:'2-digit',day:'2-digit',

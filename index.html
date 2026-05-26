@@ -1382,23 +1382,11 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function openAppModal() {
-  // 모바일(768px 이하)이면 새 탭으로 직접 열기
-  if (window.innerWidth <= 768) {
-    window.open('https://fiil.kr/webapp.html', '_blank');
-    return;
-  }
-  // 데스크탑이면 스마트폰 목업 모달
-  const modal = document.getElementById('appModal');
-  const screen = document.getElementById('appLoadingScreen');
-  const iframe = document.getElementById('appIframe');
-  // 로딩 화면 초기화
-  if (screen) screen.style.display = 'flex';
-  if (iframe) { iframe.style.display = 'none'; iframe.src = ''; }
-  modal.classList.add('show');
-  document.body.style.overflow = 'hidden';
+  // 모든 환경에서 새 탭으로 열기 (iframe GPS 차단 문제 해결)
+  window.open('https://fiil.kr/webapp.html', '_blank');
 }
 function closeModal() {
-  document.getElementById('appModal').classList.remove('show');
+  document.getElementById('appModal')?.classList.remove('show');
   document.body.style.overflow = '';
 }
 function closeAppModal(e) {
