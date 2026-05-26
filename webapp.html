@@ -1093,8 +1093,8 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); font-family:
 // ══════════════════════════════════════════════════
 // 설정 — API 키 하드코딩 (테스트용)
 // ══════════════════════════════════════════════════
-const DEEPSEEK_KEY = 'sk-e4a6f005aecf43d4aa60e77bb71de14c';
-const GEMINI_KEY   = 'AIzaSyDiytKUg_0MJVBM3gFYzTms7mO6Y2mhLT4';
+// API 키는 Cloudflare Worker 환경변수에 보관
+const PROXY_URL = 'https://gopang-proxy.tensor-city.workers.dev'; // Cloudflare Worker 프록시
 const SB_URL       = 'https://ebbecjfrwaswbdybbgiu.supabase.co';
 const SB_KEY       = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImViYmVjamZyd2Fzd2JkeWJiZ2l1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1NjE5ODQsImV4cCI6MjA5NTEzNzk4NH0.H2ahQKtWdSke04Pdi3hDY86pdTx7UUKPUpQMlS_zciA';
 
@@ -2613,7 +2613,7 @@ async function _geminiRoute(imageFile, category, userText) {
   };
   try {
     const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`,
+      `https://gopang-proxy.tensor-city.workers.dev/gemini/gemini-2.0-flash`,
       { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }
     );
     const data = await res.json();
@@ -2654,11 +2654,16 @@ async function _geminiAnalyze(imageFile, spCode) {
     generationConfig: { temperature: 0.1, maxOutputTokens: 1024 }
   };
   const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`,
+    `https://gopang-proxy.tensor-city.workers.dev/gemini/gemini-2.0-flash`,
     { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }
   );
-  if (!res.ok) throw new Error('Gemini API ' + res.status);
+  if (!res.ok) {
+    const errText = await res.text();
+    console.error('[Gemini _geminiAnalyze] HTTP', res.status, errText);
+    throw new Error('Gemini API ' + res.status + ' : ' + errText.slice(0,200));
+  }
   const data = await res.json();
+  console.log('[Gemini _geminiAnalyze] 응답:', JSON.stringify(data).slice(0,300));
   const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
   return JSON.parse(text.replace(/```json|```/g, '').trim());
 }
@@ -2701,11 +2706,16 @@ async function _geminiAnalyzeGeneral(imageFile) {
   };
 
   const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`,
+    `https://gopang-proxy.tensor-city.workers.dev/gemini/gemini-2.0-flash`,
     { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }
   );
-  if (!res.ok) throw new Error('Gemini API ' + res.status);
+  if (!res.ok) {
+    const errText = await res.text();
+    console.error('[Gemini _general] HTTP', res.status, errText);
+    throw new Error('Gemini API ' + res.status + ' : ' + errText.slice(0,200));
+  }
   const data = await res.json();
+  console.log('[Gemini _general] 응답:', JSON.stringify(data).slice(0,300));
   const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
   const result = JSON.parse(text.replace(/```json|```/g, '').trim());
   // SP-14/15 호환 필드 추가
@@ -2750,11 +2760,11 @@ async function _deepseekReport(geminiJson, category, desc, gps, address, spCode)
       costNote +
       `\n\n위 데이터를 바탕으로 신고서 요약(2~3문장)과 권고 조치 3~4가지를 작성하라.` +
       `출력 형식: {"summary":"...","actions":["...","...","..."]}`;
-  const res = await fetch('https://api.deepseek.com/v1/chat/completions', {
+  const res = await fetch('https://gopang-proxy.tensor-city.workers.dev/deepseek', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${DEEPSEEK_KEY}`,
+      // Authorization은 Worker에서 처리
     },
     body: JSON.stringify({
       model: 'deepseek-chat',
@@ -2982,6 +2992,7 @@ async function runAIAnalysis(category) {
     // 4단계: Supabase 저장 (백그라운드)
     const reportId = 'RPT-2026-' + (Math.floor(Math.random()*9000)+1000);
     const urgencyMap = {S0:'낮음', S1:'보통', S2:'높음', S3:'긴급'};
+    const now = new Date().toISOString();
     const payload = {
       id:          reportId,
       type:        category,
@@ -2989,7 +3000,7 @@ async function runAIAnalysis(category) {
       location:    gpsAddress || (gps ? `GPS: ${gps}` : '위치 미상'),
       gps:         gps,
       reporter:    null,
-      reported_at: new Date().toISOString(),
+      reported_at: now,
       urgency:     urgencyMap[geminiResult?.risk_level] || '보통',
       status:      '접수',
       analysis: {
