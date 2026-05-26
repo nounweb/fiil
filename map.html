@@ -4,8 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>실시간 지도 — FIIL.kr</title>
-<script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=c7160a2d047af2808065d9e1929a66a7&libraries=services&autoload=false&onload=kakaoMapReady"></script>
-<script>function kakaoMapReady(){kakao.maps.load(loadMap);}</script>
+<script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=c7160a2d047af2808065d9e1929a66a7&libraries=services&autoload=false"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
 :root{
@@ -227,7 +226,9 @@ async function loadMap(){
     })(p[0],p[1],cell);
   });
 }
-// kakao.maps.load → SDK onload 콜백(kakaoMapReady)에서 호출됨
+document.addEventListener("DOMContentLoaded", function(){
+  kakao.maps.load(loadMap);
+});
 
 
 // ── 모바일 사이드바 ──────────────────────────────────
