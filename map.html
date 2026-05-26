@@ -232,7 +232,7 @@ async function loadMap(){
           if(a)cell.textContent=a;
         }
       });
-    })(lat,lng,cell);
+    })(p[0],p[1],cell);
   });
 }
 loadMap();
