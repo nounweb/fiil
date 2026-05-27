@@ -2005,7 +2005,7 @@ window.addEventListener('load', async () => {
     window.__gwpInstance = gwp;
 
     // 신고 화면 바로 표시 (홈 건너뜀)
-    goScreen('screen-report');
+    setTimeout(function(){ goScreen('screen-report'); }, 500);
 
     // 고팡에 준비 완료 신호
     gwp.ready({
