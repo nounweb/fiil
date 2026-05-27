@@ -1,11 +1,11 @@
 /**
- * gwp-sdk.js — Gopang Widget Protocol SDK v2.0
+ * gwp-sdk.js — Gopang Widget Protocol SDK v2.1
  *
- * 변경사항 v2.0:
- *   - 새 탭 방식 전용: BroadcastChannel('gopang_gwp') 사용
- *   - isWidget 정적 프로퍼티 추가
- *   - iframe fallback 제거 (새 탭 방식으로 표준화)
- *   - done() 호출 시 BroadcastChannel로 직접 전송
+ * 변경사항 v2.1:
+ *   - 새 탭 방식 전용: window.opener.postMessage() 사용 (cross-origin 지원)
+ *   - isWidget static getter 추가 (gwp=1 파라미터로 판단)
+ *   - BroadcastChannel 제거 (same-origin 제한으로 cross-port 불가)
+ *   - iframe fallback 유지 (parent.postMessage)
  *
  * 사용법:
  *   <script src="https://gopang.net/gwp-sdk.js"></script>
@@ -22,8 +22,6 @@
 
 (function(global) {
   'use strict';
-
-  var CHANNEL_NAME = 'gopang_gwp';
 
   class GopangWidget {
 
@@ -99,13 +97,24 @@
     // ── 내부 ─────────────────────────────────────────────────────
     _post(type, data) {
       var payload = Object.assign({ type: type }, data);
+      // window.opener: 새 탭 방식 — cross-origin 허용
+      if (window.opener) {
+        var target = this._gopangOrigin || '*';
+        try {
+          window.opener.postMessage(payload, target);
+          console.info('[GWP-SDK] → opener.postMessage:', type);
+          return;
+        } catch(e) {
+          console.warn('[GWP-SDK] opener.postMessage 실패:', e.message);
+        }
+      }
+      // fallback: iframe 방식
       try {
-        var ch = new BroadcastChannel(CHANNEL_NAME);
-        ch.postMessage(payload);
-        setTimeout(function() { ch.close(); }, 500);
-        console.info('[GWP-SDK] →', type);
+        var target2 = this._gopangOrigin || '*';
+        parent.postMessage(payload, target2);
+        console.info('[GWP-SDK] → parent.postMessage:', type);
       } catch(e) {
-        console.warn('[GWP-SDK] BroadcastChannel 실패:', e.message);
+        console.warn('[GWP-SDK] postMessage 실패:', e.message);
       }
     }
   }
