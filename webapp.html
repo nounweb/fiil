@@ -2574,6 +2574,14 @@ async function _loadPrompt(key) {
 }
 
 // ── Supabase 헬퍼 ─────────────────────────────────
+// ── 한국 시간(KST) ISO 문자열 반환 ────────────────
+function _nowKST() {
+  // UTC+9 오프셋을 명시하여 저장
+  const now = new Date();
+  const kst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+  return kst.toISOString().replace('Z', '+09:00');
+}
+
 async function _sbFetch(path, method='GET', body=null) {
   const opts = {
     method,
@@ -2871,20 +2879,15 @@ function goBack() {
 
 // ── GPS ──────────────────────────────────────────
 function initGPS() {
-  // 페이지 로드 시 자동 요청 안 함 — 사용자 탭 시 요청
-  const bar = document.getElementById('gpsBar');
-  if (bar) {
-    bar.style.cursor = 'pointer';
-    bar.title = '탭하여 현재 위치 확인';
-    bar.addEventListener('click', requestGPS, { once: true });
-  }
-}
-
-function requestGPS() {
   if (!navigator.geolocation) {
     document.getElementById('gpsVal').textContent = 'GPS 미지원 기기';
     return;
   }
+  // 페이지 로드 시 즉시 자동 감지
+  _startGPS();
+}
+
+function _startGPS() {
   document.getElementById('gpsSpinner').style.display = 'block';
   document.getElementById('gpsVal').textContent = '위치 확인 중…';
 
@@ -2893,24 +2896,54 @@ function requestGPS() {
     const lng = pos.coords.longitude.toFixed(6);
     gpsCoords = { lat, lng };
     document.getElementById('gpsSpinner').style.display = 'none';
-    document.getElementById('gpsVal').textContent = `${lat}, ${lng} (±${Math.round(pos.coords.accuracy)}m)`;
     document.getElementById('gpsBar').style.background = 'var(--accent-light)';
+
+    // 즉시 좌표 표시 후 주소로 교체
+    document.getElementById('gpsVal').textContent = '주소 변환 중…';
     gpsAddress = await _reverseGeocode(lat, lng);
+
     if (gpsAddress) {
-      document.getElementById('gpsVal').textContent = gpsAddress + ` (${lat}, ${lng})`;
+      // 주소만 표시 (좌표 숨김)
+      document.getElementById('gpsVal').textContent = gpsAddress;
+    } else {
+      // 주소 변환 실패 시 좌표 표시
+      document.getElementById('gpsVal').textContent = `${lat}, ${lng}`;
     }
+
+    // watchPosition으로 위치 변화 감지
+    navigator.geolocation.watchPosition(async updated => {
+      const la = updated.coords.latitude.toFixed(6);
+      const ln = updated.coords.longitude.toFixed(6);
+      // 이전 위치와 크게 다를 때만 업데이트 (50m 이상)
+      const dist = Math.abs(la - lat) + Math.abs(ln - lng);
+      if (dist > 0.0005) {
+        gpsCoords = { lat: la, lng: ln };
+        document.getElementById('gpsVal').textContent = '주소 업데이트 중…';
+        gpsAddress = await _reverseGeocode(la, ln);
+        document.getElementById('gpsVal').textContent = gpsAddress || `${la}, ${ln}`;
+      }
+    }, null, { enableHighAccuracy: true, maximumAge: 30000 });
+
   }, (err) => {
     document.getElementById('gpsSpinner').style.display = 'none';
-    // GPS 미허용 — 좌표 저장하지 않음, 사용자에게 허용 요청
     gpsCoords = null;
     gpsAddress = null;
-    document.getElementById('gpsVal').textContent = '⚠️ GPS 미허용 — 위치 정보를 위해 허용해 주세요';
+
+    let msg = '위치 확인 실패';
+    if (err.code === 1) msg = '위치 권한이 거부됐습니다. 설정에서 허용해 주세요.';
+    else if (err.code === 2) msg = 'GPS 신호를 찾을 수 없습니다.';
+    else if (err.code === 3) msg = 'GPS 시간 초과. 다시 시도합니다.';
+
+    document.getElementById('gpsVal').textContent = msg;
     document.getElementById('gpsBar').style.background = 'var(--orange-bg,#fef3c7)';
-    // 재시도 버튼 재활성화
-    const bar = document.getElementById('gpsBar');
-    if (bar) bar.addEventListener('click', requestGPS, { once: true });
-  }, { timeout: 10000, maximumAge: 60000 });
+    document.getElementById('gpsBar').style.cursor = 'pointer';
+    document.getElementById('gpsBar').title = '탭하여 재시도';
+    document.getElementById('gpsBar').onclick = () => { _startGPS(); };
+
+  }, { timeout: 10000, maximumAge: 0, enableHighAccuracy: true });
 }
+
+function requestGPS() { _startGPS(); }
 
 // ── 사진 처리 ────────────────────────────────────
 function handlePhoto(input) {
@@ -3049,7 +3082,7 @@ async function runAIAnalysis(category) {
     // 5단계: 이미지 업로드 + Supabase 저장
     const reportId = 'RPT-2026-' + (Math.floor(Math.random()*9000)+1000);
     const urgencyMap = {S0:'낮음', S1:'보통', S2:'높음', S3:'긴급'};
-    const now = new Date().toISOString();
+    const now = _nowKST();
 
     // 이미지 Storage 업로드
     console.log('[Storage] 이미지 업로드 시작...');
@@ -3117,7 +3150,7 @@ async function runAIAnalysis(category) {
       location:    gpsAddress || null,
       gps:         gps,
       reporter:    null,
-      reported_at: new Date().toISOString(),
+      reported_at: _nowKST(),
       urgency:     '보통',
       status:      '접수',
       analysis:    { summary: '분석 오류 발생', error: e.message },
