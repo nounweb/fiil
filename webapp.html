@@ -1093,8 +1093,12 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); font-family:
 // ══════════════════════════════════════════════════
 // 설정 — API 키 하드코딩 (테스트용)
 // ══════════════════════════════════════════════════
-// API 키는 Cloudflare Worker 환경변수에 보관
-const PROXY_URL = 'https://gopang-proxy.tensor-city.workers.dev'; // Cloudflare Worker 프록시
+// API 호출 우선순위: A) Gemini 직접 → B) Worker 프록시 (fallback)
+const GEMINI_KEY  = 'AIzaSyD-placeholder-replace-with-actual-key-from-aistudio'; // ⚠️ 실제 키로 교체 필수 (gen-lang-client-0439904447)
+const GEMINI_MODEL = 'gemini-2.5-flash-lite-preview-06-17';
+const GEMINI_DIRECT = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_KEY}`;
+const PROXY_URL   = 'https://gopang-proxy.tensor-city.workers.dev'; // Fallback Worker
+const DEEPSEEK_KEY = 'sk-e4a6f005aecf43d4aa60e77bb71de14c';
 const SB_URL       = 'https://ebbecjfrwaswbdybbgiu.supabase.co';
 const SB_KEY       = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImViYmVjamZyd2Fzd2JkeWJiZ2l1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1NjE5ODQsImV4cCI6MjA5NTEzNzk4NH0.H2ahQKtWdSke04Pdi3hDY86pdTx7UUKPUpQMlS_zciA';
 
@@ -1178,6 +1182,63 @@ async function _sbFetch(path, method='GET', body=null) {
 }
 
 // ── Gemini Vision 분석 (SP-14-IMG) ───────────────
+// ── Gemini fetch: 직접호출 → Worker fallback ───────
+async function _geminiFetch(body) {
+  // 방법 A: Gemini 직접 호출
+  try {
+    const res = await fetch(GEMINI_DIRECT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+      signal: typeof AbortSignal.timeout === 'function' ? AbortSignal.timeout(20000) : undefined,
+    });
+    if (res.ok) {
+      console.log('[Gemini] 직접 호출 성공');
+      return await res.json();
+    }
+    console.warn('[Gemini] 직접 호출 실패:', res.status, '→ Worker fallback');
+  } catch(e) {
+    console.warn('[Gemini] 직접 호출 오류:', e.message, '→ Worker fallback');
+  }
+  // 방법 B: Worker 프록시 fallback
+  const res2 = await fetch(
+    `${PROXY_URL}/gemini/${GEMINI_MODEL}`,
+    { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }
+  );
+  if (!res2.ok) throw new Error('Gemini(proxy) ' + res2.status);
+  console.log('[Gemini] Worker fallback 성공');
+  return await res2.json();
+}
+
+// ── DeepSeek fetch: 직접호출 → Worker fallback ────
+async function _deepseekFetch(payload) {
+  // 방법 A: DeepSeek 직접 호출
+  try {
+    const res = await fetch('https://api.deepseek.com/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${DEEPSEEK_KEY}` },
+      body: JSON.stringify(payload),
+      signal: typeof AbortSignal.timeout === 'function' ? AbortSignal.timeout(30000) : undefined,
+    });
+    if (res.ok) {
+      console.log('[DeepSeek] 직접 호출 성공');
+      return await res.json();
+    }
+    console.warn('[DeepSeek] 직접 호출 실패:', res.status, '→ Worker fallback');
+  } catch(e) {
+    console.warn('[DeepSeek] 직접 호출 오류:', e.message, '→ Worker fallback');
+  }
+  // 방법 B: Worker 프록시 fallback
+  const res2 = await fetch(`${PROXY_URL}/deepseek`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  if (!res2.ok) throw new Error('DeepSeek(proxy) ' + res2.status);
+  console.log('[DeepSeek] Worker fallback 성공');
+  return await res2.json();
+}
+
 async function _geminiRoute(imageFile, category, userText) {
   const routerPrompt = await _loadPrompt('router');
   const base64 = await new Promise((res, rej) => {
@@ -1196,13 +1257,10 @@ async function _geminiRoute(imageFile, category, userText) {
     generationConfig: { temperature: 0.1, maxOutputTokens: 256 }
   };
   try {
-    const res = await fetch(
-      'https://gopang-proxy.tensor-city.workers.dev/gemini/gemini-2.5-flash-lite-preview-06-17',
-      { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }
-    );
-    const data = await res.json();
+    const data = await _geminiFetch(body);
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
     const result = JSON.parse(text.replace(/```json|```/g, '').trim());
+    if (!result.sp_code) throw new Error('sp_code 없음');
     console.log('[SP-ROUTER] 결정:', result.sp_code, '신뢰도:', result.confidence);
     return result;
   } catch(e) {
@@ -1240,15 +1298,15 @@ async function _geminiAnalyze(imageFile, spCode) {
     ]}],
     generationConfig: { temperature: 0.1, maxOutputTokens: 1500 }
   };
-  const res = await fetch(
-    'https://gopang-proxy.tensor-city.workers.dev/gemini/gemini-2.5-flash-lite-preview-06-17',
-    { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }
-  );
-  if (!res.ok) throw new Error('Gemini API ' + res.status);
-  const data = await res.json();
-  console.log('[Gemini] 응답:', JSON.stringify(data).slice(0,200));
-  const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
-  return JSON.parse(text.replace(/```json|```/g, '').trim());
+  try {
+    const data = await _geminiFetch(body);
+    console.log('[Gemini] 응답:', JSON.stringify(data).slice(0,200));
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
+    return JSON.parse(text.replace(/```json|```/g, '').trim());
+  } catch(e) {
+    console.warn('[Gemini] 분석 실패, DeepSeek Vision fallback:', e.message);
+    return await _deepseekVision(imageFile, spCode);
+  }
 }
 
 async function _geminiAnalyzeGeneral(imageFile) {
@@ -1280,12 +1338,7 @@ async function _geminiAnalyzeGeneral(imageFile) {
     ]}],
     generationConfig: { temperature: 0.2, maxOutputTokens: 512 }
   };
-  const res = await fetch(
-    'https://gopang-proxy.tensor-city.workers.dev/gemini/gemini-2.5-flash-lite-preview-06-17',
-    { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }
-  );
-  if (!res.ok) throw new Error('Gemini General API ' + res.status);
-  const data = await res.json();
+  const data = await _geminiFetch(body);
   const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
   const result = JSON.parse(text.replace(/```json|```/g, '').trim());
   result._sp_code    = 'SP-00-GEN';
@@ -1354,24 +1407,15 @@ async function _deepseekReport(geminiJson, category, desc, gps, address, spCode)
       `  "scale": "XS|S|M|L|XL"\n` +
       `}\n` +
       `비용은 제주특별자치도 기준: 수거 인건비 20,000원/인/시간, 1톤 트럭 50,000원, 처리비 200원/kg(일반)/1,000원/kg(유해). materials 비율 합계는 반드시 100.`;
-  const res = await fetch('https://gopang-proxy.tensor-city.workers.dev/deepseek', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      // Authorization은 Worker에서 처리
-    },
-    body: JSON.stringify({
-      model: 'deepseek-chat',
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user',   content: userMsg },
-      ],
-      max_tokens: 1500,
-      temperature: 0.3,
-    }),
+  const data = await _deepseekFetch({
+    model: 'deepseek-chat',
+    messages: [
+      { role: 'system', content: systemPrompt },
+      { role: 'user',   content: userMsg },
+    ],
+    max_tokens: 1500,
+    temperature: 0.3,
   });
-  if (!res.ok) throw new Error('DeepSeek API ' + res.status);
-  const data = await res.json();
   const text = data.choices?.[0]?.message?.content || '{}';
   try {
     return JSON.parse(text.replace(/```json|```/g, '').trim());
@@ -1688,12 +1732,18 @@ async function runAIAnalysis(category) {
       type_code:   spCode,
       location:    gpsAddress || (gps ? gps : '위치 미상'),
       gps:         gps,
-      reporter:    null,
+      reporter:    localStorage.getItem('gopang_phone') || null,
       reported_at: now,
       urgency:     urgencyMap[geminiResult?.risk_level] || '보통',
       status:      '접수',
       image_url:   imageUrl,
-      cost:        costTotal > 0 ? costTotal : null,
+      cost: (reportData?.cost || costData) ? {
+        labor:     reportData?.cost?.collection_fee || costData?.collection_fee || 0,
+        equipment: reportData?.cost?.disposal_fee   || costData?.disposal_fee   || 0,
+        vehicle:   reportData?.cost?.vehicle_fee    || 0,
+        total:     reportData?.cost?.total_est      || costData?.total_est      || costTotal || 0,
+        currency:  'KRW',
+      } : null,
       dispatch: (geminiResult?.truck_required || geminiResult?.workers_required) ? {
         vehicle:   geminiResult?.truck_required || null,
         personnel: geminiResult?.workers_required || null,
@@ -1740,7 +1790,7 @@ async function runAIAnalysis(category) {
       type_code:   'SP-00-GEN',
       location:    gpsAddress || null,
       gps:         gps,
-      reporter:    null,
+      reporter:    localStorage.getItem('gopang_phone') || null,
       reported_at: _nowKST(),
       urgency:     '보통',
       status:      '접수',
@@ -1878,6 +1928,11 @@ async function _handleUrlParams() {
 // ── Init ──────────────────────────────────────────
 window.addEventListener('load', async () => {
   initGPS();
+  if (typeof initPhone === 'function') initPhone();
+  // Gemini 키 유효성 사전 체크
+  if (GEMINI_KEY.includes('placeholder')) {
+    console.error('[설정 오류] GEMINI_KEY가 플레이스홀더입니다. 실제 API 키로 교체하세요.');
+  }
   await _handleUrlParams();
 });
 </script>
