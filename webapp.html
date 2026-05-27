@@ -1503,6 +1503,17 @@ function goBack() {
 
 // ── GPS ──────────────────────────────────────────
 function initGPS() {
+      // 고팡에서 GPS 주소 전달받은 경우 즉시 사용 (iframe GPS 재요청 불필요)
+      const _up = new URLSearchParams(location.search);
+      const _ga = _up.get("gps_addr");
+      if (_ga) {
+        gpsAddress = decodeURIComponent(_ga);
+        const gpsEl = document.getElementById("gpsVal");
+        const gpsSpEl = document.getElementById("gpsSpinner");
+        if (gpsEl) gpsEl.textContent = gpsAddress;
+        if (gpsSpEl) gpsSpEl.style.display = "none";
+        return;
+      }
   if (!navigator.geolocation) {
     document.getElementById('gpsVal').textContent = 'GPS 미지원 기기';
     return;
@@ -2008,5 +2019,6 @@ window.addEventListener('load', async () => {
 </script>
 </body>
 </html>
+
 
 
