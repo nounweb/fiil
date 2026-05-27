@@ -1881,6 +1881,13 @@ function showResult(category, reportId, gemini, report, location) {
           },
         },
       });
+    // ??? ?? ??
+    if (window._gopangNotify) {
+      window._gopangNotify(
+        (category || "") + " ?? ?? (" + (reportId || "") + ")",
+        { what: category, where: location, how: "image", why: "?? ?? ??" }
+      );
+    }
     }, 3000);  // 결과 화면 3초 표시 후 고팡 복귀
   }
 }
@@ -2003,6 +2010,15 @@ window.addEventListener('load', async () => {
       },
     });
     window.__gwpInstance = gwp;
+
+        // BroadcastChannel로 고팡에 결과 전달
+        window._gopangNotify = function(summary, pdvData) {
+          try {
+            const ch = new BroadcastChannel("gopang_gwp");
+            ch.postMessage({ type: "GWP_DONE", summary: summary, pdvData: pdvData });
+            setTimeout(function(){ ch.close(); }, 500);
+          } catch(e) {}
+        };
 
     // 신고 화면 바로 표시 (홈 건너뜀)
     setTimeout(function(){ goScreen('screen-report'); }, 500);
