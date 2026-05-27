@@ -2792,15 +2792,16 @@ async function _saveReport(payload) {
   return rows?.[0];
 }
 
-// ── 카카오 역지오코딩 ────────────────────────────
+// ── 카카오 역지오코딩 → Worker 프록시 ───────────────
 async function _reverseGeocode(lat, lng) {
   try {
     const res = await fetch(
-      `https://dapi.kakao.com/v2/local/geo/coord2address.json?x=${lng}&y=${lat}&input_coord=WGS84`,
-      { headers: { 'Authorization': 'KakaoAK 66648ca49f126d8752b33d542789ac56' } }
+      `${PROXY_URL}/geocode?lat=${lat}&lng=${lng}`
     );
     const data = await res.json();
-    return data.documents?.[0]?.address?.address_name || null;
+    return data.documents?.[0]?.road_address?.address_name
+        || data.documents?.[0]?.address?.address_name
+        || null;
   } catch { return null; }
 }
 
@@ -2949,43 +2950,55 @@ async function runAIAnalysis(category) {
   try {
     // 1단계: GPS + 발신자
     setStep(1);
+    console.log('[분석 시작] photoFile:', photoFile?.name, 'gps:', gps, 'category:', category);
     await new Promise(r => setTimeout(r, 400));
     setStep(2);
 
-    // 2단계: SP 라우터 실행 → 어떤 SP를 쓸지 결정
+    // 2단계: SP 라우터 → 어떤 SP를 쓸지 결정
     if (photoFile) {
       try {
+        console.log('[SP-ROUTER] 라우팅 시작...');
         const route = await _geminiRoute(photoFile, category, desc);
         spCode = route.sp_code || 'SP-14-IMG';
-        // 응급 상황 즉각 표시
+        console.log('[SP-ROUTER] 결정:', spCode, '신뢰도:', route.confidence);
         if (route.urgent) {
           appendBubble?.('ai', '🚨 응급 상황이 감지되었습니다. 즉각 대응팀이 출동합니다.');
         }
       } catch(e) {
-        console.warn('[SP-ROUTER] 실패, 기본 SP-14-IMG 사용:', e.message);
+        console.warn('[SP-ROUTER] 실패, SP-14-IMG 기본 사용:', e.message);
       }
+    } else {
+      console.warn('[SP-ROUTER] photoFile 없음 → 라우팅 건너뜀');
+      spCode = 'SP-00-GEN';
     }
     setStep(3);
 
-    // 3단계: 결정된 SP로 Gemini Vision 분석
+    // 3단계: Gemini Vision 분석
     if (photoFile) {
       try {
+        console.log('[Gemini] 분석 시작, SP:', spCode);
         geminiResult = await _geminiAnalyze(photoFile, spCode);
-        console.log('[Gemini] 분석 완료 (', spCode, '):', geminiResult.scale || geminiResult.location_type, geminiResult.risk_level);
+        console.log('[Gemini] 분석 완료:', JSON.stringify(geminiResult).slice(0,200));
       } catch(e) {
-        console.warn('[Gemini] 실패:', e.message);
+        console.error('[Gemini] 분석 실패:', e.message);
+        // Gemini 실패해도 계속 진행 (DeepSeek이 처리)
       }
     }
     setStep(4);
 
-    // 3단계: DeepSeek 신고서 생성
-    if (geminiResult) {
-      try {
-        reportData = await _deepseekReport(geminiResult, category, desc, gps, gpsAddress, spCode);
-        console.log('[DeepSeek] 신고서 생성 완료 (', spCode, ')');
-      } catch(e) {
-        console.warn('[DeepSeek] 실패:', e.message);
-      }
+    // 4단계: DeepSeek 신고서 생성
+    // geminiResult 없어도 기본 정보로 신고서 생성
+    try {
+      const analysisInput = geminiResult || {
+        scene_description: `${category} 신고. 사진 분석 불가.`,
+        risk_level: 'S1',
+      };
+      console.log('[DeepSeek] 신고서 생성 시작, SP:', spCode);
+      reportData = await _deepseekReport(analysisInput, category, desc, gps, gpsAddress, spCode);
+      console.log('[DeepSeek] 신고서 완료:', JSON.stringify(reportData).slice(0,200));
+    } catch(e) {
+      console.error('[DeepSeek] 신고서 생성 실패:', e.message);
+      reportData = { summary: `${category} 신고가 접수되었습니다.`, actions: ['담당 부서 배정', '현장 확인 출동'] };
     }
     setStep(5);
 
