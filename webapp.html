@@ -1454,24 +1454,17 @@ async function _uploadImage(file, reportId) {
   }
 }
 
-// ── 카카오 역지오코딩 → 직접 호출 (Worker 불필요) ───
+// ── 카카오 역지오코딩 → Worker 프록시 ───────────────
 async function _reverseGeocode(lat, lng) {
   try {
-    // 카카오 REST API 직접 호출 (KAKAO_REST_KEY는 Worker 환경변수에 있으나
-    // 역지오코딩은 클라이언트에서 직접 호출 가능 — Referer 기반 인증)
     const res = await fetch(
-      `https://dapi.kakao.com/v2/local/geo/coord2address.json?x=${lng}&y=${lat}`,
-      { headers: { 'Authorization': 'KakaoAK c7160a2d047af2808065d9e1929a66a7' } }
+      `${PROXY_URL}/geocode?lat=${lat}&lng=${lng}`
     );
-    if (!res.ok) throw new Error('Kakao geocode ' + res.status);
     const data = await res.json();
     return data.documents?.[0]?.road_address?.address_name
         || data.documents?.[0]?.address?.address_name
         || null;
-  } catch(e) {
-    console.warn('[Geocode] 실패:', e.message);
-    return null;
-  }
+  } catch { return null; }
 }
 
 // ══════════════════════════════════════════════════
