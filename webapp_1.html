@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -726,7 +726,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); font-family:
 .track-label { font-size: 9px; color: var(--muted); text-align: center; line-height: 1.2; }
 </style>
 <!-- GWP SDK: 고팡 위젯 프로토콜 (위젯 모드일 때만 활성화, 독립 실행 시 무해) -->
-<script src="/gwp-sdk.js"></script>
+<script src="https://gopang.net/gwp-sdk.js"></script>
 </head>
 <body>
 <div id="app">
@@ -1503,21 +1503,6 @@ function goBack() {
 
 // ── GPS ──────────────────────────────────────────
 function initGPS() {
-      // 고팡에서 GPS 주소 전달받은 경우 즉시 사용 (iframe GPS 재요청 불필요)
-      const _up = new URLSearchParams(location.search);
-      const _ga = _up.get("gps_addr");
-      if (_ga) {
-        gpsAddress = decodeURIComponent(_ga);
-            // GPS ?? ?? (??: "...GPS(lat, lng)...")
-            const _gm = gpsAddress.match(/GPS\(([\d.]+),\s*([\d.]+)\)/);
-            if (_gm) gpsCoords = { lat: _gm[1], lng: _gm[2] };
-            else gpsCoords = { lat: "0", lng: "0" };
-        const gpsEl = document.getElementById("gpsVal");
-        const gpsSpEl = document.getElementById("gpsSpinner");
-        if (gpsEl) gpsEl.textContent = gpsAddress;
-        if (gpsSpEl) gpsSpEl.style.display = "none";
-        return;
-      }
   if (!navigator.geolocation) {
     document.getElementById('gpsVal').textContent = 'GPS 미지원 기기';
     return;
@@ -1527,7 +1512,6 @@ function initGPS() {
 }
 
 function _startGPS() {
-  if (new URLSearchParams(location.search).get("gps_addr")) return;
   document.getElementById('gpsSpinner').style.display = 'block';
   document.getElementById('gpsVal').textContent = '위치 확인 중…';
 
@@ -1851,49 +1835,23 @@ function showResult(category, reportId, gemini, report, location) {
     al.innerHTML += `<div class="action-item"><div class="action-num">${i+1}</div><div class="action-text">${a}</div></div>`;
   });
 
-  // ── GWP: 고팡 위젯 모드일 때 6하 원칙 보고 후 복귀 ──
+  // ── GWP: 고팡 위젯 모드일 때 완료 신호 전송 ──────
   // 기존 앱 동작에 영향 없음 — GopangWidget이 없거나 위젯 모드 아닐 시 무시됨
   if (typeof GopangWidget !== 'undefined' && GopangWidget.isWidget) {
     const urgencyText = document.getElementById('resUrgency')?.textContent || '보통';
-    const gpsText     = document.getElementById('resGps')?.textContent || null;
-    const locText     = location || document.getElementById('resLoc')?.textContent || null;
-    const summary     = `${category} 신고 완료 (${reportId})`;
-
-    // 입력 방식 추론 — 사진 첨부 여부로 판단
-    const howStr = document.getElementById('photoInput')?.files?.length > 0
-      ? 'image' : 'text';
-
+    const summary = `${category} 신고 완료 (${reportId})`;
     setTimeout(() => {
       window.__gwpInstance?.done({
         summary: summary,
         pdvData: {
-          // ── 6하 원칙 ──────────────────────────────
-          // who: gwp-sdk가 token으로 자동 채움
-          when:  new Date().toISOString(),                   // 언제
-          where: gpsText
-            ? `GPS:${gpsText}${locText ? ' ' + locText : ''}`
-            : locText,                                       // 어디서
-          what:  summary,                                    // 무엇을
-          how:   howStr,                                     // 어떻게
-          why:   `${category} 신고 — 담당 기관 처리 요청`,   // 왜
-          // ── 서비스 원본 데이터 ──────────────────────
-          data: {
-            reportId: reportId,
-            category: category,
-            urgency:  urgencyText,
-            location: locText,
-            gps:      gpsText,
-          },
+          reportId:    reportId,
+          category:    category,
+          urgency:     urgencyText,
+          location:    location || null,
+          analyzedAt:  new Date().toISOString(),
         },
       });
-    // ??? ?? ??
-    if (window._gopangNotify) {
-      window._gopangNotify(
-        (category || "") + " ?? ?? (" + (reportId || "") + ")",
-        { what: category, where: location, how: "image", why: "?? ?? ??" }
-      );
-    }
-    }, 3000);  // 결과 화면 3초 표시 후 고팡 복귀
+    }, 3000);  // 결과 화면을 3초 보여준 뒤 고팡 복귀
   }
 }
 
@@ -1982,13 +1940,13 @@ async function _handleUrlParams() {
 window.addEventListener('load', async () => {
   initGPS();
   if (typeof initPhone === 'function') initPhone();
+  // Worker v2.0: Gemini 키는 Worker 환경변수에서 관리됨
   console.log('[초기화] API 프록시:', PROXY_URL);
   await _handleUrlParams();
 
   // ── GWP: 고팡 위젯 모드 초기화 ────────────────────────
-  // ?gwp=1 파라미터로 위젯 모드 판단
-  const _isGWP = new URLSearchParams(location.search).get('gwp') === '1';
-  if (_isGWP) {
+  // ?gwp=1 파라미터가 없으면 GopangWidget.isWidget === false → 이하 코드 무해
+  if (typeof GopangWidget !== 'undefined' && GopangWidget.isWidget) {
     const gwp = new GopangWidget({
       onInit({ token, context }) {
         // 고팡에서 전달한 사용자 토큰 저장 (reporter 필드에 사용)
@@ -2016,69 +1974,8 @@ window.addEventListener('load', async () => {
     });
     window.__gwpInstance = gwp;
 
-        // BroadcastChannel로 고팡에 결과 전달
-        window._gopangNotify = function(summary, pdvData) {
-          try {
-            const ch = new BroadcastChannel("gopang_gwp");
-            ch.postMessage({ type: "GWP_DONE", summary: summary, pdvData: pdvData });
-            setTimeout(function(){ ch.close(); }, 500);
-          } catch(e) {}
-        };
-
     // 신고 화면 바로 표시 (홈 건너뜀)
-    // photo_url, desc ???? ?? ??
-    (function() {
-      var _p = new URLSearchParams(location.search);
-      var _photoUrl = _p.get('photo_url');
-      var _desc     = _p.get('desc');
-      if (_photoUrl) {
-        // Supabase URL에서 이미지를 fetch해서 base64로 변환
-        fetch(_photoUrl)
-          .then(function(r){ return r.blob(); })
-          .then(function(blob){
-            var reader = new FileReader();
-            reader.onload = function(e){
-              photoDataUrl = e.target.result;
-              // 미리보기 설정
-              var previewEl = document.getElementById('previewImg');
-              if (previewEl){ previewEl.src = photoDataUrl; previewEl.style.display='block'; }
-              var promptEl  = document.getElementById('uploadPrompt');
-              if (promptEl)  promptEl.style.display = 'none';
-              var overlayEl = document.getElementById('uploadOverlay');
-              if (overlayEl) overlayEl.style.display = 'flex';
-              var zoneEl    = document.getElementById('uploadZone');
-              if (zoneEl)    zoneEl.classList.add('has-image');
-              // gpsCoords 설정 (없으면 더미)
-              if (!gpsCoords) gpsCoords = { lat:'0', lng:'0' };
-              // desc 설정
-              if (_desc){
-                var descEl = document.getElementById('descInput');
-                if (descEl) descEl.value = _desc;
-              }
-              // 신고 화면으로 이동 후 자동 제출
-              setTimeout(function(){
-                goScreen('screen-report');
-                setTimeout(function(){ submitReport(); }, 500);
-              }, 300);
-            };
-            reader.readAsDataURL(blob);
-          })
-          .catch(function(err){
-            console.warn('[GWP] 사진 로드 실패:', err);
-            if (_desc){
-              var descEl = document.getElementById('descInput');
-              if (descEl) descEl.value = _desc;
-            }
-            setTimeout(function(){ goScreen('screen-report'); }, 300);
-          });
-      } else {
-        if (_desc){
-          var descEl = document.getElementById('descInput');
-          if (descEl) descEl.value = _desc;
-        }
-        setTimeout(function(){ goScreen('screen-report'); }, 500);
-      }
-    })();
+    goScreen('screen-report');
 
     // 고팡에 준비 완료 신호
     gwp.ready({
@@ -2092,6 +1989,3 @@ window.addEventListener('load', async () => {
 </script>
 </body>
 </html>
-
-
-
