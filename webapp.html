@@ -725,6 +725,8 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); font-family:
 @keyframes pulse-dot { 0%,100%{box-shadow:0 0 0 0 rgba(0,82,155,0.4)} 50%{box-shadow:0 0 0 6px rgba(0,82,155,0)} }
 .track-label { font-size: 9px; color: var(--muted); text-align: center; line-height: 1.2; }
 </style>
+<!-- GWP SDK: 고팡 위젯 프로토콜 (위젯 모드일 때만 활성화, 독립 실행 시 무해) -->
+<script src="https://gopang.net/gwp-sdk.js"></script>
 </head>
 <body>
 <div id="app">
@@ -1832,6 +1834,44 @@ function showResult(category, reportId, gemini, report, location) {
   actions.forEach((a, i) => {
     al.innerHTML += `<div class="action-item"><div class="action-num">${i+1}</div><div class="action-text">${a}</div></div>`;
   });
+
+  // ── GWP: 고팡 위젯 모드일 때 6하 원칙 보고 후 복귀 ──
+  // 기존 앱 동작에 영향 없음 — GopangWidget이 없거나 위젯 모드 아닐 시 무시됨
+  if (typeof GopangWidget !== 'undefined' && GopangWidget.isWidget) {
+    const urgencyText = document.getElementById('resUrgency')?.textContent || '보통';
+    const gpsText     = document.getElementById('resGps')?.textContent || null;
+    const locText     = location || document.getElementById('resLoc')?.textContent || null;
+    const summary     = `${category} 신고 완료 (${reportId})`;
+
+    // 입력 방식 추론 — 사진 첨부 여부로 판단
+    const howStr = document.getElementById('photoInput')?.files?.length > 0
+      ? 'image' : 'text';
+
+    setTimeout(() => {
+      window.__gwpInstance?.done({
+        summary: summary,
+        pdvData: {
+          // ── 6하 원칙 ──────────────────────────────
+          // who: gwp-sdk가 token으로 자동 채움
+          when:  new Date().toISOString(),                   // 언제
+          where: gpsText
+            ? `GPS:${gpsText}${locText ? ' ' + locText : ''}`
+            : locText,                                       // 어디서
+          what:  summary,                                    // 무엇을
+          how:   howStr,                                     // 어떻게
+          why:   `${category} 신고 — 담당 기관 처리 요청`,   // 왜
+          // ── 서비스 원본 데이터 ──────────────────────
+          data: {
+            reportId: reportId,
+            category: category,
+            urgency:  urgencyText,
+            location: locText,
+            gps:      gpsText,
+          },
+        },
+      });
+    }, 3000);  // 결과 화면 3초 표시 후 고팡 복귀
+  }
 }
 
 // ── Supabase → 내 신고 현황 화면 ─────────────────
@@ -1922,6 +1962,48 @@ window.addEventListener('load', async () => {
   // Worker v2.0: Gemini 키는 Worker 환경변수에서 관리됨
   console.log('[초기화] API 프록시:', PROXY_URL);
   await _handleUrlParams();
+
+  // ── GWP: 고팡 위젯 모드 초기화 ────────────────────────
+  // ?gwp=1 파라미터가 없으면 GopangWidget.isWidget === false → 이하 코드 무해
+  if (typeof GopangWidget !== 'undefined' && GopangWidget.isWidget) {
+    const gwp = new GopangWidget({
+      onInit({ token, context }) {
+        // 고팡에서 전달한 사용자 토큰 저장 (reporter 필드에 사용)
+        if (token) localStorage.setItem('gopang_phone', token);
+        console.log('[GWP] 초기화. context:', context);
+      },
+      onInput(text, file) {
+        // 고팡 입력창 → fiil 신고 화면으로 연결
+        if (file instanceof File) {
+          // 사진 파일 → 신고 화면의 photoInput에 주입
+          const dt = new DataTransfer();
+          dt.items.add(file);
+          const photoInput = document.getElementById('photoInput');
+          if (photoInput) {
+            photoInput.files = dt.files;
+            photoInput.dispatchEvent(new Event('change', { bubbles: true }));
+          }
+        }
+        if (text) {
+          // 텍스트 → 추가 설명 입력창에 주입
+          const desc = document.getElementById('descInput');
+          if (desc) desc.value = text;
+        }
+      },
+    });
+    window.__gwpInstance = gwp;
+
+    // 신고 화면 바로 표시 (홈 건너뜀)
+    goScreen('screen-report');
+
+    // 고팡에 준비 완료 신호
+    gwp.ready({
+      title:       'K-Cleaner',
+      placeholder: '📷 카메라로 현장 사진을 찍어 전송하세요',
+      accept:      'image/*',
+      showCamera:  true,
+    });
+  }
 });
 </script>
 </body>
