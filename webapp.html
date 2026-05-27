@@ -1294,8 +1294,8 @@ async function _geminiAnalyze(imageFile, spCode) {
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
     return JSON.parse(text.replace(/```json|```/g, '').trim());
   } catch(e) {
-    console.warn('[Gemini] 분석 실패, DeepSeek Vision fallback:', e.message);
-    return await _deepseekVision(imageFile, spCode);
+    console.warn('[Gemini] 분석 실패:', e.message);
+    return null;
   }
 }
 
