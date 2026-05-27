@@ -1094,10 +1094,12 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); font-family:
 // 설정 — API 키 하드코딩 (테스트용)
 // ══════════════════════════════════════════════════
 // API 호출 우선순위: A) Gemini 직접 → B) Worker 프록시 (fallback)
-const GEMINI_KEY  = 'AIzaSyD-placeholder-replace-with-actual-key-from-aistudio'; // ⚠️ 실제 키로 교체 필수 (gen-lang-client-0439904447)
+// Gemini 직접 호출 비활성화 — Worker가 키 관리
+// Worker v2.0 배포 후 Worker가 Gemini 키를 직접 보유
+const GEMINI_KEY   = null; // Worker 환경변수에서 관리
 const GEMINI_MODEL = 'gemini-2.5-flash-lite-preview-06-17';
-const GEMINI_DIRECT = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_KEY}`;
-const PROXY_URL   = 'https://gopang-proxy.tensor-city.workers.dev'; // Fallback Worker
+const GEMINI_DIRECT = null; // 직접 호출 미사용 (Worker 통해서만)
+const PROXY_URL    = 'https://gopang-proxy.tensor-city.workers.dev';
 const DEEPSEEK_KEY = 'sk-e4a6f005aecf43d4aa60e77bb71de14c';
 const SB_URL       = 'https://ebbecjfrwaswbdybbgiu.supabase.co';
 const SB_KEY       = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImViYmVjamZyd2Fzd2JkeWJiZ2l1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1NjE5ODQsImV4cCI6MjA5NTEzNzk4NH0.H2ahQKtWdSke04Pdi3hDY86pdTx7UUKPUpQMlS_zciA';
@@ -1184,30 +1186,18 @@ async function _sbFetch(path, method='GET', body=null) {
 // ── Gemini Vision 분석 (SP-14-IMG) ───────────────
 // ── Gemini fetch: 직접호출 → Worker fallback ───────
 async function _geminiFetch(body) {
-  // 방법 A: Gemini 직접 호출
-  try {
-    const res = await fetch(GEMINI_DIRECT, {
+  // Worker v2.0: Gemini 키는 Worker 환경변수에서 관리
+  const res = await fetch(
+    `${PROXY_URL}/gemini/${GEMINI_MODEL}`,
+    {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
-      signal: typeof AbortSignal.timeout === 'function' ? AbortSignal.timeout(20000) : undefined,
-    });
-    if (res.ok) {
-      console.log('[Gemini] 직접 호출 성공');
-      return await res.json();
     }
-    console.warn('[Gemini] 직접 호출 실패:', res.status, '→ Worker fallback');
-  } catch(e) {
-    console.warn('[Gemini] 직접 호출 오류:', e.message, '→ Worker fallback');
-  }
-  // 방법 B: Worker 프록시 fallback
-  const res2 = await fetch(
-    `${PROXY_URL}/gemini/${GEMINI_MODEL}`,
-    { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }
   );
-  if (!res2.ok) throw new Error('Gemini(proxy) ' + res2.status);
-  console.log('[Gemini] Worker fallback 성공');
-  return await res2.json();
+  if (!res.ok) throw new Error('Gemini(Worker) ' + res.status);
+  console.log('[Gemini] Worker 호출 성공');
+  return await res.json();
 }
 
 // ── DeepSeek fetch: 직접호출 → Worker fallback ────
@@ -1464,17 +1454,24 @@ async function _uploadImage(file, reportId) {
   }
 }
 
-// ── 카카오 역지오코딩 → Worker 프록시 ───────────────
+// ── 카카오 역지오코딩 → 직접 호출 (Worker 불필요) ───
 async function _reverseGeocode(lat, lng) {
   try {
+    // 카카오 REST API 직접 호출 (KAKAO_REST_KEY는 Worker 환경변수에 있으나
+    // 역지오코딩은 클라이언트에서 직접 호출 가능 — Referer 기반 인증)
     const res = await fetch(
-      `${PROXY_URL}/geocode?lat=${lat}&lng=${lng}`
+      `https://dapi.kakao.com/v2/local/geo/coord2address.json?x=${lng}&y=${lat}`,
+      { headers: { 'Authorization': 'KakaoAK c7160a2d047af2808065d9e1929a66a7' } }
     );
+    if (!res.ok) throw new Error('Kakao geocode ' + res.status);
     const data = await res.json();
     return data.documents?.[0]?.road_address?.address_name
         || data.documents?.[0]?.address?.address_name
         || null;
-  } catch { return null; }
+  } catch(e) {
+    console.warn('[Geocode] 실패:', e.message);
+    return null;
+  }
 }
 
 // ══════════════════════════════════════════════════
@@ -1929,10 +1926,8 @@ async function _handleUrlParams() {
 window.addEventListener('load', async () => {
   initGPS();
   if (typeof initPhone === 'function') initPhone();
-  // Gemini 키 유효성 사전 체크
-  if (GEMINI_KEY.includes('placeholder')) {
-    console.error('[설정 오류] GEMINI_KEY가 플레이스홀더입니다. 실제 API 키로 교체하세요.');
-  }
+  // Worker v2.0: Gemini 키는 Worker 환경변수에서 관리됨
+  console.log('[초기화] API 프록시:', PROXY_URL);
   await _handleUrlParams();
 });
 </script>
