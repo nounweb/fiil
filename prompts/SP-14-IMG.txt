@@ -102,6 +102,17 @@
 
   "notable_items": [],
 
+  "cost_estimate": {
+    "collection_fee": null,
+    "disposal_fee": null,
+    "total_est": null,
+    "currency": "KRW",
+    "basis": "제주특별자치도 해양쓰레기 수거 기준"
+  },
+
+  "truck_required": null,
+  "workers_required": null,
+
   "exif": {
     "lat": null,
     "lng": null,
@@ -170,3 +181,4 @@
 4. 추정 불가 수치는 null (0 아님)
 5. scene_description은 한국어, 객관적 사실만, 2~3문장
 6. 판단·권고·견적·행동 요령 절대 포함 금지
+7. cost_estimate는 수거 인건비(인당 2만원/h)+차량비+처리비(kg당 200원) 합산 (추정 불가 시 null)
