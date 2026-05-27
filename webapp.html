@@ -1551,6 +1551,17 @@ const _PROMPT_IMG_INLINE = `# K-Cleaner 이미지 분석 전용 Vision Prompt
 
   "notable_items": [],
 
+  "cost_estimate": {
+    "collection_fee": null,
+    "disposal_fee": null,
+    "total_est": null,
+    "currency": "KRW",
+    "basis": "제주특별자치도 해양쓰레기 수거 기준"
+  },
+
+  "truck_required": null,
+  "workers_required": null,
+
   "exif": {
     "lat": null,
     "lng": null,
@@ -1619,6 +1630,7 @@ const _PROMPT_IMG_INLINE = `# K-Cleaner 이미지 분석 전용 Vision Prompt
 4. 추정 불가 수치는 null (0 아님)
 5. scene_description은 한국어, 객관적 사실만, 2~3문장
 6. 판단·권고·견적·행동 요령 절대 포함 금지
+7. cost_estimate는 수거 인건비(인당 2만원/h)+차량비+처리비(kg당 200원) 합산 (추정 불가 시 null)
 `;
 const _PROMPT_CLN_INLINE = `# K-Cleaner 전문가 AI Prompt
 # ═══════════════════════════════════════════════════
@@ -2600,7 +2612,6 @@ async function _sbFetch(path, method='GET', body=null) {
 
 // ── Gemini Vision 분석 (SP-14-IMG) ───────────────
 async function _geminiRoute(imageFile, category, userText) {
-  // SP-00-ROUTER: 어떤 SP를 사용할지 결정
   const routerPrompt = await _loadPrompt('router');
   const base64 = await new Promise((res, rej) => {
     const r = new FileReader();
@@ -2609,41 +2620,40 @@ async function _geminiRoute(imageFile, category, userText) {
     r.readAsDataURL(imageFile);
   });
   const mime = imageFile.type || 'image/jpeg';
-  const body = {
-    system_instruction: { parts: [{ text: routerPrompt }] },
-    contents: [{
-      parts: [
-        { inline_data: { mime_type: mime, data: base64 } },
-        { text: `신고유형: ${category||'미선택'}\n사용자설명: ${userText||'없음'}\n위 이미지를 분석하여 적합한 SP 코드를 JSON으로 반환하라.` }
-      ]
-    }],
-    generationConfig: { temperature: 0.1, maxOutputTokens: 256 }
-  };
   try {
-    const res = await fetch(
-      `https://gopang-proxy.tensor-city.workers.dev/gemini/gemini-2.0-flash`,
-      { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }
-    );
+    const res = await fetch('https://gopang-proxy.tensor-city.workers.dev/deepseek', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'deepseek-chat',
+        messages: [
+          { role: 'system', content: routerPrompt },
+          { role: 'user', content: [
+            { type: 'image_url', image_url: { url: `data:${mime};base64,${base64}` } },
+            { type: 'text', text: `신고유형: ${category||'미선택'}\n사용자설명: ${userText||'없음'}\n위 이미지를 분석하여 적합한 SP 코드를 JSON으로만 반환하라.` }
+          ]}
+        ],
+        temperature: 0.1, max_tokens: 256, stream: false,
+      }),
+    });
     const data = await res.json();
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
-    const result = JSON.parse(text.replace(/\`\`\`json|\`\`\`/g, '').trim());
-    console.log('[SP-ROUTER]', result.sp_code, '선택 (신뢰도:', result.confidence, ')');
+    const text = data.choices?.[0]?.message?.content || '{}';
+    const result = JSON.parse(text.replace(/```json|```/g, '').trim());
+    console.log('[SP-ROUTER/DS] 결정:', result.sp_code, '신뢰도:', result.confidence);
     return result;
   } catch(e) {
-    console.warn('[SP-ROUTER] 라우팅 실패, SP-14-IMG 기본 사용:', e.message);
+    console.warn('[SP-ROUTER/DS] 실패, SP-14-IMG 기본 사용:', e.message);
     return { sp_code: 'SP-14-IMG', confidence: 0.5, urgent: false };
   }
 }
 
 async function _geminiAnalyze(imageFile, spCode) {
-  // SP-00-GEN: 전용 SP 없는 경우 → Gemini 범용 분석
   if (!spCode || spCode === 'SP-00-GEN') {
     return await _geminiAnalyzeGeneral(imageFile);
   }
-  // sp_code에 따라 적절한 프롬프트 선택
   const promptKey = (spCode === 'SP-15-IMG') ? 'sp15' : 'img';
   const systemPrompt = await _loadPrompt(promptKey);
-  console.log('[Gemini] 사용 프롬프트:', spCode || 'SP-14-IMG');
+  console.log('[DeepSeek Vision] 분석 시작, SP:', spCode);
   const base64 = await new Promise((res, rej) => {
     const r = new FileReader();
     r.onload = () => res(r.result.split(',')[1]);
@@ -2651,36 +2661,30 @@ async function _geminiAnalyze(imageFile, spCode) {
     r.readAsDataURL(imageFile);
   });
   const mime = imageFile.type || 'image/jpeg';
-  const body = {
-    system_instruction: { parts: [{ text: systemPrompt }] },
-    contents: [{
-      parts: [
-        { inline_data: { mime_type: mime, data: base64 } },
-        { text: '위 이미지를 분석하여 지정된 JSON 형식으로만 출력하라.' }
-      ]
-    }],
-    generationConfig: { temperature: 0.1, maxOutputTokens: 1024 }
-  };
-  const res = await fetch(
-    `https://gopang-proxy.tensor-city.workers.dev/gemini/gemini-2.0-flash`,
-    { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }
-  );
-  if (!res.ok) {
-    const errText = await res.text();
-    console.error('[Gemini _geminiAnalyze] HTTP', res.status, errText);
-    throw new Error('Gemini API ' + res.status + ' : ' + errText.slice(0,200));
-  }
+  const res = await fetch('https://gopang-proxy.tensor-city.workers.dev/deepseek', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'deepseek-chat',
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: [
+          { type: 'image_url', image_url: { url: `data:${mime};base64,${base64}` } },
+          { type: 'text', text: '위 이미지를 분석하여 지정된 JSON 형식으로만 출력하라. JSON 외 텍스트 금지.' }
+        ]}
+      ],
+      temperature: 0.1, max_tokens: 1500, stream: false,
+    }),
+  });
+  if (!res.ok) throw new Error('DeepSeek Vision API ' + res.status);
   const data = await res.json();
-  console.log('[Gemini _geminiAnalyze] 응답:', JSON.stringify(data).slice(0,300));
-  const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
+  console.log('[DeepSeek Vision] 응답:', JSON.stringify(data).slice(0,200));
+  const text = data.choices?.[0]?.message?.content || '{}';
   return JSON.parse(text.replace(/```json|```/g, '').trim());
 }
 
-// ── DeepSeek 신고서 생성 (SP-14 K-Cleaner) ───────
-// ── SP-00-GEN: 범용 Gemini 이미지 분석 ──────────────
-// 전용 SP가 없을 때 Gemini가 자유롭게 이미지를 분석하고
-// 사용자 메시지를 해석하여 구조화된 결과 반환
 async function _geminiAnalyzeGeneral(imageFile) {
+  console.log('[DeepSeek Vision General] 범용 분석 시작');
   const base64 = await new Promise((res, rej) => {
     const r = new FileReader();
     r.onload = () => res(r.result.split(',')[1]);
@@ -2688,47 +2692,39 @@ async function _geminiAnalyzeGeneral(imageFile) {
     r.readAsDataURL(imageFile);
   });
   const mime = imageFile.type || 'image/jpeg';
-
   const systemPrompt =
-    `당신은 이미지 분석 전문가다. 사진을 보고 아래 JSON 형식으로만 출력하라. JSON 외 텍스트 금지.\n` +
-    `{\n` +
-    `  "scene_type": "사진 유형 (실내/실외/사람/사물/문서/기타)",\n` +
-    `  "main_subject": "주요 피사체 한국어 설명",\n` +
-    `  "objects_detected": ["감지된 주요 물체 목록"],\n` +
-    `  "condition": "상태 설명 (양호/불량/위험/정상 등)",\n` +
-    `  "estimated_issue": "추정되는 문제나 상황 한국어 설명",\n` +
-    `  "urgency": "낮음|보통|높음|긴급",\n` +
-    `  "recommended_action": "권고 조치 1~2문장",\n` +
-    `  "scene_description": "전체 상황 객관적 설명 2~3문장"\n` +
-    `}`;
-
-  const body = {
-    system_instruction: { parts: [{ text: systemPrompt }] },
-    contents: [{
-      parts: [
-        { inline_data: { mime_type: mime, data: base64 } },
-        { text: '이 이미지를 분석하여 지정된 JSON 형식으로만 출력하라.' }
-      ]
-    }],
-    generationConfig: { temperature: 0.2, maxOutputTokens: 512 }
-  };
-
-  const res = await fetch(
-    `https://gopang-proxy.tensor-city.workers.dev/gemini/gemini-2.0-flash`,
-    { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }
-  );
-  if (!res.ok) {
-    const errText = await res.text();
-    console.error('[Gemini _general] HTTP', res.status, errText);
-    throw new Error('Gemini API ' + res.status + ' : ' + errText.slice(0,200));
-  }
+    '당신은 이미지 분석 전문가다. 사진을 보고 아래 JSON 형식으로만 출력하라. JSON 외 텍스트 금지.\n' +
+    '{\n' +
+    '  "scene_type": "사진 유형 (실내/실외/사람/사물/문서/기타)",\n' +
+    '  "main_subject": "주요 피사체 한국어 설명",\n' +
+    '  "objects_detected": ["감지된 주요 물체 목록"],\n' +
+    '  "condition": "상태 설명 (양호/불량/위험/정상 등)",\n' +
+    '  "estimated_issue": "추정되는 문제나 상황 한국어 설명",\n' +
+    '  "urgency": "낮음|보통|높음|긴급",\n' +
+    '  "recommended_action": "권고 조치 1~2문장",\n' +
+    '  "scene_description": "전체 상황 객관적 설명 2~3문장"\n' +
+    '}';
+  const res = await fetch('https://gopang-proxy.tensor-city.workers.dev/deepseek', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'deepseek-chat',
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: [
+          { type: 'image_url', image_url: { url: `data:${mime};base64,${base64}` } },
+          { type: 'text', text: '이 이미지를 분석하여 지정된 JSON 형식으로만 출력하라.' }
+        ]}
+      ],
+      temperature: 0.2, max_tokens: 512, stream: false,
+    }),
+  });
+  if (!res.ok) throw new Error('DeepSeek Vision General ' + res.status);
   const data = await res.json();
-  console.log('[Gemini _general] 응답:', JSON.stringify(data).slice(0,300));
-  const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
+  const text = data.choices?.[0]?.message?.content || '{}';
   const result = JSON.parse(text.replace(/```json|```/g, '').trim());
-  // SP-14/15 호환 필드 추가
-  result._sp_code     = 'SP-00-GEN';
-  result.risk_level   = { '낮음':'S0','보통':'S1','높음':'S2','긴급':'S3' }[result.urgency] || 'S0';
+  result._sp_code    = 'SP-00-GEN';
+  result.risk_level  = { '낮음':'S0','보통':'S1','높음':'S2','긴급':'S3' }[result.urgency] || 'S0';
   result.image_quality = 'GOOD';
   result.confidence    = 0.75;
   return result;
@@ -2742,7 +2738,7 @@ async function _deepseekReport(geminiJson, category, desc, gps, address, spCode)
     : await _loadPrompt('cln');
 
   // SP-00-GEN: 범용 메시지 구성
-  const costNote = (!isGeneral && spCode === 'SP-15-IMG' && geminiJson.cost_estimate)
+  const costNote = (!isGeneral && geminiJson.cost_estimate)
     ? `\n비용산출: 수거비 ₩${(geminiJson.cost_estimate.collection_fee||0).toLocaleString()} + 처리비 ₩${(geminiJson.cost_estimate.disposal_fee||0).toLocaleString()} = 합계 ₩${(geminiJson.cost_estimate.total_est||0).toLocaleString()}\n필요차량: ${geminiJson.truck_required||'미상'} / 작업자: ${geminiJson.workers_required||'미상'}명`
     : '';
 
@@ -2804,7 +2800,9 @@ async function _saveReport(payload) {
 async function _uploadImage(file, reportId) {
   if (!file) return null;
   try {
-    const ext  = file.name.split('.').pop() || 'jpg';
+    const _mimeExt = {'image/jpeg':'jpg','image/jpg':'jpg','image/png':'png',
+      'image/webp':'webp','image/heic':'jpg','image/heif':'jpg','image/gif':'gif'};
+    const ext = _mimeExt[file.type] || (file.name.includes('.') ? file.name.split('.').pop() : 'jpg');
     const path = `reports/${reportId}.${ext}`;
     const res  = await fetch(
       `${SB_URL}/storage/v1/object/report-images/${path}`,
@@ -2814,7 +2812,7 @@ async function _uploadImage(file, reportId) {
           'apikey':        SB_KEY,
           'Authorization': 'Bearer ' + SB_KEY,
           'Content-Type':  file.type || 'image/jpeg',
-          'x-upsert':      'true',
+          'x-upsert':      'false',
         },
         body: file,
       }
@@ -3050,15 +3048,15 @@ async function runAIAnalysis(category) {
     }
     setStep(3);
 
-    // 3단계: Gemini Vision 분석
+    // 3단계: DeepSeek Vision 분석
     if (photoFile) {
       try {
-        console.log('[Gemini] 분석 시작, SP:', spCode);
+        console.log('[DeepSeek Vision] 분석 시작, SP:', spCode);
         geminiResult = await _geminiAnalyze(photoFile, spCode);
-        console.log('[Gemini] 분석 완료:', JSON.stringify(geminiResult).slice(0,200));
+        console.log('[DeepSeek Vision] 분석 완료:', JSON.stringify(geminiResult).slice(0,200));
       } catch(e) {
-        console.error('[Gemini] 분석 실패:', e.message);
-        // Gemini 실패해도 계속 진행 (DeepSeek이 처리)
+        console.error('[DeepSeek Vision] 분석 실패:', e.message);
+        // Vision 분석 실패해도 계속 진행
       }
     }
     setStep(4);
@@ -3104,11 +3102,12 @@ async function runAIAnalysis(category) {
       urgency:     urgencyMap[geminiResult?.risk_level] || '보통',
       status:      '접수',
       image_url:   imageUrl,
-      cost:        costTotal > 0 ? {
-        total:     costTotal,
-        labor:     costData?.collection_fee || 0,
-        equipment: 0,
-        supplies:  costData?.disposal_fee || 0,
+      cost:        costTotal > 0 ? costTotal : null,
+      dispatch: (geminiResult?.truck_required || geminiResult?.workers_required) ? {
+        vehicle:   geminiResult?.truck_required || null,
+        personnel: geminiResult?.workers_required || null,
+        team:      null,
+        dispatchedAt: null,
       } : null,
       analysis: {
         sp_code:      spCode,
@@ -3179,7 +3178,7 @@ function showResult(category, reportId, gemini, report, location) {
 
   document.getElementById('resultCode').textContent = reportId || 'RPT-2026-????';
   document.getElementById('resType').textContent    = category;
-  document.getElementById('resTime').textContent    = new Date().toLocaleString('ko-KR');
+  document.getElementById('resTime').textContent    = new Date().toLocaleString('ko-KR',{timeZone:'Asia/Seoul'});
   document.getElementById('resUrgency').textContent =
     gemini ? { S0:'🟢 낮음', S1:'🟡 보통', S2:'🟠 높음', S3:'🔴 긴급' }[gemini.risk_level] || db.urgency
            : db.urgency;
@@ -3224,7 +3223,7 @@ async function _loadStatusScreen() {
     body.innerHTML = rows.map(r => {
       const st   = r.status || '접수';
       const bc   = badgeClass[st] || 'badge-new';
-      const date = r.reported_at ? new Date(r.reported_at).toLocaleDateString('ko-KR') : '';
+      const date = r.reported_at ? new Date(r.reported_at).toLocaleDateString('ko-KR',{timeZone:'Asia/Seoul'}) : '';
       const prog = st==='완료' ? 100 : st==='처리중' ? 60 : 20;
       return `
         <div class="status-card" onclick="_openReport('${r.id}')" style="cursor:pointer;">
@@ -3259,7 +3258,7 @@ async function _openReport(id) {
     const a = r.analysis || {};
     showResult(r.type, r.id, a.gemini, { summary: a.summary, actions: a.actions }, r.location);
     document.getElementById('resTime').textContent =
-      r.reported_at ? new Date(r.reported_at).toLocaleString('ko-KR') : '—';
+      r.reported_at ? new Date(r.reported_at).toLocaleString('ko-KR',{timeZone:'Asia/Seoul'}) : '—';
     document.getElementById('resGps').textContent = r.gps || '—';
   } catch(e) { alert('신고 데이터를 불러올 수 없습니다.'); }
 }
@@ -3276,7 +3275,7 @@ async function _handleUrlParams() {
       const a = r.analysis || {};
       showResult(r.type, r.id, a.gemini, { summary: a.summary, actions: a.actions }, r.location);
       document.getElementById('resTime').textContent =
-        r.reported_at ? new Date(r.reported_at).toLocaleString('ko-KR') : '—';
+        r.reported_at ? new Date(r.reported_at).toLocaleString('ko-KR',{timeZone:'Asia/Seoul'}) : '—';
       document.getElementById('resGps').textContent = r.gps || '—';
       return true;
     }
