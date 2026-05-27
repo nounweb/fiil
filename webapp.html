@@ -2971,8 +2971,9 @@ function clearPhoto() {
 
 // ── 신고 제출 ────────────────────────────────────
 function submitReport() {
-  const cat = document.getElementById('categorySelect').value;
-  if (!cat) { alert('신고 유형을 선택해주세요.'); return; }
+  const sel = document.getElementById('categorySelect');
+  if (!sel.value) sel.value = '기타';
+  const cat = sel.value;
   if (!gpsCoords) {
     alert('위치 정보가 필요합니다.\n상단 GPS 바를 탭하여 위치를 허용해 주세요.');
     return;
