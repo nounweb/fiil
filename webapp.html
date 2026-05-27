@@ -2792,6 +2792,38 @@ async function _saveReport(payload) {
   return rows?.[0];
 }
 
+// ── Supabase Storage 이미지 업로드 ──────────────
+async function _uploadImage(file, reportId) {
+  if (!file) return null;
+  try {
+    const ext  = file.name.split('.').pop() || 'jpg';
+    const path = `reports/${reportId}.${ext}`;
+    const res  = await fetch(
+      `${SB_URL}/storage/v1/object/report-images/${path}`,
+      {
+        method:  'POST',
+        headers: {
+          'apikey':        SB_KEY,
+          'Authorization': 'Bearer ' + SB_KEY,
+          'Content-Type':  file.type || 'image/jpeg',
+          'x-upsert':      'true',
+        },
+        body: file,
+      }
+    );
+    if (!res.ok) {
+      const err = await res.text();
+      console.warn('[Storage] 업로드 실패:', res.status, err);
+      return null;
+    }
+    // 공개 URL 반환
+    return `${SB_URL}/storage/v1/object/public/report-images/${path}`;
+  } catch(e) {
+    console.warn('[Storage] 업로드 오류:', e.message);
+    return null;
+  }
+}
+
 // ── 카카오 역지오코딩 → Worker 프록시 ───────────────
 async function _reverseGeocode(lat, lng) {
   try {
@@ -2948,9 +2980,21 @@ async function runAIAnalysis(category) {
   let spCode       = 'SP-14-IMG';  // 기본값
 
   try {
-    // 1단계: GPS + 발신자
+    // 1단계: GPS + 역지오코딩 (아직 주소 없으면 재시도)
     setStep(1);
-    console.log('[분석 시작] photoFile:', photoFile?.name, 'gps:', gps, 'category:', category);
+    console.log('[분석 시작] photoFile:', photoFile?.name, 'gps:', gps, 'gpsAddress:', gpsAddress, 'category:', category);
+    if (gps && !gpsAddress) {
+      console.log('[역지오코딩] 재시도 중...');
+      const p = gps.replace(/\s/g,'').split(',');
+      if (p.length >= 2) {
+        gpsAddress = await _reverseGeocode(p[0], p[1]);
+        console.log('[역지오코딩] 결과:', gpsAddress);
+        if (gpsAddress) {
+          const el = document.getElementById('gpsVal');
+          if (el) el.textContent = gpsAddress + ` (${gps})`;
+        }
+      }
+    }
     await new Promise(r => setTimeout(r, 400));
     setStep(2);
 
@@ -3002,20 +3046,37 @@ async function runAIAnalysis(category) {
     }
     setStep(5);
 
-    // 4단계: Supabase 저장 (백그라운드)
+    // 5단계: 이미지 업로드 + Supabase 저장
     const reportId = 'RPT-2026-' + (Math.floor(Math.random()*9000)+1000);
     const urgencyMap = {S0:'낮음', S1:'보통', S2:'높음', S3:'긴급'};
     const now = new Date().toISOString();
+
+    // 이미지 Storage 업로드
+    console.log('[Storage] 이미지 업로드 시작...');
+    const imageUrl = await _uploadImage(photoFile, reportId);
+    console.log('[Storage] image_url:', imageUrl);
+
+    // 비용 계산 (SP-14/SP-15 gemini 결과에서 추출)
+    const costData = geminiResult?.cost_estimate || null;
+    const costTotal = costData?.total_est || 0;
+
     const payload = {
       id:          reportId,
       type:        category,
       type_code:   spCode,
-      location:    gpsAddress || (gps ? `GPS: ${gps}` : '위치 미상'),
+      location:    gpsAddress || (gps ? gps : '위치 미상'),
       gps:         gps,
       reporter:    null,
       reported_at: now,
       urgency:     urgencyMap[geminiResult?.risk_level] || '보통',
       status:      '접수',
+      image_url:   imageUrl,
+      cost:        costTotal > 0 ? {
+        total:     costTotal,
+        labor:     costData?.collection_fee || 0,
+        equipment: 0,
+        supplies:  costData?.disposal_fee || 0,
+      } : null,
       analysis: {
         sp_code:      spCode,
         summary:      reportData?.summary || geminiResult?.scene_description || '',
@@ -3025,23 +3086,24 @@ async function runAIAnalysis(category) {
         scale:        geminiResult?.scale || geminiResult?.location_type,
         risk_level:   geminiResult?.risk_level,
         total_weight: geminiResult?.total_weight_kg_est,
-        cost:         geminiResult?.cost_estimate || null,
+        cost:         costData,
         truck:        geminiResult?.truck_required || null,
         workers:      geminiResult?.workers_required || null,
       },
     };
 
-    // 백그라운드 저장 (UI 블로킹 없음)
-    _saveReport(payload).then(() => {
-      console.log('[Supabase] 저장 완료:', reportId);
-    }).catch(e => {
+    console.log('[Supabase] 저장 시작:', reportId);
+    try {
+      await _saveReport(payload);
+      console.log('[Supabase] 저장 완료:', reportId, '| image_url:', imageUrl);
+    } catch(e) {
       console.warn('[Supabase] 저장 실패:', e.message);
-    });
+    }
 
     setStep(5);
-    await new Promise(r => setTimeout(r, 800));
+    await new Promise(r => setTimeout(r, 600));
 
-    // 5단계: 결과 화면
+    // 결과 화면
     showResult(category, reportId, geminiResult, reportData, gpsAddress || gps);
 
   } catch(e) {
