@@ -1187,7 +1187,7 @@ async function _sbFetch(path, method='GET', body=null) {
 
 // ── Gemini Vision 분석 (SP-14-IMG) ───────────────
 // ── Gemini fetch: 직접호출 → Worker fallback ───────
-async function _geminiFetch(body) {
+async function _openaiFetch(body) {
   // Worker v2.0: Gemini 키는 Worker 환경변수에서 관리
   const res = await fetch(
     `${PROXY_URL}/gemini/${GEMINI_MODEL}`,
@@ -1198,7 +1198,7 @@ async function _geminiFetch(body) {
     }
   );
   if (!res.ok) throw new Error('Gemini(Worker) ' + res.status);
-  console.log('[Gemini] Worker 호출 성공');
+  console.log('[OpenAI] Worker 호출 성공');
   return await res.json();
 }
 
@@ -1231,7 +1231,7 @@ async function _deepseekFetch(payload) {
   return await res2.json();
 }
 
-async function _geminiRoute(imageFile, category, userText) {
+async function _openaiRoute(imageFile, category, userText) {
   const routerPrompt = await _loadPrompt('router');
   const base64 = await new Promise((res, rej) => {
     const r = new FileReader();
@@ -1249,7 +1249,7 @@ async function _geminiRoute(imageFile, category, userText) {
     generationConfig: { temperature: 0.1, maxOutputTokens: 256 }
   };
   try {
-    const data = await _geminiFetch(body);
+    const data = await _openaiFetch(body);
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
     const result = JSON.parse(text.replace(/```json|```/g, '').trim());
     if (!result.sp_code) throw new Error('sp_code 없음');
@@ -1261,9 +1261,9 @@ async function _geminiRoute(imageFile, category, userText) {
   }
 }
 
-async function _geminiAnalyze(imageFile, spCode) {
+async function _openaiAnalyze(imageFile, spCode) {
   if (!spCode || spCode === 'SP-00-GEN') {
-    return await _geminiAnalyzeGeneral(imageFile);
+    return await _openaiAnalyzeGeneral(imageFile);
   }
   const _visionMap = {
     'SP-14-IMG': 'img',
@@ -1274,7 +1274,7 @@ async function _geminiAnalyze(imageFile, spCode) {
   };
   const promptKey = _visionMap[spCode] || 'img';
   const systemPrompt = await _loadPrompt(promptKey);
-  console.log('[Gemini] 분석 시작, SP:', spCode);
+  console.log('[OpenAI] 분석 시작, SP:', spCode);
   const base64 = await new Promise((res, rej) => {
     const r = new FileReader();
     r.onload = () => res(r.result.split(',')[1]);
@@ -1291,17 +1291,17 @@ async function _geminiAnalyze(imageFile, spCode) {
     generationConfig: { temperature: 0.1, maxOutputTokens: 1500 }
   };
   try {
-    const data = await _geminiFetch(body);
-    console.log('[Gemini] 응답:', JSON.stringify(data).slice(0,200));
+    const data = await _openaiFetch(body);
+    console.log('[OpenAI] 응답:', JSON.stringify(data).slice(0,200));
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
     return JSON.parse(text.replace(/```json|```/g, '').trim());
   } catch(e) {
-    console.warn('[Gemini] 분석 실패:', e.message);
+    console.warn('[OpenAI] 분석 실패:', e.message);
     return null;
   }
 }
 
-async function _geminiAnalyzeGeneral(imageFile) {
+async function _openaiAnalyzeGeneral(imageFile) {
   console.log('[Gemini General] 범용 분석 시작');
   const base64 = await new Promise((res, rej) => {
     const r = new FileReader();
@@ -1330,7 +1330,7 @@ async function _geminiAnalyzeGeneral(imageFile) {
     ]}],
     generationConfig: { temperature: 0.2, maxOutputTokens: 512 }
   };
-  const data = await _geminiFetch(body);
+  const data = await _openaiFetch(body);
   const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
   const result = JSON.parse(text.replace(/```json|```/g, '').trim());
   result._sp_code    = 'SP-00-GEN';
@@ -1676,7 +1676,7 @@ async function runAIAnalysis(category) {
     if (photoFile) {
       try {
         console.log('[SP-ROUTER] 라우팅 시작...');
-        const route = await _geminiRoute(photoFile, category, desc);
+        const route = await _openaiRoute(photoFile, category, desc);
         spCode = route.sp_code || 'SP-14-IMG';
         console.log('[SP-ROUTER] 결정:', spCode, '신뢰도:', route.confidence);
         if (route.urgent) {
@@ -1694,11 +1694,11 @@ async function runAIAnalysis(category) {
     // 3단계: Gemini Vision 분석
     if (photoFile) {
       try {
-        console.log('[Gemini] 분석 시작, SP:', spCode);
-        geminiResult = await _geminiAnalyze(photoFile, spCode);
-        console.log('[Gemini] 분석 완료:', JSON.stringify(geminiResult).slice(0,200));
+        console.log('[OpenAI] 분석 시작, SP:', spCode);
+        geminiResult = await _openaiAnalyze(photoFile, spCode);
+        console.log('[OpenAI] 분석 완료:', JSON.stringify(geminiResult).slice(0,200));
       } catch(e) {
-        console.error('[Gemini] 분석 실패:', e.message);
+        console.error('[OpenAI] 분석 실패:', e.message);
         // Vision 분석 실패해도 계속 진행
       }
     }
@@ -2051,6 +2051,7 @@ window.addEventListener('load', async () => {
 </script>
 </body>
 </html>
+
 
 
 
