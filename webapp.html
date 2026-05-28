@@ -1980,6 +1980,8 @@ window.addEventListener('load', async () => {
               const reader = new FileReader();
               reader.onload = e => {
                 photoDataUrl = e.target.result;
+              // photoFile도 세팅 — AI 분석(Gemini/DeepSeek)이 photoFile 기준으로 동작
+              photoFile = new File([blob], 'gopang-photo.jpg', { type: 'image/jpeg' });
                 const previewEl = document.getElementById('previewImg');
                 const promptEl  = document.getElementById('uploadPrompt');
                 const overlayEl = document.getElementById('uploadOverlay');
@@ -2049,6 +2051,7 @@ window.addEventListener('load', async () => {
 </script>
 </body>
 </html>
+
 
 
 
