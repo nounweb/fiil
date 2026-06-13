@@ -100,6 +100,7 @@ input{font-family:var(--font)}
   opacity:0;transition:opacity .1s;
 }
 .sidebar:hover .sb-badge{opacity:1}
+#sb-llm-badge{opacity:1!important}
 /* ── mobile sidebar override ── */
 .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:299}
 .sidebar-overlay.show{display:block}
@@ -340,6 +341,11 @@ input{font-family:var(--font)}
       <span class="sb-label">오픈해시 기록</span>
     </a>
     <div class="sb-section">관리</div>
+    <button class="sb-item" id="sb-llm-btn" onclick="openLLMPanel()" style="width:100%;text-align:left;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"/><circle cx="9" cy="14" r="1" fill="currentColor"/><circle cx="15" cy="14" r="1" fill="currentColor"/></svg>
+      <span class="sb-label">AI 모델 설정</span>
+      <span class="sb-badge" id="sb-llm-badge">●</span>
+    </button>
     <a class="sb-item " href="resources.html">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
       <span class="sb-label">인력 · 장비</span>
@@ -515,6 +521,189 @@ input{font-family:var(--font)}
 </div><!-- /main -->
 </div><!-- /app -->
 
+<!-- ══ LLM 설정 패널 ══ -->
+<style>
+/* ── LLM 슬라이드오버 패널 ── */
+.llm-overlay{
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:500;
+  align-items:flex-start;justify-content:flex-end;
+}
+.llm-overlay.open{display:flex}
+.llm-panel{
+  width:420px;max-width:100vw;height:100vh;
+  background:#fff;border-left:1px solid var(--border);
+  display:flex;flex-direction:column;
+  animation:slideIn .22s ease;
+  overflow:hidden;
+}
+@keyframes slideIn{from{transform:translateX(100%)}to{transform:translateX(0)}}
+.llm-head{
+  padding:16px 20px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:10px;flex-shrink:0;
+}
+.llm-head-icon{
+  width:32px;height:32px;border-radius:8px;background:var(--accent);
+  display:flex;align-items:center;justify-content:center;color:#fff;
+}
+.llm-head h2{font-size:15px;font-weight:600;flex:1}
+.llm-close{
+  width:28px;height:28px;border-radius:4px;display:flex;align-items:center;justify-content:center;
+  color:var(--text2);transition:background .1s;
+}
+.llm-close:hover{background:var(--bg-hover)}
+.llm-body{flex:1;overflow-y:auto;padding:20px}
+.llm-section{margin-bottom:20px}
+.llm-label{font-size:12px;font-weight:600;color:var(--text2);margin-bottom:8px;display:block;letter-spacing:.3px}
+.llm-provider-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:4px}
+.llm-prov-card{
+  border:1.5px solid var(--border);border-radius:8px;padding:10px 12px;
+  cursor:pointer;transition:all .12s;display:flex;align-items:center;gap:8px;
+  background:#fff;font-size:13px;font-weight:500;color:var(--text);
+}
+.llm-prov-card:hover{border-color:var(--accent);background:#f0fdf4}
+.llm-prov-card.selected{border-color:var(--accent);background:#f0fdf4;color:#15803d}
+.llm-prov-logo{width:22px;height:22px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0}
+.llm-input{
+  width:100%;border:1px solid var(--border);border-radius:6px;
+  padding:9px 12px;font-size:13px;font-family:var(--font-mono);color:var(--text);
+  outline:none;transition:border-color .12s;background:var(--bg-subtle);
+}
+.llm-input:focus{border-color:var(--accent);background:#fff}
+.llm-input-wrap{position:relative}
+.llm-eye{
+  position:absolute;right:10px;top:50%;transform:translateY(-50%);
+  color:var(--text3);cursor:pointer;display:flex;align-items:center;
+}
+.llm-eye:hover{color:var(--text2)}
+.llm-model-row{display:flex;gap:8px;align-items:center}
+.llm-select{
+  flex:1;border:1px solid var(--border);border-radius:6px;
+  padding:9px 12px;font-size:13px;color:var(--text);
+  outline:none;background:var(--bg-subtle);transition:border-color .12s;
+}
+.llm-select:focus{border-color:var(--accent);background:#fff}
+.llm-status-box{
+  border-radius:6px;padding:10px 14px;font-size:13px;
+  display:none;align-items:center;gap:8px;margin-top:10px;
+}
+.llm-status-box.ok{display:flex;background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0}
+.llm-status-box.err{display:flex;background:#fef2f2;color:#dc2626;border:1px solid #fecaca}
+.llm-status-box.testing{display:flex;background:#eff6ff;color:#2563eb;border:1px solid #bfdbfe}
+.llm-foot{padding:16px 20px;border-top:1px solid var(--border);display:flex;gap:8px;flex-shrink:0}
+.llm-btn{
+  flex:1;padding:9px 16px;border-radius:6px;font-size:13px;font-weight:600;
+  cursor:pointer;transition:all .12s;border:1px solid transparent;
+}
+.llm-btn-primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.llm-btn-primary:hover{background:var(--accent-d);border-color:var(--accent-d)}
+.llm-btn-secondary{background:var(--bg);color:var(--text2);border-color:var(--border)}
+.llm-btn-secondary:hover{background:var(--bg-hover);color:var(--text)}
+.llm-btn-danger{background:#fff;color:#dc2626;border-color:#fecaca}
+.llm-btn-danger:hover{background:#fef2f2}
+.llm-current-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0;
+  border-radius:9999px;font-size:12px;font-weight:600;padding:3px 10px;
+  margin-bottom:14px;
+}
+.llm-current-badge.none{background:#f9fafb;color:#6b7280;border-color:#e5e7eb}
+.spin{animation:rot .8s linear infinite}
+@keyframes rot{to{transform:rotate(360deg)}}
+/* ── 구분선 ── */
+.llm-divider{border:none;border-top:1px solid var(--border);margin:20px 0}
+</style>
+
+<div class="llm-overlay" id="llm-overlay" onclick="closeLLMPanel(event)">
+  <div class="llm-panel" onclick="event.stopPropagation()">
+    <div class="llm-head">
+      <div class="llm-head-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"/><circle cx="9" cy="14" r="1" fill="currentColor"/><circle cx="15" cy="14" r="1" fill="currentColor"/></svg>
+      </div>
+      <h2>AI 모델 설정</h2>
+      <button class="llm-close" onclick="closeLLMPanel()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <div class="llm-body">
+      <!-- 현재 설정 상태 -->
+      <div id="llm-current-status"></div>
+
+      <!-- 공급자 선택 -->
+      <div class="llm-section">
+        <span class="llm-label">AI 공급자 선택</span>
+        <div class="llm-provider-grid" id="llm-prov-grid">
+          <button class="llm-prov-card" data-prov="deepseek" onclick="selectProvider('deepseek')">
+            <div class="llm-prov-logo" style="background:#4d7cfe;color:#fff">D</div>
+            DeepSeek
+          </button>
+          <button class="llm-prov-card" data-prov="claude" onclick="selectProvider('claude')">
+            <div class="llm-prov-logo" style="background:#d97706;color:#fff">A</div>
+            Claude
+          </button>
+          <button class="llm-prov-card" data-prov="gemini" onclick="selectProvider('gemini')">
+            <div class="llm-prov-logo" style="background:#4285f4;color:#fff">G</div>
+            Gemini
+          </button>
+          <button class="llm-prov-card" data-prov="grok" onclick="selectProvider('grok')">
+            <div class="llm-prov-logo" style="background:#1a1a1a;color:#fff">X</div>
+            Grok
+          </button>
+          <button class="llm-prov-card" data-prov="openai" onclick="selectProvider('openai')">
+            <div class="llm-prov-logo" style="background:#10a37f;color:#fff">O</div>
+            OpenAI
+          </button>
+        </div>
+      </div>
+
+      <!-- 모델 선택 -->
+      <div class="llm-section" id="llm-model-section" style="display:none">
+        <span class="llm-label">모델</span>
+        <div class="llm-model-row">
+          <select class="llm-select" id="llm-model-select" onchange="onModelSelect()"></select>
+        </div>
+        <!-- 커스텀 모델명 직접 입력 -->
+        <div style="margin-top:8px;display:none" id="llm-custom-model-wrap">
+          <input class="llm-input" type="text" id="llm-custom-model" placeholder="모델명 직접 입력 (예: deepseek-chat)">
+        </div>
+      </div>
+
+      <!-- API 키 입력 -->
+      <div class="llm-section" id="llm-key-section" style="display:none">
+        <span class="llm-label">API 키</span>
+        <div class="llm-input-wrap">
+          <input class="llm-input" type="password" id="llm-api-key"
+            placeholder="sk-..." style="padding-right:36px"
+            oninput="clearTestResult()">
+          <span class="llm-eye" onclick="toggleKeyVisibility()">
+            <svg id="llm-eye-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </span>
+        </div>
+        <p style="font-size:12px;color:var(--text3);margin-top:6px">
+          키는 이 브라우저의 localStorage에만 저장됩니다. 서버로 전송되지 않습니다.
+        </p>
+        <!-- 연결 테스트 결과 -->
+        <div class="llm-status-box" id="llm-test-result"></div>
+      </div>
+
+      <hr class="llm-divider">
+
+      <!-- 참고 링크 -->
+      <div class="llm-section" id="llm-links-section" style="display:none">
+        <span class="llm-label">API 키 발급</span>
+        <div id="llm-links-content" style="display:flex;flex-direction:column;gap:6px;font-size:13px"></div>
+      </div>
+    </div>
+
+    <div class="llm-foot">
+      <button class="llm-btn llm-btn-danger" onclick="clearLLMConfig()">초기화</button>
+      <button class="llm-btn llm-btn-secondary" onclick="testLLMConnection()" id="llm-test-btn">연결 테스트</button>
+      <button class="llm-btn llm-btn-primary" onclick="saveLLMConfig()">저장</button>
+    </div>
+  </div>
+</div>
+<!-- ══ /LLM 설정 패널 ══ -->
+
 <script>
 const _SB_URL='https://ebbecjfrwaswbdybbgiu.supabase.co';
 const _SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImViYmVjamZyd2Fzd2JkeWJiZ2l1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1NjE5ODQsImV4cCI6MjA5NTEzNzk4NH0.H2ahQKtWdSke04Pdi3hDY86pdTx7UUKPUpQMlS_zciA';
@@ -675,6 +864,303 @@ function closeSidebar(){
 
 loadReports();
 setInterval(loadReports,30000);
+
+// ══════════════════════════════════════════════════
+// LLM 설정 패널 로직
+// ══════════════════════════════════════════════════
+const _LLM_STORAGE_KEY = 'fiil_llm_config';
+
+const _LLM_PROVIDERS = {
+  deepseek: {
+    name: 'DeepSeek',
+    models: [
+      { value: 'deepseek-chat',     label: 'DeepSeek V3 (deepseek-chat)' },
+      { value: 'deepseek-reasoner', label: 'DeepSeek R1 (deepseek-reasoner)' },
+      { value: '__custom__',        label: '직접 입력…' },
+    ],
+    keyPlaceholder: 'sk-…',
+    docsUrl: 'https://platform.deepseek.com/api_keys',
+  },
+  claude: {
+    name: 'Claude (Anthropic)',
+    models: [
+      { value: 'claude-haiku-4-5-20251001', label: 'Claude Haiku 4.5 (빠름·저렴)' },
+      { value: 'claude-sonnet-4-6',         label: 'Claude Sonnet 4.6 (권장)' },
+      { value: 'claude-opus-4-6',           label: 'Claude Opus 4.6 (고성능)' },
+      { value: '__custom__',                label: '직접 입력…' },
+    ],
+    keyPlaceholder: 'sk-ant-…',
+    docsUrl: 'https://console.anthropic.com/settings/keys',
+  },
+  gemini: {
+    name: 'Google Gemini',
+    models: [
+      { value: 'gemini-2.0-flash',         label: 'Gemini 2.0 Flash (권장)' },
+      { value: 'gemini-2.5-flash',         label: 'Gemini 2.5 Flash' },
+      { value: 'gemini-2.5-flash-lite',    label: 'Gemini 2.5 Flash Lite (저렴)' },
+      { value: '__custom__',               label: '직접 입력…' },
+    ],
+    keyPlaceholder: 'AIza…',
+    docsUrl: 'https://aistudio.google.com/app/apikey',
+  },
+  grok: {
+    name: 'Grok (xAI)',
+    models: [
+      { value: 'grok-3-mini',  label: 'Grok 3 Mini (빠름)' },
+      { value: 'grok-3',       label: 'Grok 3' },
+      { value: '__custom__',   label: '직접 입력…' },
+    ],
+    keyPlaceholder: 'xai-…',
+    docsUrl: 'https://console.x.ai/',
+  },
+  openai: {
+    name: 'OpenAI',
+    models: [
+      { value: 'gpt-4o-mini', label: 'GPT-4o Mini (권장)' },
+      { value: 'gpt-4o',      label: 'GPT-4o' },
+      { value: 'o4-mini',     label: 'o4-mini (추론)' },
+      { value: '__custom__',  label: '직접 입력…' },
+    ],
+    keyPlaceholder: 'sk-proj-…',
+    docsUrl: 'https://platform.openai.com/api-keys',
+  },
+};
+
+let _selProvider = null;
+
+function _getLLMConfig() {
+  try { const r = localStorage.getItem(_LLM_STORAGE_KEY); return r ? JSON.parse(r) : null; } catch(e) { return null; }
+}
+
+function _updateSidebarBadge() {
+  const cfg = _getLLMConfig();
+  const badge = document.getElementById('sb-llm-badge');
+  const btn = document.getElementById('sb-llm-btn');
+  if (!badge || !btn) return;
+  if (cfg && cfg.apiKey && cfg.provider) {
+    const pName = _LLM_PROVIDERS[cfg.provider]?.name || cfg.provider;
+    badge.textContent = pName;
+    badge.style.cssText = 'background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0;opacity:1;margin-left:auto;font-size:11px;font-weight:600;padding:1px 6px;border-radius:10px;';
+  } else {
+    badge.textContent = '미설정';
+    badge.style.cssText = 'background:#fef2f2;color:#dc2626;border:1px solid #fecaca;opacity:1;margin-left:auto;font-size:11px;font-weight:600;padding:1px 6px;border-radius:10px;';
+  }
+}
+
+function openLLMPanel() {
+  const overlay = document.getElementById('llm-overlay');
+  overlay.classList.add('open');
+  _renderCurrentStatus();
+  const cfg = _getLLMConfig();
+  if (cfg && cfg.provider) {
+    selectProvider(cfg.provider);
+    setTimeout(() => {
+      const keyInput = document.getElementById('llm-api-key');
+      if (keyInput && cfg.apiKey) keyInput.value = cfg.apiKey;
+      const modelSel = document.getElementById('llm-model-select');
+      if (modelSel && cfg.model) {
+        // 저장된 모델값이 선택지에 있으면 선택, 없으면 커스텀
+        const found = [...modelSel.options].some(o => o.value === cfg.model);
+        if (found) { modelSel.value = cfg.model; onModelSelect(); }
+        else {
+          modelSel.value = '__custom__';
+          onModelSelect();
+          const cm = document.getElementById('llm-custom-model');
+          if (cm) cm.value = cfg.model;
+        }
+      }
+    }, 0);
+  }
+  closeSidebar();
+}
+
+function closeLLMPanel(e) {
+  if (e && e.target !== document.getElementById('llm-overlay')) return;
+  document.getElementById('llm-overlay').classList.remove('open');
+}
+
+function _renderCurrentStatus() {
+  const box = document.getElementById('llm-current-status');
+  const cfg = _getLLMConfig();
+  if (!cfg || !cfg.apiKey) {
+    box.innerHTML = '<div class="llm-current-badge none">⚠ 설정 없음 — AI 분석 기능 비활성화</div>';
+  } else {
+    const pName = _LLM_PROVIDERS[cfg.provider]?.name || cfg.provider;
+    box.innerHTML = `<div class="llm-current-badge">✓ 현재: ${pName} / ${cfg.model || '기본 모델'}</div>`;
+  }
+}
+
+function selectProvider(prov) {
+  _selProvider = prov;
+  // 카드 선택 표시
+  document.querySelectorAll('.llm-prov-card').forEach(c => c.classList.toggle('selected', c.dataset.prov === prov));
+
+  const info = _LLM_PROVIDERS[prov];
+  if (!info) return;
+
+  // 모델 드롭다운 채우기
+  const sel = document.getElementById('llm-model-select');
+  sel.innerHTML = info.models.map(m => `<option value="${m.value}">${m.label}</option>`).join('');
+  document.getElementById('llm-model-section').style.display = 'block';
+  document.getElementById('llm-key-section').style.display = 'block';
+  document.getElementById('llm-links-section').style.display = 'block';
+  onModelSelect();
+
+  // 키 placeholder
+  document.getElementById('llm-api-key').placeholder = info.keyPlaceholder;
+
+  // 링크
+  document.getElementById('llm-links-content').innerHTML =
+    `<a href="${info.docsUrl}" target="_blank" rel="noopener" style="color:var(--blue);display:flex;align-items:center;gap:5px">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      ${info.name} API 키 발급 페이지
+    </a>`;
+
+  clearTestResult();
+}
+
+function onModelSelect() {
+  const sel = document.getElementById('llm-model-select');
+  const customWrap = document.getElementById('llm-custom-model-wrap');
+  customWrap.style.display = sel.value === '__custom__' ? 'block' : 'none';
+}
+
+function toggleKeyVisibility() {
+  const inp = document.getElementById('llm-api-key');
+  const icon = document.getElementById('llm-eye-icon');
+  if (inp.type === 'password') {
+    inp.type = 'text';
+    icon.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';
+  } else {
+    inp.type = 'password';
+    icon.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+  }
+}
+
+function clearTestResult() {
+  const box = document.getElementById('llm-test-result');
+  box.className = 'llm-status-box';
+  box.innerHTML = '';
+}
+
+function _getFormValues() {
+  const provider = _selProvider;
+  const apiKey = document.getElementById('llm-api-key').value.trim();
+  const selModel = document.getElementById('llm-model-select').value;
+  const model = selModel === '__custom__'
+    ? (document.getElementById('llm-custom-model').value.trim() || '')
+    : selModel;
+  return { provider, apiKey, model };
+}
+
+async function testLLMConnection() {
+  const { provider, apiKey, model } = _getFormValues();
+  const box = document.getElementById('llm-test-result');
+  const btn = document.getElementById('llm-test-btn');
+
+  if (!provider) { box.className='llm-status-box err'; box.style.display='flex'; box.innerHTML='<span>공급자를 먼저 선택하세요.</span>'; return; }
+  if (!apiKey) { box.className='llm-status-box err'; box.style.display='flex'; box.innerHTML='<span>API 키를 입력하세요.</span>'; return; }
+
+  box.className='llm-status-box testing'; box.style.display='flex';
+  box.innerHTML = '<svg class="spin" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> <span>연결 테스트 중…</span>';
+  btn.disabled = true;
+
+  try {
+    const testPayload = {
+      messages: [
+        { role: 'system', content: '당신은 테스트 봇입니다.' },
+        { role: 'user', content: 'ping' },
+      ],
+      max_tokens: 20,
+      temperature: 0,
+    };
+    const info = _LLM_PROVIDERS[provider];
+    const effectiveModel = model || info.models[0].value;
+
+    let ok = false;
+
+    // ── OpenAI 호환 ──
+    const _openaiCompat = {
+      deepseek: 'https://api.deepseek.com/v1/chat/completions',
+      openai:   'https://api.openai.com/v1/chat/completions',
+      grok:     'https://api.x.ai/v1/chat/completions',
+    };
+    if (_openaiCompat[provider]) {
+      const res = await fetch(_openaiCompat[provider], {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+        body: JSON.stringify({ ...testPayload, model: effectiveModel }),
+        signal: AbortSignal.timeout(15000),
+      });
+      ok = res.ok;
+      if (!ok) { const t=await res.text(); throw new Error(`${res.status} ${t.slice(0,80)}`); }
+    }
+    // ── Claude ──
+    else if (provider === 'claude') {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01' },
+        body: JSON.stringify({ model: effectiveModel, max_tokens: 20, system: '테스트', messages: [{ role:'user', content:'ping' }] }),
+        signal: AbortSignal.timeout(15000),
+      });
+      ok = res.ok;
+      if (!ok) { const t=await res.text(); throw new Error(`${res.status} ${t.slice(0,80)}`); }
+    }
+    // ── Gemini ──
+    else if (provider === 'gemini') {
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${effectiveModel}:generateContent?key=${apiKey}`,
+        { method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ contents:[{parts:[{text:'ping'}]}], generationConfig:{maxOutputTokens:10} }),
+          signal: AbortSignal.timeout(15000) }
+      );
+      ok = res.ok;
+      if (!ok) { const t=await res.text(); throw new Error(`${res.status} ${t.slice(0,80)}`); }
+    }
+
+    box.className='llm-status-box ok';
+    box.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> <span>연결 성공! ${info.name} / ${effectiveModel}</span>`;
+  } catch(e) {
+    box.className='llm-status-box err';
+    box.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> <span>실패: ${e.message}</span>`;
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function saveLLMConfig() {
+  const { provider, apiKey, model } = _getFormValues();
+  if (!provider) { alert('공급자를 선택하세요.'); return; }
+  if (!apiKey) { alert('API 키를 입력하세요.'); return; }
+  const cfg = { provider, apiKey, model, savedAt: new Date().toISOString() };
+  localStorage.setItem(_LLM_STORAGE_KEY, JSON.stringify(cfg));
+  _updateSidebarBadge();
+  _renderCurrentStatus();
+  document.getElementById('llm-overlay').classList.remove('open');
+  // 짧은 성공 토스트
+  const toast = document.createElement('div');
+  toast.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1e293b;color:#fff;font-size:13px;font-weight:500;padding:10px 20px;border-radius:8px;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,.2)';
+  toast.textContent = `✓ ${_LLM_PROVIDERS[provider]?.name} 설정 저장 완료`;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 2800);
+}
+
+function clearLLMConfig() {
+  if (!confirm('LLM 설정을 초기화하시겠습니까?\nAI 분석 기능이 비활성화됩니다.')) return;
+  localStorage.removeItem(_LLM_STORAGE_KEY);
+  _selProvider = null;
+  document.querySelectorAll('.llm-prov-card').forEach(c => c.classList.remove('selected'));
+  document.getElementById('llm-api-key').value = '';
+  document.getElementById('llm-model-section').style.display = 'none';
+  document.getElementById('llm-key-section').style.display = 'none';
+  document.getElementById('llm-links-section').style.display = 'none';
+  clearTestResult();
+  _updateSidebarBadge();
+  _renderCurrentStatus();
+}
+
+// 페이지 로드 시 배지 갱신
+_updateSidebarBadge();
 
 </script>
 </body>
