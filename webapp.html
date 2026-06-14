@@ -1227,7 +1227,10 @@ async function _openaiFetch(body) {
 async function _deepseekFetch(payload) {
   const cfg = _getLLMConfig();
 
-  // 설정 없음 → Worker fallback (DeepSeek proxy)
+  // ── [비활성화] 설정 없음 → Worker fallback (DeepSeek proxy) ──
+  // dashboard.html(관리자)에서 localStorage('fiil_llm_config')에 저장한
+  // 설정만 사용하도록 변경. 자체 운영 Worker 프록시 폴백은 더 이상 사용하지 않음.
+  /*
   if (!cfg || !cfg.apiKey) {
     console.warn('[LLM] 설정 없음 → Worker fallback');
     const res = await fetch(`${PROXY_URL}/deepseek`, {
@@ -1237,6 +1240,10 @@ async function _deepseekFetch(payload) {
     });
     if (!res.ok) throw new Error('LLM(proxy) ' + res.status);
     return await res.json();
+  }
+  */
+  if (!cfg || !cfg.apiKey) {
+    throw new Error('LLM 설정 없음: 관리자 대시보드(dashboard.html)에서 AI 모델/API 키를 설정하세요.');
   }
 
   const { provider, apiKey, model } = cfg;
@@ -2060,6 +2067,7 @@ async function _handleUrlParams() {
 window.addEventListener('load', async () => {
   initGPS();
   if (typeof initPhone === 'function') initPhone();
+  _checkLLMConfig(); // LLM 설정 없으면 상단에 안내 배너 표시
   console.log('[초기화] API 프록시:', PROXY_URL);
   await _handleUrlParams();
 
