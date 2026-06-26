@@ -688,6 +688,37 @@ input{font-family:var(--font)}
 
       <hr class="llm-divider">
 
+      <!-- 사진 분석 DeepSeek 폴백 (Gemini 실패 시) — 일반 LLM 설정과 별개 ── -->
+      <div class="llm-section">
+        <span class="llm-label">📷 사진 분석 폴백 (Gemini 실패 시)</span>
+        <p style="font-size:12px;color:var(--text3);margin:2px 0 10px">
+          Gemini Vision 호출이 실패했을 때만 사용됩니다. 모델은
+          <strong>DeepSeek V4 Flash</strong>로 고정됩니다 — DeepSeek는 아직
+          이미지를 직접 분석할 수 없어, 사진 설명·신고 텍스트만으로 제한적인
+          분석을 시도합니다(사진 내용 자체는 인식하지 못합니다).
+        </p>
+        <div class="llm-input-wrap">
+          <input class="llm-input" type="password" id="fallback-deepseek-key"
+            placeholder="sk-..." style="padding-right:36px"
+            oninput="clearFallbackTestResult()">
+          <span class="llm-eye" onclick="toggleFallbackKeyVisibility()">
+            <svg id="fallback-eye-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </span>
+        </div>
+        <p style="font-size:12px;color:var(--text3);margin-top:6px">
+          키는 이 브라우저의 localStorage에만 저장됩니다. 서버(Cloudflare)로
+          전송되지 않으며, Gemini가 실패했을 때만 브라우저가 DeepSeek에 직접 호출합니다.
+        </p>
+        <div class="llm-status-box" id="fallback-test-result"></div>
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <button class="llm-btn llm-btn-secondary" onclick="testFallbackConnection()" id="fallback-test-btn" style="flex:1">연결 테스트</button>
+          <button class="llm-btn llm-btn-primary" onclick="saveFallbackKey()" style="flex:1">저장</button>
+          <button class="llm-btn llm-btn-danger" onclick="clearFallbackKey()">삭제</button>
+        </div>
+      </div>
+
+      <hr class="llm-divider">
+
       <!-- 참고 링크 -->
       <div class="llm-section" id="llm-links-section" style="display:none">
         <span class="llm-label">API 키 발급</span>
@@ -869,14 +900,18 @@ setInterval(loadReports,30000);
 // LLM 설정 패널 로직
 // ══════════════════════════════════════════════════
 const _LLM_STORAGE_KEY = 'fiil_llm_config';
+const _FALLBACK_DEEPSEEK_KEY = 'fiil_deepseek_fallback_key'; // 사진분석(Gemini 실패) 전용 폴백 키
+const _FALLBACK_MODEL = 'deepseek-v4-flash'; // 폴백 모델은 항상 고정 — 선택 불가
 
 const _LLM_PROVIDERS = {
   deepseek: {
     name: 'DeepSeek',
     models: [
-      { value: 'deepseek-chat',     label: 'DeepSeek V3 (deepseek-chat)' },
-      { value: 'deepseek-reasoner', label: 'DeepSeek R1 (deepseek-reasoner)' },
-      { value: '__custom__',        label: '직접 입력…' },
+      { value: 'deepseek-v4-flash',  label: 'DeepSeek V4 Flash (권장·빠름)' },
+      { value: 'deepseek-v4-pro',    label: 'DeepSeek V4 Pro (고성능)' },
+      { value: 'deepseek-chat',      label: 'DeepSeek V3 (7/24 지원종료 예정)' },
+      { value: 'deepseek-reasoner',  label: 'DeepSeek R1 (7/24 지원종료 예정)' },
+      { value: '__custom__',         label: '직접 입력…' },
     ],
     keyPlaceholder: 'sk-…',
     docsUrl: 'https://platform.deepseek.com/api_keys',
@@ -971,6 +1006,10 @@ function openLLMPanel() {
       }
     }, 0);
   }
+  // 사진 분석 폴백 키도 같이 불러오기
+  const fbKey = localStorage.getItem(_FALLBACK_DEEPSEEK_KEY);
+  const fbInput = document.getElementById('fallback-deepseek-key');
+  if (fbInput) fbInput.value = fbKey || '';
   closeSidebar();
 }
 
@@ -1157,6 +1196,71 @@ function clearLLMConfig() {
   clearTestResult();
   _updateSidebarBadge();
   _renderCurrentStatus();
+}
+
+// ══════════════════════════════════════════════════
+// 사진 분석 DeepSeek 폴백 — 일반 LLM 설정과 완전히 별개 저장소.
+// 모델은 항상 deepseek-v4-flash로 고정(이미지 미지원 — 텍스트 전용 폴백).
+// ══════════════════════════════════════════════════
+function toggleFallbackKeyVisibility() {
+  const inp = document.getElementById('fallback-deepseek-key');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+}
+
+function clearFallbackTestResult() {
+  const box = document.getElementById('fallback-test-result');
+  box.className = 'llm-status-box';
+  box.innerHTML = '';
+}
+
+function saveFallbackKey() {
+  const key = document.getElementById('fallback-deepseek-key').value.trim();
+  if (!key) { alert('DeepSeek API 키를 입력하세요.'); return; }
+  localStorage.setItem(_FALLBACK_DEEPSEEK_KEY, key);
+  const toast = document.createElement('div');
+  toast.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1e293b;color:#fff;font-size:13px;font-weight:500;padding:10px 20px;border-radius:8px;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,.2)';
+  toast.textContent = '✓ 사진 분석 폴백 키 저장 완료 (DeepSeek V4 Flash)';
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 2800);
+}
+
+function clearFallbackKey() {
+  if (!confirm('사진 분석 폴백 키를 삭제하시겠습니까?\nGemini 실패 시 더 이상 자동 폴백되지 않습니다.')) return;
+  localStorage.removeItem(_FALLBACK_DEEPSEEK_KEY);
+  document.getElementById('fallback-deepseek-key').value = '';
+  clearFallbackTestResult();
+}
+
+async function testFallbackConnection() {
+  const key = document.getElementById('fallback-deepseek-key').value.trim();
+  const box = document.getElementById('fallback-test-result');
+  const btn = document.getElementById('fallback-test-btn');
+  if (!key) { box.className='llm-status-box err'; box.style.display='flex'; box.innerHTML='<span>API 키를 입력하세요.</span>'; return; }
+
+  box.className='llm-status-box testing'; box.style.display='flex';
+  box.innerHTML = '<svg class="spin" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> <span>연결 테스트 중…</span>';
+  btn.disabled = true;
+
+  try {
+    const res = await fetch('https://api.deepseek.com/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
+      body: JSON.stringify({
+        model: _FALLBACK_MODEL,
+        messages: [{ role: 'user', content: 'ping' }],
+        max_tokens: 10, temperature: 0,
+      }),
+      signal: AbortSignal.timeout(15000),
+    });
+    if (!res.ok) { const t = await res.text(); throw new Error(`${res.status} ${t.slice(0,80)}`); }
+    box.className='llm-status-box ok';
+    box.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> <span>연결 성공! DeepSeek V4 Flash</span>`;
+  } catch(e) {
+    box.className='llm-status-box err';
+    box.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> <span>실패: ${e.message}</span>`;
+  } finally {
+    btn.disabled = false;
+  }
 }
 
 // 페이지 로드 시 배지 갱신
