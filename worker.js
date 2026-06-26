@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════
-// gopang-proxy — AI API 프록시
+// drone-proxy — fiil 전용 AI API 프록시 (gopang-proxy와 별개)
 // Gemini 2.0 Flash Vision (단독 호출)
 // 환경변수: Gemini
 // v2.0: Gemini→DeepSeek 자동 폴백 제거. 사진 분석은 Gemini만 사용하며,
